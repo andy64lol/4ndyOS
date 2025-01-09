@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lock Screen</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      background-image: url('https://img.freepik.com/premium-vector/abstract-technology-binary-code-red-background-with-numbers_158941-159.jpg?w=1060');
+      background-size: cover;
+      color: white;
+    }
+    .lock-screen {
+      position: relative;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      z-index: 2;
+    }
+    .lock-screen h1 {
+      margin-bottom: 20px;
+    }
+    .lock-screen input {
+      padding: 10px;
+      width: 80%;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 5px;
+      outline: none;
+    }
+    .lock-screen button {
+      padding: 10px 20px;
+      background: #ff0000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .lock-screen button:hover {
+      background: #cc0000;
+    }
+    .error {
+      margin-top: 10px;
+      color: red;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+  <div class="lock-screen">
+    <h1>Enter Password</h1>
+    <input type="password" id="password" placeholder="Password">
+    <br>
+    <button onclick="unlock()">Unlock</button>
+    <div class="error" id="error"></div>
+  </div>
+
+  <script>
+    function unlock() {
+      const password = document.getElementById('password').value;
+      const error = document.getElementById('error');
+      const validPasswords = ['Scr4tchC0D3', '4ndy64', '1234', 'PluginWarp'];
+
+      if (validPasswords.includes(password)) {
+        window.location.href = './4ndyOS.html'; // Ensure 4ndyOS.html is in the same directory.
+      } else {
+        error.textContent = 'Incorrect password. Try again.';
+      }
+    }
+
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const columns = canvas.width / 20;
+    const drops = Array.from({ length: columns }).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#ff0000';
+      ctx.font = '16px monospace';
+
+      drops.forEach((y, x) => {
+        const text = Math.random() > 0.5 ? '0' : '1';
+        ctx.fillText(text, x * 20, y * 20);
+        
+        if (y * 20 > canvas.height && Math.random() > 0.975) {
+          drops[x] = 0;
+        }
+        drops[x]++;
+      });
+
+      requestAnimationFrame(drawMatrix);
+    }
+
+    setInterval(() => requestAnimationFrame(drawMatrix), 8.33); // 120 frames per second
+  </script>
+</body>
+  </html>
+  
