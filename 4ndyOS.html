@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4ndyOS</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background-image: url('https://img.freepik.com/premium-vector/abstract-technology-binary-code-red-background-with-numbers_158941-159.jpg?w=1060');
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #menu {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #menu-panel {
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      width: 200px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+    }
+    #menu-panel button {
+      width: 100%;
+      margin: 5px 0;
+      padding: 10px;
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #menu-panel button:hover {
+      background: rgba(255, 0, 0, 1);
+    }
+    .folder {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .folder.active {
+      display: flex;
+    }
+    .app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .app img {
+      width: 50px;
+      height: 50px;
+    }
+    .app span {
+      margin-top: 5px;
+    }
+    .app:hover {
+      background: rgba(255, 0, 0, 1);
+    }
+  </style>
+</head>
+<body>
+  <div id="menu">Menu</div>
+  <div id="menu-panel">
+    <button onclick="showFolder('programming')">Programming</button>
+    <button onclick="showFolder('extensions')">Extensions</button>
+  </div>
+
+  <div id="folders">
+    <!-- Programming Folder -->
+    <div class="folder" id="programming">
+      <div class="app" onclick="openApp('https://turbowarp.org/')">
+        <img src="https://styles.redditmedia.com/t5_4fecpl/styles/communityIcon_kvqiaj7y5olb1.png" alt="TurboWarp">
+        <span>TurboWarp</span>
+      </div>
+      <div class="app" onclick="openApp('https://penguinmod.com/')">
+        <img src="https://cdn-1.webcatalog.io/catalog/penguinmod/penguinmod-icon-filled-256.webp?v=1722827062080" alt="PenguinMod">
+        <span>P. Mod</span>
+      </div>
+      <div class="app" onclick="openApp('https://github.com')">
+        <img src="https://icon2.cleanpng.com/20240213/pap/transparent-github-icon-silhouette-of-cat-with-curled-body-and-open-1710879428476.webp" alt="GitHub">
+        <span>GitHub</span>
+      </div>
+    </div>
+
+    <!-- Extensions Folder -->
+    <div class="folder" id="extensions">
+      <div class="app" onclick="openApp('https://plugin-warp.github.io/PluginWarp/')">
+        <span>PW</span>
+      </div>
+      <div class="app" onclick="openApp('https://extensions.turbowarp.org')">
+        <span>TW Ext</span>
+      </div>
+      <div class="app" onclick="openApp('https://extensions.penguinmod.com')">
+        <span>PM Ext</span>
+      </div>
+      <div class="app" onclick="openApp('https://sharkpools-extensions.vercel.app')">
+        <span>SharkPool</span>
+      </div>
+      <div class="app" onclick="openApp('https://extensions.mistium.com')">
+        <span>Mistium</span>
+      </div>
+      <div class="app" onclick="openApp('https://electramod-extensions-gallery.vercel.app')">
+        <span>Electra</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const menu = document.getElementById('menu');
+    const menuPanel = document.getElementById('menu-panel');
+    const folders = document.querySelectorAll('.folder');
+
+    menu.addEventListener('click', () => {
+      menuPanel.style.display = menuPanel.style.display === 'none' || menuPanel.style.display === '' ? 'block' : 'none';
+    });
+
+    function showFolder(folderId) {
+      folders.forEach(folder => folder.classList.remove('active'));
+      document.getElementById(folderId).classList.add('active');
+      menuPanel.style.display = 'none';
+    }
+
+    function openApp(url) {
+      window.open(url, '_blank');
+    }
+  </script>
+</body>
+</html>
