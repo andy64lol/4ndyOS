@@ -17,7 +17,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center; /* Centering the content vertically */
       height: 100vh;
       overflow: hidden;
       color: #ff0000;
@@ -111,7 +111,7 @@
     }
     #message {
       position: absolute;
-      bottom: 20px;
+      bottom: 60px; /* Adjusted to make space for footer */
       color: white;
       font-size: 24px;
       text-align: center;
@@ -119,7 +119,17 @@
       opacity: 0.8;
       width: 100%;
     }
-    #taskbar {
+    #datetime {
+      position: absolute;
+      bottom: 30px; /* Adjusted to make space for footer */
+      color: white;
+      font-size: 18px;
+      text-align: center;
+      z-index: 150;
+      opacity: 0.8;
+      width: 100%;
+    }
+    #task bar {
       position: absolute;
       bottom: 0;
       left: 0;
@@ -130,6 +140,17 @@
       padding: 10px;
       z-index: 100;
     }
+    #footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      color: white;
+      font-size: 12px;
+      padding: 5px;
+      background: rgba(0, 0, 0, 0.7);
+    }
   </style>
 </head>
 <body>
@@ -138,11 +159,12 @@
   <div id="menu-panel">
     <button onclick="showFolder('programming')">编程</button>
     <button onclick="showFolder('extensions')">扩展</button>
-    <button onclick="showFolder('communication')">通讯</button> <!-- New folder button -->
+    <button onclick="showFolder('communication')">通讯</button>
+    <button onclick="showFolder('settings')">设置</button>
   </div>
   <div id="folders">
     <div class="folder" id="programming">
-            <div class="app" onclick="openApp('https://penguinmod.com/')">
+      <div class="app" onclick="openApp('https://penguinmod.com/')">
         <img src="https://cdn-1.webcatalog.io/catalog/penguinmod/penguinmod-icon-filled-256.webp?v=1722827062080" alt="PenguinMod">
         <span>P. Mod</span>
       </div>
@@ -161,6 +183,10 @@
       <div class="app" onclick="openApp('https://codesandbox.io')">
         <img src="https://codesandbox.io/favicon.ico" alt="CodeSandbox">
         <span>CodeSandbox</span>
+      </div>
+      <div class="app" onclick="openApp('https://stackoverflow.com')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Stack_Overflow_icon.svg" alt="Stack Overflow">
+        <span>Stack Overflow</span>
       </div>
     </div>
 
@@ -185,20 +211,34 @@
       </div>
     </div>
 
-    <!-- New folder for Communication -->
     <div class="folder" id="communication">
       <div class="app" onclick="openApp('https://discord.com')">
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Discord_logo_2021.svg" alt="Discord">
         <span>Discord</span>
       </div>
       <div class="app" onclick="openApp('https://web.whatsapp.com')">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+        < img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
         <span>WhatsApp</span>
+      </div>
+      <div class="app" onclick="openApp('https://telegram.org')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/8e/Telegram_logo.svg" alt="Telegram">
+        <span>Telegram</span>
+      </div>
+      <div class="app" onclick="openApp('https://signal.org')">
+        <img src="https://signal.org/images/logo.png" alt="Signal">
+        <span>Signal</span>
+      </div>
+      <div class="app" onclick="openApp('https://zoom.us')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Zoom_Logo.png" alt="Zoom">
+        <span>Zoom</span>
+      </div>
+      <div class="app" onclick="openApp('https://skype.com')">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Skype_logo.svg" alt="Skype">
+        <span>Skype</span>
       </div>
     </div>
   </div>
 
-  <!-- Taskbar -->
   <div id="taskbar">
     <div class="app" onclick="showFolder('programming')">
       <span>编程</span>
@@ -209,16 +249,22 @@
     <div class="app" onclick="showFolder('communication')">
       <span>通讯</span>
     </div>
+    <div class="app" onclick="showFolder('settings')">
+      <span>设置</span>
+    </div>
   </div>
 
   <div id="message"></div>
+  <div id="datetime"></div>
+  <div id="footer">© 2023 4ndyOS. All rights reserved.</div>
 
   <script>
     const menu = document.getElementById('menu');
     const menuPanel = document.getElementById('menu-panel');
     const folders = document.querySelectorAll('.folder');
     const messageDiv = document.getElementById('message');
-    
+    const datetimeDiv = document.getElementById('datetime');
+
     menu.addEventListener('click', () => {
       menuPanel.style.display = menuPanel.style.display === 'none' || menuPanel.style.display === '' ? 'block' : 'none';
     });
@@ -233,7 +279,6 @@
       window.open(url, '_blank');
     }
 
-    // Add random message generator for background
     const messages = [
       "欢迎来到4ndyOS!",
       "今天是一个美好的日子。",
@@ -247,9 +292,15 @@
       messageDiv.textContent = messages[randomIndex];
     }
 
-    setInterval(randomMessage, 5000); // Change message every 5 seconds
+    function updateDateTime() {
+      const now = new Date();
+      const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+      datetimeDiv.textContent = now.toLocaleString('zh-CN', options);
+    }
 
-    // Binary animation on the canvas
+    setInterval(randomMessage, 5000);
+    setInterval(updateDateTime, 1000); // Update time every second
+
     const canvas = document.getElementById('binaryCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -273,7 +324,8 @@
       ctx.font = `${fontSize}px Arial`;
       drops.forEach((y, index) => {
         const text = binaryCharacters[Math.floor(Math.random() * binaryCharacters.length)];
-        ctx.fillText(text, index * fontSize, y * fontSize);
+        ctx.fillText(text, index * font ```html
+Size, y * fontSize);
         if (y * fontSize > canvas.height && Math.random() > 0.975) {
           drops[index] = 0;
         }
@@ -285,6 +337,3 @@
   </script>
 </body>
 </html>
-
-
- 
