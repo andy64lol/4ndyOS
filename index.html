@@ -90,14 +90,20 @@
     function unlock() {
       const password = document.getElementById('password').value;
       const error = document.getElementById('error');
-      const validPasswords = ['Scr4tchC0D3', '4ndy64', '1234', 'PluginWarp'];
 
-      if (validPasswords.includes(password)) {
-        window.location.href = './4ndyOS.html';
-      } else if (password === '小越的OS') {
-        window.location.href = './4ndyOSspecialver.html';
+      // Check for the L1t3 password
+      if (password === "L1t3") {
+        window.location.href = './4ndyOSLite0.0.1.html'; // Redirect to 4ndyOSLite0.0.1.html
       } else {
-        error.textContent = 'Incorrect password. Try again.';
+        const validPasswords = ['Scr4tchC0D3', '4ndy64', '1234', 'PluginWarp'];
+
+        if (validPasswords.includes(password)) {
+          window.location.href = './4ndyOS.html';
+        } else if (password === '小越的OS') {
+          window.location.href = './4ndyOSspecialver.html';
+        } else {
+          error.textContent = 'Incorrect password. Try again.';
+        }
       }
     }
 
