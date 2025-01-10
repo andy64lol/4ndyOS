@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndyOS Lite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-image: url('https://img.freepik.com/premium-vector/abstract-technology-binary-code-red-background-with-numbers_158941-159.jpg?w=1060');
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; 
+            height: 100vh;
+            overflow: hidden;
+            color: #ffffff;
+        }
+        #menu {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 100;
+        }
+        #menu-panel {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            width: 220px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+        #menu-panel button {
+            width: 100%;
+            margin: 5px 0;
+            padding: 12px;
+            background: linear-gradient(to right, rgba(255, 0, 0, 0.8), rgba(34, 193, 195, 0.8));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #menu-panel button:hover {
+            background: linear-gradient(to right, rgba(255, 0, 0, 1), rgba(34, 193, 195, 1));
+        }
+        .folder {
+            display: none;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 15px;
+            padding: 10px;
+        }
+        .folder.active {
+            display: flex;
+        }
+        .app {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 60px; /* Iconos un poco más grandes */
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, background 0.3s;
+            z-index: 90;
+        }
+        .app span {
+            margin-top: 5px;
+            font-size: 14px; /* Texto un poco más grande */
+            text-align: center;
+        }
+        .app:hover {
+            background: rgba(255, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1; /* Put binary numbers behind other elements */
+        }
+        #message {
+            position: absolute;
+            bottom: 60px; 
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            z-index: 150;
+            opacity: 0.8;
+            width: 100%;
+        }
+        #taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            z-index: 100;
+        }
+        #footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="binaryCanvas"></canvas>
+    <div id="menu">Menú</div>
+    <div id="menu-panel">
+        <button onclick="showFolder('programming')">Programación</button>
+        <button onclick="showFolder('jsScratchExtensions')">Ext. .js Scratch</button>
+        <button onclick="showFolder('communication')">Comunicación</button>
+        <button onclick="showFolder('ai')">IA</button>
+        <button onclick="showFolder('browser')">Navegador</button>
+        <button onclick="showFolder('resources')">Recursos</button>
+        <button onclick="showFolder('tools')">Herramientas</button>
+        <button onclick="showFolder('games')">Juegos</button>
+        <button onclick="showFolder('media')">Medios</button>
+    </div>
+    <div id="folders">
+        <div class="folder" id="programming">
+            <div class="app" onclick="openApp('https://penguinmod.com/')"><span>P. Mod</span></div>
+            <div class="app" onclick="openApp('https://github.com')"><span>Git</span></div>
+            <div class="app" onclick="openApp('https://codepen.io')"><span>CP</span></div>
+            <div class="app" onclick="openApp('https://replit.com')"><span>RPL</span></div>
+            <div class="app" onclick="openApp('https://scratch.mit.edu')"><span>SCR</span></div>
+            <div class="app" onclick="openApp('https://turbowarp.org')"><span>TW</span></div>
+            <div class="app" onclick="openApp('https://www.codecademy.com')"><span>CC</span></div>
+            <div class="app" onclick="openApp('https://www.freecodecamp.org')"><span>FC</span></div>
+        </div>
+        <div class="folder" id="jsScratchExtensions">
+            <div class="app" onclick="openApp('https://plugin-warp.github.io/PluginWarp/')"><span>PW</span></div>
+            <div class="app" onclick="openApp('https://extensions.turbowarp.org')"><span>Ext TW</span></div>
+            <div class="app" onclick="openApp('https://extensions.penguinmod.com')"><span>Ext PM</span></div>
+            <div class="app" onclick="openApp('https://sharkpools-extensions.vercel.app')"><span>Shk</span></div>
+            <div class="app" onclick="openApp('https://extensions.mistium.com')"><span>Mst</span></div>
+        </div>
+        <div class="folder" id="communication">
+            <div class="app" onclick="openApp('https://discord.com')"><span>DC</span></div>
+            <div class="app" onclick="openApp('https://signal.org')"><span>SG</span></div>
+            <div class="app" onclick="openApp('https://telegram.org')"><span>TG</span></div>
+            <div class="app" onclick="openApp('https://slack.com')"><span>SLK</span></div>
+            <div class="app" onclick="openApp('https://zoom.us')"><span>ZM</span></div>
+            <div class="app" onclick="openApp('https://www.microsoft.com/en-us/microsoft-teams/group-chat-software')"><span>TM</span></div>
+        </div>
+        <div class="folder" id="ai">
+            <div class="app" onclick="openApp('https://openai.com')"><span>IA</span></div>
+            <div class="app" onclick="openApp('https://www.ibm.com/watson')"><span>WAT</span></div>
+            <div class="app" onclick="openApp('https://www.google.com/ai')"><span>G IA</span></div>
+            <div class="app" onclick="openApp('https://www.microsoft.com/en-us/ai')"><span>MS IA</span></div>
+        </div>
+        <div class="folder" id="browser">
+            <div class="app" onclick="openApp('https://andy64lol.github.io/andysearch.github.io/')"><span>AS</span></div>
+            <div class="app" onclick="openApp('https://www.google.com')"><span>GGL</span></div>
+            <div class="app" onclick="openApp('https://www.bing.com')"><span>BING</span></div>
+            <div class="app" onclick="openApp('https://www.duckduckgo.com')"><span>DDG</span></div>
+            <div class="app" onclick="openApp('https://www.yahoo.com')"><span>YAH</span></div>
+            <div class="app" onclick="openApp('https://www.ask.com')"><span>ASK</span></div>
+        </div>
+        <div class="folder" id="resources">
+            <div class="app" onclick="openApp('https://www.addictivetips.com')"><span>AT</span></div>
+            <div class="app" onclick="openApp('https://www.thewindowsclub.com')"><span>TWC</span></div>
+            <div class="app" onclick="openApp('https://www.techradar.com')"><span>TR</span></div>
+            <div class="app" onclick="openApp('https://www.howtogeek.com')"><span>HTG</span></div>
+        </div>
+        <div class="folder" id="tools">
+            <div class="app" onclick="openApp('https://www.grammarly.com')"><span>GML</span></div>
+            <div class="app" onclick="openApp('https://www.canva.com')"><span>CNV</span></div>
+            <div class="app" onclick="openApp('https://www.figma.com')"><span>FIG</span></div>
+            <div class="app" onclick="openApp('https://www.trello.com')"><span>TRL</span></div>
+        </div>
+        <div class="folder" id="games">
+            <div class="app" onclick="openApp('https://www.miniclip.com')"><span>MC</span></div>
+            <div class="app" onclick="openApp('https://www.kongregate.com')"><span>KG</span></div>
+            <div class="app" onclick="openApp('https://www.armorgames.com')"><span>AG</span></div>
+        </div>
+        <div class="folder" id="media">
+            <div class="app" onclick="openApp('https://www.youtube.com')"><span>YT</span></div>
+            <div class="app" onclick="openApp('https://www.spotify.com')"><span>SPF</span></div>
+            <div class="app" onclick="openApp('https://www.soundcloud.com')"><span>SC</span></div>
+            <div class="app" onclick="openApp('https://www.netflix.com')"><span>NF</span></div>
+            <div class="app" onclick="openApp('https://www.twitch.tv')"><span>TW</span></div>
+        </div>
+    </div>
+    <div id="message">Gracias por probar la versión 0.0.1 de la versión Lite</div>
+    <div id="taskbar"></div>
+    <div id="footer">
+        4ndyOS &copy; 2025 - Todos los derechos reservados.
+    </div>
+    <script>
+        let isMenuOpen = false;
+        const menu = document.getElementById('menu');
+        const menuPanel = document.getElementById('menu-panel');
+        const folders = document.querySelectorAll('.folder');
+        const binaryCanvas = document.getElementById('binaryCanvas');
+        const messageDiv = document.getElementById('message');
+
+        menu.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            menuPanel.style.display = isMenuOpen ? 'block' : 'none';
+        });
+
+        function showFolder(folderId) {
+            folders.forEach(folder => folder.classList.remove('active'));
+            document.getElementById(folderId).classList.add('active');
+        }
+
+        function openApp(url) {
+            window.open(url, '_blank');
+        }
+
+        function generateBinaryAnimation() {
+            const ctx = binaryCanvas.getContext('2d');
+            binaryCanvas.width = window.innerWidth;
+            binaryCanvas.height = window.innerHeight;
+
+            const binaryHeight = 20;
+            const columns = Math.floor(binaryCanvas.width / binaryHeight);
+            const binaryArray = Array(columns).fill(1);
+
+            function animateBinary() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, binaryCanvas.width, binaryCanvas.height);
+
+                ctx.fillStyle = 'red';  // Change to red
+                binaryArray.forEach((value, index) => {
+                    ctx.fillText(value === 1 ? '1' : '0', index * binaryHeight, Math.random() * binaryCanvas.height);
+                    binaryArray[index] = Math.random() > 0.98 ? 1 : 0;
+                });
+
+                requestAnimationFrame(animateBinary);
+            }
+
+            ctx.font = `${binaryHeight}px monospace`;
+            animateBinary();
+        }
+
+        generateBinaryAnimation();
+    </script>
+</body>
+</html>
