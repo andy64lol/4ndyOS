@@ -17,7 +17,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Centering the content vertically */
+            justify-content: center; 
             height: 100vh;
             overflow: hidden;
             color: #ffffff;
@@ -107,7 +107,7 @@
         }
         #message {
             position: absolute;
-            bottom: 60px; /* Adjusted to make space for footer */
+            bottom: 60px; 
             color: white;
             font-size: 24px;
             text-align: center;
@@ -137,31 +137,6 @@
             font-size: 12px;
             padding: 5px;
             background: rgba(0, 0, 0, 0.7);
-        }
-        #ai-input {
-            position: absolute;
-            bottom: 100px; /* Adjust as needed */
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-        }
-        #userQuestion {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 300px; /* Adjust width as needed */
-        }
-        #askButton {
-            padding: 10px 15px;
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #askButton:hover {
-            background-color: #cc0000;
         }
     </style>
 </head>
@@ -323,41 +298,11 @@
             });
         }
 
-        setInterval(draw, 17);
+        setInterval(draw, 17)
 
-        document.getElementById('askButton').addEventListener('click', async () => {
-            const question = document.getElementById('userQuestion').value;
-            if (question) {
-                const response = await askAI(question);
-                messageDiv.textContent = response;
-            }
-        });
+       
 
-        async function askAI(question) {
-            const apiKey = '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';
-            const apiUrl = 'https://api.groq.com/your-endpoint'; // Replace with the actual endpoint
-
-            try {
-                const res = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({ question })
-                });
-
-                if (!res.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await res.json();
-                return data.answer; // Adjust based on the actual response structure
-            } catch (error) {
-                console.error('Error:', error);
-                return 'Sorry, I could not process your request.';
-            }
-        }
+        
     </script>
 </body>
 </html>
