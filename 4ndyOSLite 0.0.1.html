@@ -1,277 +1,250 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4ndyOS Lite</title>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        body {
-            background-image: url('https://img.freepik.com/premium-vector/abstract-technology-binary-code-red-background-with-numbers_158941-159.jpg?w=1060');
-            background-size: cover;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center; 
+            background-color: #1a0000;
+            color: #ff0000;
+            font-family: monospace;
             height: 100vh;
             overflow: hidden;
-            color: #ffffff;
-        }
-        #menu {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 100;
-        }
-        #menu-panel {
-            position: absolute;
-            top: 50px;
-            left: 10px;
-            width: 220px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
-            display: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-        }
-        #menu-panel button {
-            width: 100%;
-            margin: 5px 0;
-            padding: 12px;
-            background: linear-gradient(to right, rgba(255, 0, 0, 0.8), rgba(34, 193, 195, 0.8));
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        #menu-panel button:hover {
-            background: linear-gradient(to right, rgba(255, 0, 0, 1), rgba(34, 193, 195, 1));
-        }
-        .folder {
-            display: none;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            gap: 15px;
-            padding: 10px;
-        }
-        .folder.active {
-            display: flex;
-        }
-        .app {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 60px; /* Iconos un poco más grandes */
-            height: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-radius: 15px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s, background 0.3s;
-            z-index: 90;
         }
-        .app span {
-            margin-top: 5px;
-            font-size: 14px; /* Texto un poco más grande */
-            text-align: center;
-        }
-        .app:hover {
-            background: rgba(255, 0, 0, 0.8);
-            transform: scale(1.1);
-        }
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1; /* Put binary numbers behind other elements */
-        }
-        #message {
-            position: absolute;
-            bottom: 60px; 
-            color: white;
-            font-size: 24px;
-            text-align: center;
-            z-index: 150;
-            opacity: 0.8;
-            width: 100%;
-        }
-        #taskbar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.7);
+
+        h1 {
+            margin: 0;
             padding: 10px;
-            z-index: 100;
+            font-size: 1.8rem;
+            text-align: center;
+            background: #330000;
+            color: #ff0000;
         }
-        #footer {
+
+        .taskbar {
             position: absolute;
             bottom: 0;
-            left: 0;
             width: 100%;
-            text-align: center;
-            color: white;
-            font-size: 12px;
+            background: rgba(255, 0, 0, 0.1);
             padding: 5px;
-            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            border-top: 2px solid #ff0000;
+        }
+
+        .button {
+            color: #ff0000;
+            cursor: pointer;
+            padding: 5px 15px;
+            border: 2px solid #ff0000;
+            border-radius: 3px;
+            background: rgba(255, 0, 0, 0.2);
+            transition: background 0.3s;
+        }
+
+        .button:hover {
+            background: rgba(255, 0, 0, 0.5);
+        }
+
+        .window {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff0000;
+            padding: 20px;
+            width: 60%;
+            max-width: 500px;
+            display: none;
+            flex-direction: column;
+            border-radius: 5px;
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, 0);
+        }
+
+        .close {
+            align-self: flex-end;
+            cursor: pointer;
+            padding: 2px 5px;
+            color: #ff0000;
+            border: 1px solid #ff0000;
+        }
+
+        .terminal-output {
+            height: 200px;
+            overflow-y: auto;
+            padding: 5px;
+            background: #330000;
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            font-size: 0.9rem;
+        }
+
+        .terminal-input {
+            width: 100%;
+            padding: 5px;
+            background: #1a0000;
+            color: #ff0000;
+            border: 1px solid #ff0000;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .file-item {
+            margin: 5px 0;
+        }
+
+        #fileInput {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <canvas id="binaryCanvas"></canvas>
-    <div id="menu">Menú</div>
-    <div id="menu-panel">
-        <button onclick="showFolder('programming')">Programación</button>
-        <button onclick="showFolder('jsScratchExtensions')">Ext. .js Scratch</button>
-        <button onclick="showFolder('communication')">Comunicación</button>
-        <button onclick="showFolder('ai')">IA</button>
-        <button onclick="showFolder('browser')">Navegador</button>
-        <button onclick="showFolder('resources')">Recursos</button>
-        <button onclick="showFolder('tools')">Herramientas</button>
-        <button onclick="showFolder('games')">Juegos</button>
-        <button onclick="showFolder('media')">Medios</button>
+    <h1>Welcome to 4ndyOS Lite</h1>
+
+    <div id="terminal" class="window">
+        <span class="close" id="closeTerminal">X</span>
+        <div class="terminal-output" id="terminalOutput"></div>
+        <input type="text" class="terminal-input" id="terminalInput" placeholder="Type a command...">
     </div>
-    <div id="folders">
-        <div class="folder" id="programming">
-            <div class="app" onclick="openApp('https://penguinmod.com/')"><span>P. Mod</span></div>
-            <div class="app" onclick="openApp('https://github.com')"><span>Git</span></div>
-            <div class="app" onclick="openApp('https://codepen.io')"><span>CP</span></div>
-            <div class="app" onclick="openApp('https://replit.com')"><span>RPL</span></div>
-            <div class="app" onclick="openApp('https://scratch.mit.edu')"><span>SCR</span></div>
-            <div class="app" onclick="openApp('https://turbowarp.org')"><span>TW</span></div>
-            <div class="app" onclick="openApp('https://www.codecademy.com')"><span>CC</span></div>
-            <div class="app" onclick="openApp('https://www.freecodecamp.org')"><span>FC</span></div>
-        </div>
-        <div class="folder" id="jsScratchExtensions">
-            <div class="app" onclick="openApp('https://plugin-warp.github.io/PluginWarp/')"><span>PW</span></div>
-            <div class="app" onclick="openApp('https://extensions.turbowarp.org')"><span>Ext TW</span></div>
-            <div class="app" onclick="openApp('https://extensions.penguinmod.com')"><span>Ext PM</span></div>
-            <div class="app" onclick="openApp('https://sharkpools-extensions.vercel.app')"><span>Shk</span></div>
-            <div class="app" onclick="openApp('https://extensions.mistium.com')"><span>Mst</span></div>
-        </div>
-        <div class="folder" id="communication">
-            <div class="app" onclick="openApp('https://discord.com')"><span>DC</span></div>
-            <div class="app" onclick="openApp('https://signal.org')"><span>SG</span></div>
-            <div class="app" onclick="openApp('https://telegram.org')"><span>TG</span></div>
-            <div class="app" onclick="openApp('https://slack.com')"><span>SLK</span></div>
-            <div class="app" onclick="openApp('https://zoom.us')"><span>ZM</span></div>
-            <div class="app" onclick="openApp('https://www.microsoft.com/en-us/microsoft-teams/group-chat-software')"><span>TM</span></div>
-        </div>
-        <div class="folder" id="ai">
-            <div class="app" onclick="openApp('https://openai.com')"><span>IA</span></div>
-            <div class="app" onclick="openApp('https://www.ibm.com/watson')"><span>WAT</span></div>
-            <div class="app" onclick="openApp('https://www.google.com/ai')"><span>G IA</span></div>
-            <div class="app" onclick="openApp('https://www.microsoft.com/en-us/ai')"><span>MS IA</span></div>
-        </div>
-        <div class="folder" id="browser">
-            <div class="app" onclick="openApp('https://andy64lol.github.io/andysearch.github.io/')"><span>AS</span></div>
-            <div class="app" onclick="openApp('https://www.google.com')"><span>GGL</span></div>
-            <div class="app" onclick="openApp('https://www.bing.com')"><span>BING</span></div>
-            <div class="app" onclick="openApp('https://www.duckduckgo.com')"><span>DDG</span></div>
-            <div class="app" onclick="openApp('https://www.yahoo.com')"><span>YAH</span></div>
-            <div class="app" onclick="openApp('https://www.ask.com')"><span>ASK</span></div>
-        </div>
-        <div class="folder" id="resources">
-            <div class="app" onclick="openApp('https://www.addictivetips.com')"><span>AT</span></div>
-            <div class="app" onclick="openApp('https://www.thewindowsclub.com')"><span>TWC</span></div>
-            <div class="app" onclick="openApp('https://www.techradar.com')"><span>TR</span></div>
-            <div class="app" onclick="openApp('https://www.howtogeek.com')"><span>HTG</span></div>
-        </div>
-        <div class="folder" id="tools">
-            <div class="app" onclick="openApp('https://www.grammarly.com')"><span>GML</span></div>
-            <div class="app" onclick="openApp('https://www.canva.com')"><span>CNV</span></div>
-            <div class="app" onclick="openApp('https://www.figma.com')"><span>FIG</span></div>
-            <div class="app" onclick="openApp('https://www.trello.com')"><span>TRL</span></div>
-        </div>
-        <div class="folder" id="games">
-            <div class="app" onclick="openApp('https://www.miniclip.com')"><span>MC</span></div>
-            <div class="app" onclick="openApp('https://www.kongregate.com')"><span>KG</span></div>
-            <div class="app" onclick="openApp('https://www.armorgames.com')"><span>AG</span></div>
-        </div>
-        <div class="folder" id="media">
-            <div class="app" onclick="openApp('https://www.youtube.com')"><span>YT</span></div>
-            <div class="app" onclick="openApp('https://www.spotify.com')"><span>SPF</span></div>
-            <div class="app" onclick="openApp('https://www.soundcloud.com')"><span>SC</span></div>
-            <div class="app" onclick="openApp('https://www.netflix.com')"><span>NF</span></div>
-            <div class="app" onclick="openApp('https://www.twitch.tv')"><span>TW</span></div>
+
+    <div id="files" class="window">
+        <span class="close" id="closeFiles">X</span>
+ <div>
+            <h3>File Manager</h3>
+            <div id="fileContent">Files available: <br>notes.txt, todo.txt, 4ndy_data.json</div>
         </div>
     </div>
-    <div id="message">Gracias por probar la versión 0.0.1 de la versión Lite</div>
-    <div id="taskbar"></div>
-    <div id="footer">
-        4ndyOS &copy; 2025 - Todos los derechos reservados.
+
+    <input type="file" id="fileInput">
+
+    <div class="taskbar">
+        <div class="button" id="terminalButton">Terminal</div>
+        <div class="button" id="filesButton">Files</div>
     </div>
+
     <script>
-        let isMenuOpen = false;
-        const menu = document.getElementById('menu');
-        const menuPanel = document.getElementById('menu-panel');
-        const folders = document.querySelectorAll('.folder');
-        const binaryCanvas = document.getElementById('binaryCanvas');
-        const messageDiv = document.getElementById('message');
+        let openWindow = null;
+        let uploadedFiles = [];
 
-        menu.addEventListener('click', () => {
-            isMenuOpen = !isMenuOpen;
-            menuPanel.style.display = isMenuOpen ? 'block' : 'none';
-        });
+        document.getElementById('terminalButton').addEventListener('click', () => toggleWindow('terminal'));
+        document.getElementById('filesButton').addEventListener('click', () => toggleWindow('files'));
+        document.getElementById('closeTerminal').addEventListener('click', () => toggleWindow('terminal'));
+        document.getElementById('closeFiles').addEventListener('click', () => toggleWindow('files'));
+        document.getElementById('terminalInput').addEventListener('keydown', handleInput);
+        document.getElementById('fileInput').addEventListener('change', handleUpload);
 
-        function showFolder(folderId) {
-            folders.forEach(folder => folder.classList.remove('active'));
-            document.getElementById(folderId).classList.add('active');
-        }
-
-        function openApp(url) {
-            window.open(url, '_blank');
-        }
-
-        function generateBinaryAnimation() {
-            const ctx = binaryCanvas.getContext('2d');
-            binaryCanvas.width = window.innerWidth;
-            binaryCanvas.height = window.innerHeight;
-
-            const binaryHeight = 20;
-            const columns = Math.floor(binaryCanvas.width / binaryHeight);
-            const binaryArray = Array(columns).fill(1);
-
-            function animateBinary() {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-                ctx.fillRect(0, 0, binaryCanvas.width, binaryCanvas.height);
-
-                ctx.fillStyle = 'red';  // Change to red
-                binaryArray.forEach((value, index) => {
-                    ctx.fillText(value === 1 ? '1' : '0', index * binaryHeight, Math.random() * binaryCanvas.height);
-                    binaryArray[index] = Math.random() > 0.98 ? 1 : 0;
-                });
-
-                requestAnimationFrame(animateBinary);
+        function toggleWindow(id) {
+            if (openWindow && openWindow !== id) {
+                document.getElementById(openWindow).style.display = 'none';
             }
-
-            ctx.font = `${binaryHeight}px monospace`;
-            animateBinary();
+            const windowElement = document.getElementById(id);
+            windowElement.style.display = windowElement.style.display === 'block' ? 'none' : 'block';
+            openWindow = windowElement.style.display === 'block' ? id : null;
         }
 
-        generateBinaryAnimation();
+        function handleInput(event) {
+            if (event.key === 'Enter') {
+                const input = document.getElementById('terminalInput');
+                const output = document.getElementById('terminalOutput');
+                const command = input.value.trim();
+                output.innerHTML += `<div>> ${command}</div>`;
+                processCommand(command, output);
+                input.value = '';
+                output.scrollTop = output.scrollHeight;
+            }
+        }
+
+        function processCommand(command, output) {
+            const commands = {
+                '/help': () => output.innerHTML += '<div>For setting commands, type /help s<br>For file commands, type /help f<br>For common commands, type /help n</div>',
+                '/help s': () => output.innerHTML += '<div>Setting Commands: /clear, /check ver, /check time</div>',
+                '/help f': () => output.innerHTML += '<div>File Commands: /list files, /open file="filename", /delete file="filename", /create file="filename" content="text", /rename file="old" to="new", /dload file="filename", /upload file</div>',
+                '/help n': () => output.innerHTML += '<div>Common Commands: /help, /about, /o url="example.com", /run html="html", /execute</div>',
+                '/about': () => output.innerHTML += '<div>4ndyOS Lite - A hacker-inspired minimalist OS</div>',
+                '/clear': () => output.innerHTML = '',
+                '/check ver': () => output.innerHTML += '<div>4ndyOS Lite v1.0.0</div>',
+                '/check time': () => output.innerHTML += `<div>Current time: ${new Date().toLocaleTimeString()}</div>`,
+                '/execute': () => output.innerHTML += '<div>Executing task...</div>',
+                '/list files': () => output.innerHTML += `<div>Files: notes.txt, todo.txt, 4ndy_data.json${uploadedFiles.length > 0 ? ', ' + uploadedFiles.join(', ') : ''}</div>`,
+                '/upload file': () => document.getElementById('fileInput').click(),
+            };
+
+            if (commands[command.toLowerCase()]) {
+                commands[command.toLowerCase()]();
+            } else {
+                handleFileCommands(command, output);
+            }
+        }
+
+        function handleFileCommands(command, output) {
+            if (command.startsWith('/o url=')) {
+                const url = command.substring(8).trim().replace(/['"]+/g, '');
+                output.innerHTML += `<div>Opening URL: ${url}</div>`;
+                window.open(`https://${url}`, '_blank');
+            } else if (command.startsWith('/run html=')) {
+                const htmlCode = command.substring(10).trim().replace(/['"]+/g, '');
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(htmlCode);
+                newWindow.document.close();
+                output.innerHTML += '<div>HTML executed in a new window.</div>';
+            } else if (command.startsWith ('/open file=')) {
+                const fileName = command.substring(12).trim().replace(/['"]+/g, '');
+                if (['notes.txt', 'todo.txt', '4ndy_data.json'].includes(fileName) || uploadedFiles.includes(fileName)) {
+                    output.innerHTML += `<div>Opening ${fileName}: Mock content of ${fileName}</div>`;
+                } else {
+                    output.innerHTML += `<div>File not found: ${fileName}</div>`;
+                }
+            } else if (command.startsWith('/delete file=')) {
+                const deleteFile = command.substring(14).trim().replace(/['"]+/g, '');
+                if (uploadedFiles.includes(deleteFile)) {
+                    uploadedFiles = uploadedFiles.filter(file => file !== deleteFile);
+                    output.innerHTML += `<div>Deleted ${deleteFile}</div>`;
+                } else {
+                    output.innerHTML += `<div>File not found: ${deleteFile}</div>`;
+                }
+            } else if (command.startsWith('/create file=')) {
+                const [filePart, contentPart] = command.split(' content=');
+                const newFile = filePart.substring(13).trim().replace(/['"]+/g, '');
+                const content = contentPart ? contentPart.trim().replace(/['"]+/g, '') : '';
+                uploadedFiles.push(newFile);
+                output.innerHTML += `<div>Created ${newFile} with content: "${content}"</div>`;
+            } else if (command.startsWith('/rename file=')) {
+                const [oldPart, newPart] = command.split(' to=');
+                const oldName = oldPart.substring(13).trim().replace(/['"]+/g, '');
+                const newName = newPart.trim().replace(/['"]+/g, '');
+                if (uploadedFiles.includes(oldName)) {
+                    uploadedFiles = uploadedFiles.map(file => file === oldName ? newName : file);
+                    output.innerHTML += `<div>Renamed ${oldName} to ${newName}</div>`;
+                } else {
+                    output.innerHTML += `<div>File not found: ${oldName}</div>`;
+                }
+            } else if (command.startsWith('/dload file=')) {
+                const fileName = command.substring(12).trim().replace(/['"]+/g, '');
+                const blob = new Blob([`Mock content of ${fileName}`], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                link.click();
+                output.innerHTML += `<div>Downloading ${fileName}</div>`;
+            } else {
+                output.innerHTML += '<div>Unknown command. Type "/help" for a list of commands.</div>';
+            }
+        }
+
+        function handleUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadedFiles.push(file.name);
+                const output = document.getElementById('terminalOutput');
+                output.innerHTML += `<div>Uploaded file: ${file.name}</div>`;
+            }
+        }
     </script>
 </body>
 </html>
