@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4ndyOS VER 0.0.1 m4trix</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+    body {
+      background-color: black;
+      color: #ff073a;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: flex-end;
+    }
+
+    #terminal {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+      border-top: 1px solid #ff073a;
+    }
+
+    #input-line {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-top: 1px solid #ff073a;
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    #input-line span {
+      margin-right: 5px;
+    }
+
+    #input {
+      background: none;
+      border: none;
+      color: #ff073a;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      width: 100%;
+      outline: none;
+    }
+
+    #output {
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .command-output {
+      color: #ff073a; 
+    }
+
+    .error-output {
+      color: #ff0000; /* Red for error messages */
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
+</head>
+<body>
+  <div id="terminal">
+    <div id="output"></div>
+  </div>
+  <div id="input-line">
+    <span>USER:</span>
+    <input type="text" id="input" autofocus>
+  </div>
+
+  <script>
+    const output = document.getElementById('output');
+    const input = document.getElementById('input');
+    let username = "user";
+    let commandHistory = [];
+    let historyIndex = -1;
+
+    const commands = {
+      help: () => `4ndyOS: Comandos disponibles:
+        help - Muestra este menú
+        clear - Limpia la pantalla
+        echo [texto] - Repite el texto ingresado
+        echo [n] [texto] - Repite el texto 'n' veces
+        about - Muestra información del sistema
+        version - Muestra la versión de 4ndyOS
+        time GMT - Muestra la hora en formato GMT
+        time - Muestra la hora local en formato AM/PM
+        date - Muestra la fecha y hora actual
+        solve [expresión] - Resuelve una expresión matemática avanzada
+        web [URL] - Abre una página web
+        random [min] [max] - Genera un número aleatorio
+        upper [texto] - Convierte el texto a mayúsculas
+        lower [texto] - Convierte el texto a minúsculas
+        /change username [nombre] - Cambia el nombre de usuario
+        shutdown - Apaga el sistema directamente
+        restart - Reinicia la terminal
+        greet [nombre] - Saluda a la persona especificada
+        reverse [texto] - Invierte el texto ingresado
+        count [texto] - Cuenta el número de caracteres en el texto
+        length [texto] - Muestra la longitud del texto
+        concat [texto1] [texto2] - Concatena dos textos
+        factorial [n] - Calcula el factorial de un número
+        fibonacci [n] - Muestra la secuencia de Fibonacci hasta 'n'
+        prime [n] - Verifica si un número es primo
+        weather [ciudad] - Muestra el clima actual de la ciudad
+        joke - Muestra un chiste aleatorio
+        quote - Muestra una cita inspiradora
+        convert [valor] [unidad1] [unidad2] - Convierte entre unidades
+        palindrome [texto] - Verifica si el texto es un palíndromo
+        ascii [texto] - Muestra el código ASCII de cada carácter
+        binary [n] - Convierte un número decimal a binario
+        hex [n] - Convierte un número decimal a hexadecimal
+        octal [n] - Convierte un número decimal a octal
+        color [color] - Cambia el color del texto
+        timezones - Muestra las zonas horarias disponibles
+        uptime - Muestra el tiempo de actividad del sistema
+        memory - Muestra el uso de memoria del sistema
+        cpu - Muestra la información de la CPU
+        disk - Muestra el uso del disco
+        list [directorio] - Lista los archivos en un directorio
+        read [archivo] - Lee el contenido de un archivo
+        write [archivo] [texto] - Escribe texto en un archivo
+        delete [archivo] - Elimina un archivo
+        rename [archivo] [nuevo_nombre] - Renombra un archivo
+        copy [archivo] [destino] - Copia un archivo a un nuevo destino
+        move [archivo] [destino] - Mueve un archivo a un nuevo destino
+        search [texto] - Busca un texto en los archivos
+        exit - Cierra la terminal
+        clearhistory - Limpia el historial de comandos
+        echohistory - Muestra el historial de comandos
+        randomcolor - Muestra un color aleatorio
+        countdown [n] - Cuenta regresivamente desde 'n'
+        timer [n] - Establece un temporizador de 'n' segundos
+        alarm [n] - Establece una alarma para 'n' segundos
+        convertcurrency [cantidad] [moneda1] [moneda2] - Convierte entre monedas
+        translate [texto] [idioma] - Traduce el texto a otro idioma
+        encrypt [texto] - Encripta el texto ingresado
+        decrypt [texto] - Desencripta el texto ingresado
+        history - Muestra el historial de comandos
+        clearall - Limpia la pantalla y el historial
+        save [nombre] - Guarda el estado actual
+        load [nombre] - Carga un estado guardado`,
+      clear: () => {
+        output.innerHTML = "";
+        return "";
+      },
+      echo: (args) => `4ndyOS: ${args.join(" ")}`,
+      "echo_count": (args) => {
+        const count = parseInt(args[0], 10);
+        const text = args.slice(1).join(" ");
+        return `4ndyOS: ${Array(count).fill(text).join(" ")}`;
+      },
+      about: () => "4ndyOS: 4ndyOS VER 0.0.1 m4trix, creado por Andi.",
+      version: () => "4ndyOS: 4ndyOS VER 0.0.1 m4trix",
+      time: () => {
+        const date = new Date();
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? "PM" : "AM";
+        const localTime = `${hours % 12 || 12}:${minutes < 10 ? "0" + minutes : minutes} ${ampm}`;
+        return `4ndyOS: Hora local: ${localTime}`;
+      },
+      "time GMT": () => {
+        const date = new Date();
+        const gmtTime = date.toUTCString();
+        return `4ndyOS: Hora GMT: ${gmtTime}`;
+      },
+      date: () => {
+        const date = new Date();
+        return `4ndyOS: Fecha y hora actual: ${date.toLocaleString()}`;
+      },
+      solve: (args) => {
+        try {
+          const expression = args.join(" ");
+          const result = math.evaluate(expression);
+          return `4ndyOS: Resultado: ${result}`;
+        } catch (e) {
+          return "4ndyOS: Error: expresión matemática inválida.";
+        }
+      },
+      web: (args) => {
+        if (!args[0]) {
+          return "4ndyOS: Error: Especifica una URL. Ejemplo: web https://example.com";
+        }
+        const url = args[0].startsWith("http") ? args[0] : `https://${args[0]}`;
+        openWebWindow(url);
+        return `4ndyOS: Abriendo: ${url}`;
+      },
+      random: (args) => {
+        const min = parseInt(args[0], 10) || 0;
+        const max = parseInt(args[1], 10) || 100;
+        return `4ndyOS: Número aleatorio: ${Math.floor(Math.random() * (max - min + 1)) + min}`;
+      },
+      upper: (args) => `4ndyOS: ${args.join(" ").toUpperCase()}`,
+      lower: (args) => `4ndyOS: ${args.join(" ").toLowerCase()}`,
+      restart: () => {
+        output.innerHTML = "";
+        return "4ndyOS: Se ha reiniciado la terminal. Bienvenido.";
+      },
+      "/change": (args) => {
+        if (args[0] === "username" && args[1]) {
+          username = args.slice(1).join(" ");
+          return `4ndyOS: Nombre de usuario cambiado a '${username}'.`;
+        }
+        return "4ndyOS: Uso: /change username [nuevo_nombre]";
+      },
+      shutdown: () => {
+        window.location.href = "index.html"; // Redirige a index.html directamente
+        return `4ndyOS: Sistema apagado. Redirigiendo a la página de inicio...`;
+      },
+      greet: (args) => {
+        const name = args[0] || username;
+        return `4ndyOS: Hola, ${name}!`;
+      },
+      reverse: (args) => `4ndyOS: ${args.join(" ").split("").reverse().join("")}`,
+      count: (args) => `4ndyOS: Número de caracteres: ${args.join(" ").length}`,
+      length: (args) => `4ndyOS: Longitud: ${args.join(" ").length}`,
+      concat: (args) => `4ndyOS: ${args.join(" ")}`,
+      factorial: (args) => {
+        const n = parseInt(args[0], 10);
+        if (isNaN(n) || n < 0) return "4ndyOS: Error: número inválido.";
+        const factorial = (num) => (num <= 1 ? 1 : num * factorial(num - 1));
+        return `4ndyOS: Factorial de ${n}: ${factorial(n)}`;
+      },
+      fibonacci: (args) => {
+        const n = parseInt(args[0], 10);
+        if (isNaN(n) || n < 0) return "4ndyOS: Error: número inválido.";
+        const fib = (num) => (num <= 1 ? num : fib(num - 1) + fib(num - 2));
+        const sequence = Array.from({ length: n }, (_, i) => fib(i)).join(", ");
+        return `4ndyOS: Secuencia de Fibonacci hasta ${n}: ${sequence}`;
+      },
+      prime: (args) => {
+        const n = parseInt(args[0], 10);
+        if (isNaN(n) || n < 2) return "4ndyOS: Error: número inválido.";
+        const isPrime = (num) => {
+          for (let i = 2; i <= Math.sqrt(num); i++) {
+            if (num % i === 0) return false;
+          }
+          return true;
+        };
+        return `4ndyOS: ${n} es ${isPrime(n) ? "primo" : "no primo"}.`;
+      },
+      weather: (args) => {
+        // Placeholder for weather command
+        return "4ndyOS: Comando de clima no implementado.";
+      },
+      joke: () => {
+        // Placeholder for joke command
+        return "4ndyOS: Comando de chiste no implementado.";
+      },
+      quote: () => {
+        // Placeholder for quote command
+        return "4ndyOS: Comando de cita no implementado.";
+      },
+      convert: (args) => {
+        // Placeholder for convert command
+        return "4ndyOS: Comando de conversión no implementado.";
+      },
+      palindrome: (args) => {
+        const text = args.join(" ");
+        const isPalindrome = text === text.split("").reverse().join("");
+        return `4ndyOS: '${text}' es ${isPalindrome ? "" : "no "}un palíndromo.`;
+      },
+      ascii: (args) => {
+        const text = args.join(" ");
+        return `4ndyOS: ${text.split("").map(char => `${char}: ${char.charCodeAt(0)}`).join(", ")}`;
+      },
+      binary: (args) => {
+        const n = parseInt(args[0], 10);
+        if (isNaN(n)) return "4ndyOS: Error: número inválido.";
+        return `4ndyOS: ${n} en binario es ${n.toString(2)}`;
+      },
+      hex: (args) => {
+        const n = parseInt(args[0], 10);
+        if (isNaN(n)) return "4ndyOS: Error: número inválido.";
+        return `4ndyOS: ${n} en hexadecimal es ${n.toString(16)}`;
+      },
+      octal: (args) => {
+        const n = parseInt(args[0], 10);
+        if (isNaN(n)) return "4ndyOS: Error: número inválido.";
+        return `4ndyOS: ${n} en octal es ${n.toString(8)}`;
+      },
+      color: (args) => {
+        const color = args[0];
+        document.body.style.color = color;
+        return `4ndyOS: Color del texto cambiado a ${color}.`;
+      },
+      timezones: () => {
+        return `4ndyOS: Zonas horarias disponibles: GMT, EST, PST, CET, IST, etc.`;
+      },
+      uptime: () => {
+        return `4ndyOS: Tiempo de actividad: ${Math.floor(Math.random() * 100)} horas.`;
+      },
+      memory: () => {
+        return `4ndyOS: Uso de memoria: ${Math.floor(Math.random() * 100)} MB.`;
+      },
+      cpu: () => {
+        return `4ndyOS: Información de la CPU: Intel Core i7.`;
+      },
+      disk: () => {
+        return `4ndyOS: Uso del disco: ${Math.floor(Math.random() * 100)} GB.`;
+      },
+      list: (args) => {
+        const dir = args[0] || ".";
+        return `4ndyOS: Listando archivos en ${dir}: archivo1.txt, archivo2.txt, archivo3.txt`;
+      },
+      read: (args) => {
+        const file = args[0];
+        return `4ndyOS: Contenido de ${file}: "Este es un archivo de ejemplo."`;
+      },
+      write: (args) => {
+        const file = args[0];
+        const text = args.slice(1).join(" ");
+        return `4ndyOS: Escribiendo en ${file}: "${text}"`;
+      },
+      delete: (args) => {
+        const file = args[0];
+        return `4ndyOS: Archivo ${file} eliminado.`;
+      },
+      rename: (args) => {
+        const oldName = args[0];
+        const newName = args[1];
+        return `4ndyOS: Archivo ${oldName} renombrado a ${newName}.`;
+      },
+      copy: (args) => {
+        const file = args[0];
+        const destination = args[1];
+        return `4ndyOS: Archivo ${file} copiado a ${destination}.`;
+      },
+      move: (args) => {
+        const file = args[0];
+        const destination = args[1];
+        return `4ndyOS: Archivo ${file} movido a ${destination}.`;
+      },
+      search: (args) => {
+        const text = args.join(" ");
+        return `4ndyOS: Buscando "${text}" en archivos...`;
+      },
+      exit: () => {
+        return `4ndyOS: Cerrando la terminal.`;
+      },
+      clearhistory: () => {
+        commandHistory = [];
+        return `4ndyOS: Historial de comandos limpiado.`;
+      },
+      echohistory: () => {
+        return `4ndyOS: Historial de comandos: ${commandHistory.join(", ")}`;
+      },
+      randomcolor: () => {
+        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+        document.body.style.color = randomColor;
+        return `4ndyOS: Color aleatorio: ${randomColor}`;
+      },
+      countdown: (args) => {
+        const n = parseInt(args[0], 10);
+        if (isNaN(n)) return "4ndyOS: Error: número inválido.";
+        return `4ndyOS: Contando regresivamente desde ${n}...`;
+      },
+      timer: (args) => {
+        const n = parseInt(args[0], 10);
+        if (isNaN(n)) return "4ndyOS: Error: número inválido.";
+        return `4ndyOS: Temporizador establecido para ${n} segundos.`;
+      },
+      alarm: (args) => {
+        const n = parseInt(args[0], 10);
+        if (isNaN(n)) return "4ndyOS: Error: número inválido.";
+        return `4ndyOS: Alarma establecida para ${n} segundos.`;
+      },
+      convertcurrency: (args) => {
+        const amount = parseFloat(args[0]);
+        const fromCurrency = args[1];
+        const toCurrency = args[2];
+        return `4ndyOS: ${amount} ${fromCurrency} es equivalente a ${amount * 1.1} ${toCurrency}.`; // Placeholder conversion rate
+      },
+      translate: (args) => {
+        const text = args.slice(0, -1).join(" ");
+        const language = args[args.length - 1];
+        return `4ndyOS: Traduciendo "${text}" a ${language}...`;
+      },
+      encrypt: (args) => {
+        const text = args.join(" ");
+        return `4ndyOS: Texto encriptado: "${btoa(text)}"`;
+      },
+      decrypt: (args) => {
+        const text = args.join(" ");
+        return `4ndyOS: Texto desencriptado: "${atob(text)}"`;
+      },
+      history: () => {
+        return `4ndyOS: Historial de comandos: ${commandHistory.join(", ")}`;
+      },
+      clearall: () => {
+        output.innerHTML = "";
+        commandHistory = [];
+        return `4ndyOS: Pantalla y historial limpiados.`;
+      },
+      save: (args) => {
+        const name = args[0];
+        return `4ndyOS: Estado guardado como ${name}.`;
+      },
+      load: (args) => {
+        const name = args[0];
+        return `4ndyOS: Estado ${name} cargado.`;
+      }
+    };
+
+    function openWebWindow(url ) {
+      const width = 800;
+      const height = 600;
+      const left = (screen.width - width) / 2;
+      const top = (screen.height - height) / 2;
+
+      window.open(
+        url,
+        "_blank",
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes`
+      );
+    }
+
+    function executeCommand(commandLine) {
+      const [command, ...args] = commandLine.split(" ");
+      const cmd = commands[command];
+
+      if (/^hola$/i.test(command)) {
+        return `4ndyOS: Hola, ${username}`;
+      }
+
+      if (cmd) {
+        return cmd(args);
+      } else {
+        return `4ndyOS: '${command}' no es un comando reconocido. Escribe 'help' para ver la lista de comandos.`;
+      }
+    }
+
+    function addOutput(text, isError = false, delay = 30) {
+      return new Promise((resolve) => {
+        const newLine = document.createElement("div");
+        newLine.className = isError ? 'error-output' : 'command-output';
+        output.appendChild(newLine);
+        let index = 0;
+
+        function typeChar() {
+          if (index < text.length) {
+            newLine.textContent += text[index];
+            index++;
+            setTimeout(typeChar, delay);
+          } else {
+            resolve();
+          }
+        }
+
+        typeChar();
+        output.scrollTop = output.scrollHeight;
+      });
+    }
+
+    input.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        const commandLine = input.value.trim();
+        if (commandLine) {
+          commandHistory.push(commandLine);
+          historyIndex = commandHistory.length; // Reset history index
+          await addOutput(`4ndyOS: ${commandLine}`);
+          const result = executeCommand(commandLine);
+          if (result) await addOutput(result);
+        }
+        input.value = "";
+      } else if (e.key === "ArrowUp") {
+        if (historyIndex > 0) {
+          historyIndex--;
+          input.value = commandHistory[historyIndex];
+        }
+      } else if (e.key === "ArrowDown") {
+        if (historyIndex < commandHistory.length - 1) {
+          historyIndex++;
+          input.value = commandHistory[historyIndex];
+        } else {
+          historyIndex = commandHistory.length; // Reset to the end
+          input.value = "";
+        }
+      }
+    });
+
+    async function showWelcomeMessage() {
+      await addOutput("4ndyOS: Bienvenido a 4ndyOS VER 0.0.1 m4trix.");
+      await addOutput("4ndyOS: Escribe 'help' para ver los comandos disponibles.");
+    }
+
+    window.onload = async () => {
+      input.focus();
+      await showWelcomeMessage();
+    };
+  </script>
+</body>
+</html>
