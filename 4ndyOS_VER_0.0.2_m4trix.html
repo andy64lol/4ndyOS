@@ -119,12 +119,12 @@
         if (isNaN(repeatCount) || repeatCount <= 0) {
           return "4ndyOS: Error: especifica un número válido de repeticiones.";
         }
-        const repeatLimit = 50; // Cap maximum repeats for performance.
+        const repeatLimit = 50; 
         const limitedCount = Math.min(repeatCount, repeatLimit);
         const result = Array(limitedCount).fill(text).join("\n");
         return `4ndyOS: (Mostrando hasta ${limitedCount} repeticiones)\n${result}`;
       },
-      about: () => "4ndyOS: 4ndyOS VER 0.0.2 m4trix, creado por 4ndy64, el primer sistema operativo basado en comandos.",
+      about: () => "4ndyOS: 4ndyOS VER 0.0.2 m4trix, creado por 4ndy64, un sistema operativo basado en comandos.",
       version: () => "4ndyOS: 4ndyOS VER 0.0.2 m4trix",
       time: () => {
         const date = new Date();
@@ -179,7 +179,7 @@
         return "4ndyOS: Uso: /change username [nuevo_nombre]";
       },
       shutdown: () => {
-        window.location.href = "index.html"; // Redirige a index.html directamente
+        window.location.href = "index.html"; 
         return `4ndyOS: Sistema apagado. Redirigiendo a la página de inicio...`;
       }
     };
@@ -207,7 +207,7 @@
       const cmd = commands[command];
 
       if (/^hola$/i.test(command)) {
-        return `4ndyOS: Hola, ${username}`;
+        return `4ndyOS: Hola, ${username} ,¿En qué te puedo ayudar hoy?`;
       }
 
       if (cmd) {
