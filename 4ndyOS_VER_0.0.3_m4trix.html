@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4ndyOS VER 0.0.3 m4trix</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+    body {
+      background-color: black;
+      color: #ff073a;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: flex-end;
+    }
+
+    #terminal {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    #input-line {
+      display: flex;
+      align-items: center;
+      position: relative;
+      bottom: 0;
+      padding: 10px;
+    }
+
+    #input-line span {
+      margin-right: 5px;
+    }
+
+    #input {
+      background: none;
+      border: none;
+      color: #ff073a;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      width: 100%;
+      outline: none;
+    }
+
+    #output {
+      white-space: pre-wrap;
+    }
+
+    #time-date {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #ff073a;
+      font-size: 14px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
+</head>
+<body>
+  <div id="terminal">
+    <div id="output"></div>
+  </div>
+  <div id="input-line">
+    <span>USER:</span>
+    <input type="text" id="input" autofocus>
+  </div>
+  <div id="time-date"></div>
+
+  <script>
+    const output = document.getElementById('output');
+    const input = document.getElementById('input');
+    const timeDateElement = document.getElementById('time-date');
+    let username = "user";
+
+    function updateTimeDate() {
+      const now = new Date();
+      const time = now.toLocaleTimeString();
+      const date = now.toLocaleDateString();
+      timeDateElement.textContent = `Fecha: ${date} | Hora: ${time}`;
+    }
+
+    setInterval(updateTimeDate, 1000);
+    updateTimeDate();
+
+    const commands = {
+      h: () =>
+        `4ndyOS: Comandos disponibles:
+        //h - Ayuda
+        //c - Limpiar
+        //e [texto] - Escribir texto
+        *(n)//[texto] - Repetir texto n veces
+        //a - Info del sistema
+        //v - Ver versión
+        //s [expr] - Resolver expresión
+        //w [URL] - Abrir web
+        //r [min] [max] - Random
+        //u [texto] - Uppercase
+        //l [texto] - Lowercase
+        /ch u [nombre] - Cambiar usuario
+        //x - Apagar
+        //re - Reiniciar`,
+      c: () => {
+        output.innerHTML = "";
+        return "";
+      },
+      e: (args) => `4ndyOS: ${args.join(" ")}`,
+      repeat: (args) => {
+        const repeatCount = parseInt(args[0], 10);
+        const text = args.slice(1).join(" ");
+        if (isNaN(repeatCount) || repeatCount <= 0) {
+          return "4ndyOS: Error: número inválido de repeticiones.";
+        }
+        const repeatLimit = 50;
+        const limitedCount = Math.min(repeatCount, repeatLimit);
+        const result = Array(limitedCount).fill(text).join("\n");
+        return `4ndyOS: (Max ${limitedCount} repeticiones)\n${result}`;
+      },
+      a: () => "4ndyOS: 4ndyOS VER 0.0.3 m4trix, creado por 4ndy64.",
+      v: () => "4ndyOS: 4ndyOS VER 0.0.3 m4trix",
+      s: (args) => {
+        try {
+          const expression = args.join(" ");
+          const result = math.evaluate(expression);
+          return `4ndyOS: Resultado: ${result}`;
+        } catch (e) {
+          return "4ndyOS: Error: expresión inválida.";
+        }
+      },
+      w: (args) => {
+        if (!args[0]) {
+          return "4ndyOS: Error: URL requerida. Ej: //w example.com";
+        }
+        const url = args[0].startsWith("http") ? args[0] : `https://${args[0]}`;
+        openWebWindow(url);
+        return `4ndyOS: Abriendo ${url}`;
+      },
+      r: (args) => {
+        const min = parseInt(args[0], 10) || 0;
+        const max = parseInt(args[1], 10) || 100;
+        return `4ndyOS: Random: ${Math.floor(Math.random() * (max - min + 1)) + min}`;
+      },
+      u: (args) => `4ndyOS: ${args.join(" ").toUpperCase()}`,
+      l: (args) => `4ndyOS: ${args.join(" ").toLowerCase()}`,
+      re: () => {
+        output.innerHTML = "";
+        return "4ndyOS: Terminal reiniciada.";
+      },
+      "/ch": (args) => {
+        if (args[0] === "u" && args[1]) {
+          username = args.slice(1).join(" ");
+          return `4ndyOS: Usuario cambiado a '${username}'.`;
+        }
+        return "4ndyOS: Uso: /ch u [nombre]";
+      },
+      x: () => {
+        window.location.href = "index.html";
+        return "4ndyOS: Apagado. Redirigiendo...";
+      }
+    };
+
+    function openWebWindow(url) {
+      const width = 800;
+      const height = 600;
+      const left = (screen.width - width) / 2;
+      const top = (screen.height - height) / 2;
+
+      window.open(
+        url,
+        "_blank",
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes`
+      );
+    }
+
+    function executeCommand(commandLine) {
+      const repeatPattern = /\/\/([^*]*)\*\d+/;
+      const repeatMatch = commandLine.match(/\/\/\*c:"(.*?)\"\*(\d+)$/);
+      if (repeatMatch) {
+        return commands.repeat([repeatMatch[2], repeatMatch[1]]);
+      }
+
+      const [command, ...args] = commandLine.split(" ");
+      const cmd = commands[command.slice(2)];
+
+      if (/^hola$/i.test(command)) {
+        return `4ndyOS: Hola, ${username}`;
+      }
+
+      if (cmd) {
+        return cmd(args);
+      } else {
+        return `4ndyOS: '${command}' no es válido. Usa //h.`;
+      }
+    }
+
+    function addOutput(text, delay = 30) {
+      return new Promise((resolve) => {
+        const newLine = document.createElement("div");
+        output.appendChild(newLine);
+        let index = 0;
+
+        function typeChar() {
+          if (index < text.length) {
+            newLine.textContent += text[index];
+            index++;
+            setTimeout(typeChar, Math.max(delay - Math.floor(text.length / 50), 5));
+          } else {
+            resolve();
+          }
+        }
+
+        typeChar();
+        output.scrollTop = output.scrollHeight;
+      });
+    }
+
+    input.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        const commandLine = input.value.trim();
+        if (commandLine) {
+          await addOutput(`4ndyOS: ${commandLine}`);
+          const result = executeCommand(commandLine);
+          if (result) await addOutput(result);
+        }
+        input.value = "";
+      }
+    });
+
+    async function showWelcomeMessage() {
+      await addOutput("4ndyOS: Bienvenido a 4ndyOS VER 0.0.3 m4trix.");
+      await addOutput("4ndyOS: Escribe '//h' para comandos.");
+    }
+
+    window.onload = async () => {
+      input.focus();
+      await showWelcomeMessage();
+    };
+  </script>
+</body>
+</html>
