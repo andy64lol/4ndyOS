@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4ndyOS VER 0.0.3 m4trix</title>
+  <title>4ndyOS VER 0.0.3 m4trix Plus</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
     body {
-      background-color: #121212; /* Dark background for a modern look */
-      color: #ff073a; /* Bright text color */
-      font-family: 'VT323', monospace; /* Monospace font for terminal feel */
+      background-color: #121212;
+      color: #ff073a; 
+      font-family: 'VT323', monospace; 
       font-size: 18px;
       margin: 0;
       padding: 0;
@@ -23,49 +23,49 @@
       flex-grow: 1;
       overflow-y: auto;
       padding: 20px;
-      border-top: 2px solid #ff073a; /* Accent color for the top border */
-      box-shadow: 0 0 20px rgba(255, 7, 58, 0.5); /* Soft shadow for depth */
-      border-radius: 10px; /* Rounded corners */
-      background-color: #1e1e1e; /* Slightly lighter background for terminal */
+      border-top: 2px solid #ff073a;
+      box-shadow: 0 0 20px rgba(255, 7, 58, 0.5); 
+      border-radius: 10px; 
+      background-color: #1e1e1e; 
       transition: box-shadow 0.3s ease;
     }
     #input-line {
       display: flex;
       align-items: center;
       padding: 10px;
-      background-color: #2e2e2e; /* Darker background for input line */
-      border-top: 2px solid #ff073a; /* Accent color for the top border */
-      border-radius: 0 0 10px 10px; /* Rounded corners at the bottom */
+      background-color: #2e2e2e; 
+      border-top: 2px solid #ff073a; 
+      border-radius: 0 0 10px 10px; 
     }
     #input-line span {
       margin-right: 5px;
-      color: #ff073a; /* Accent color for user label */
+      color: #ff073a; 
     }
     #input {
       background: none;
       border: none;
-      color: #ff073a; /* Bright text color */
-      font-family: 'VT323', monospace; /* Monospace font for terminal feel */
+      color: #ff073a; 
+      font-family: 'VT323', monospace; 
       font-size: 18px;
       width: 100%;
       outline: none;
       padding: 5px;
-      border-radius: 5px; /* Rounded corners for input */
+      border-radius: 5px; 
       transition: background-color 0.3s ease;
     }
     #input:focus {
-      background-color: rgba(255, 7, 58, 0.1); /* Light background on focus */
+      background-color: rgba(255, 7, 58, 0.1); 
     }
     #output {
-      white-space: pre-wrap; /* Preserve whitespace */
-      line-height: 1.5; /* Improved line height for readability */
-      margin-bottom: 10px; /* Space at the bottom */
+      white-space: pre-wrap; 
+      line-height: 1.5; 
+      margin-bottom: 10px; 
     }
     #time-date {
       position: absolute;
       top: 10px;
       right: 10px;
-      color: #ff073a; /* Bright text color */
+      color: #ff073a; 
       font-size: 14px;
       transition: color 0.3s ease;
     }
@@ -139,8 +139,8 @@
         }
         return "4ndyOS: Error en comando //searchword. Usa //searchword [texto],[palabra].";
       },
-      a: () => "4ndyOS: 4ndyOS VER 0.0.3 m4trix, creado por 4ndy64.",
-      v: () => "4ndyOS: 4ndyOS VER 0.0.3 m4trix",
+      a: () => "4ndyOS: 4ndyOS VER 0.0.3 m4trix Plus, creado por 4ndy64.",
+      v: () => "4ndyOS: 4ndyOS VER 0.0.3 m4trix Plus",
       s: (args) => {
         try {
           const expression = args.join(" ");
@@ -200,7 +200,7 @@
       const cmd = commands[command.slice(2)];
 
       if (/^hola$/i.test(command)) {
-        return `4ndyOS: Hola, ${username}`;
+        return `4ndyOS: Hola, ${username} ,¿cómo te puedo ayudar hoy?`;
       }
 
       if (cmd) {
