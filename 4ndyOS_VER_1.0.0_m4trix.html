@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4ndyOS VER 1.0.0 m4trix Plus</title>
+  <title>4ndyOS VER 1.0.0 m4trix</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
     body {
       background-color: #121212;
-      color: #ff073a; 
-      font-family: 'VT323', monospace; 
+      color: #00ffff;
+      font-family: 'VT323', monospace;
       font-size: 18px;
       margin: 0;
       padding: 0;
@@ -23,69 +23,73 @@
       flex-grow: 1;
       overflow-y: auto;
       padding: 20px;
-      border-top: 2px solid #ff073a;
-      box-shadow: 0 0 20px rgba(255, 7, 58, 0.5); 
-      border-radius: 10px; 
-      background-color: #1e1e1e; 
+      border-top: 2px solid #00ffff;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+      border-radius: 10px;
+      background-color: #1e1e1e;
       transition: box-shadow 0.3s ease, background-color 0.3s ease;
     }
     #input-line {
       display: flex;
       align-items: center;
       padding: 10px;
-      background-color: #2e2e2e; 
-      border-top: 2px solid #ff073a; 
-      border-radius: 0 0 10px 10px; 
+      background-color: #2e2e2e;
+      border-top: 2px solid #00ffff;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
     #input-line span {
       margin-right: 5px;
-      color: #ff073a; 
+      color: #00ffff; /* Color inicial para el modo oscuro */
+      transition: color 0.3s ease; /* Transición suave para el cambio de color */
     }
     #input {
       background: none;
       border: none;
-      color: #ff073a; 
-      font-family: 'VT323', monospace; 
+      color: #00ffff;
+      font-family: 'VT323', monospace;
       font-size: 18px;
       width: 100%;
       outline: none;
       padding: 5px;
-      border-radius: 5px; 
-      transition: background-color 0.3s ease;
+      border-radius: 5px;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     #input:focus {
-      background-color: rgba(255, 7, 58, 0.1); 
+      background-color: rgba(0, 255, 255, 0.1);
     }
     #output {
-      white-space: pre-wrap; 
-      line-height: 1.5; 
-      margin-bottom: 10px; 
+      white-space: pre-wrap;
+      line-height: 1.5;
+      margin-bottom: 10px;
     }
     #time-date {
       position: absolute;
       top: 10px;
       right: 10px;
-      color: #ff073a; 
+      color: #00ffff;
       font-size: 14px;
       transition: color 0.3s ease;
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
 </head>
 <body>
   <div id="terminal">
     <div id="output"></div>
   </div>
   <div id="input-line">
-    <span>USER:</span>
+    <span id="user-label">USER:</span>
     <input type="text" id="input" autofocus>
   </div>
   <div id="time-date"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
   <script>
     const output = document.getElementById('output');
     const input = document.getElementById('input');
     const timeDateElement = document.getElementById('time-date');
+    const userLabel = document.getElementById('user-label'); // Obtener el elemento USER
     let username = "user";
     let currentMode = "dark";
 
@@ -115,7 +119,7 @@
         //w [URL] - Abrir web
         //r [min] [max] - Random
         //u [texto] - Uppercase
-        //mode [light/dark] - Cambiar modo de visualización
+        //mode [light/dark/black-white/rgb] - Cambiar modo de visualización
         //x - Apagar
         //re - Reiniciar`,
       c: () => {
@@ -140,8 +144,8 @@
         }
         return "4ndyOS: Error en comando //searchword. Usa //searchword [texto],[palabra].";
       },
-      a: () => "4ndyOS: 4ndyOS VER 1.0.0 m4trix Plus, creado por 4ndy64.",
-      v: () => "4ndyOS: 4ndyOS VER 1.0.0 m4trix Plus",
+      a: () => "4ndyOS: 4ndyOS VER 1.0.0 m4trix, creado por 4ndy64.",
+      v: () => "4ndyOS: 4ndyOS VER 1.0.0 m4trix",
       s: (args) => {
         try {
           const expression = args.join(" ");
@@ -186,17 +190,51 @@
           document.body.style.color = "#121212";
           document.getElementById('terminal').style.backgroundColor = "#f0f0f0";
           document.getElementById('input-line').style.backgroundColor = "#e0e0e0";
+          document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.1)";
+          document.getElementById('terminal').style.borderTopColor = "#0000ff";
+          document.getElementById('input').style.color = "#121212"; // Cambiar color del texto de entrada
+          document.getElementById('input').style.backgroundColor = "#ffffff"; // Cambiar fondo de entrada
+          userLabel.style.color = "#121212"; // Cambiar color de USER
           currentMode = "light";
           return "4ndyOS: Modo claro activado.";
         } else if (args[0] === "dark") {
           document.body.style.backgroundColor = "#121212";
-          document.body.style.color = "#ff073a";
+          document.body.style.color = "#00ffff";
           document.getElementById('terminal').style.backgroundColor = "#1e1e1e";
           document.getElementById('input-line').style.backgroundColor = "#2e2e2e";
+          document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(0, 255, 255, 0.2)";
+          document.getElementById('terminal').style.borderTopColor = "#00ffff";
+          document.getElementById('input').style.color = "#00ffff"; // Cambiar color del texto de entrada
+          document.getElementById('input').style.backgroundColor = "transparent"; // Cambiar fondo de entrada
+          userLabel.style.color = "#00ffff"; // Cambiar color de USER
           currentMode = "dark";
           return "4ndyOS: Modo oscuro activado.";
+        } else if (args[0] === "black-white") {
+          document.body.style.backgroundColor = "#000000";
+          document.body.style.color = "#FFFFFF";
+          document.getElementById('terminal').style.backgroundColor = "#000000";
+          document.getElementById('input-line').style.backgroundColor = "#333333";
+          document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(255, 255, 255, 0.2)";
+          document.getElementById('terminal').style.borderTopColor = "#FFFFFF";
+          document.getElementById('input').style.color = "#FFFFFF"; // Cambiar color del texto de entrada
+          document.getElementById('input').style.backgroundColor = "#000000"; // Cambiar fondo de entrada
+          userLabel.style.color = "#FFFFFF"; // Cambiar color de USER
+          currentMode = "black-white";
+          return "4ndyOS: Modo blanco-negro activado.";
+        } else if (args[0] === "rgb") {
+          document.body.style.backgroundColor = "#FF0000"; // Rojo
+          document.body.style.color = "#00FF00"; // Verde
+          document.getElementById('terminal').style.backgroundColor = "#0000FF"; // Azul
+          document.getElementById('input-line').style.backgroundColor = "#FFFF00"; // Amarillo
+          document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.5)";
+          document.getElementById('terminal').style.borderTopColor = "#FF00FF"; // Magenta
+          document.getElementById('input').style.color = "#FFFFFF"; // Cambiar color del texto de entrada
+          document.getElementById('input').style.backgroundColor = "#000000"; // Cambiar fondo de entrada
+          userLabel.style.color = "#FFFFFF"; // Cambiar color de USER
+          currentMode = "rgb";
+          return "4ndyOS: Modo RGB activado.";
         }
-        return "4ndyOS: Error: Comando inválido para //mode. Usa //mode light o //mode dark.";
+        return "4ndyOS: Error: Comando inválido para //mode. Usa //mode light, dark o blanco-negro.";
       }
     };
 
@@ -238,7 +276,7 @@
           if (index < text.length) {
             newLine.textContent += text[index];
             index++;
-            setTimeout(typeChar, Math.max(delay - Math.floor(text.length / 50), 5));
+            setTimeout(typeChar, Math.max(delay - Math.floor(text .length / 50), 5));
           } else {
             resolve();
           }
