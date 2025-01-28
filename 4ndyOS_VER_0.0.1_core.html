@@ -64,6 +64,18 @@
             background: #666;
         }
 
+        .taskbar .shutdown {
+            padding: 5px 10px;
+            background: red;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .taskbar .shutdown:hover {
+            background: darkred;
+        }
+
         .window {
             position: absolute;
             top: 50px;
@@ -107,7 +119,6 @@
             overflow: auto;
         }
 
-        /* Settings app styles */
         .settings {
             font-size: 16px;
         }
@@ -148,6 +159,7 @@
     <div class="taskbar">
         <div class="start-menu">4ndyOS</div>
         <div class="open-apps" id="openApps"></div>
+        <div class="shutdown" onclick="shutdown()">Shutdown</div>
         <div id="clock"></div>
     </div>
 
@@ -276,6 +288,10 @@
 
         function changeBackground(color) {
             document.getElementById('desktop').style.background = color;
+        }
+
+        function shutdown() {
+            window.location.href = "index.html";
         }
 
         setInterval(updateClock, 1000);
