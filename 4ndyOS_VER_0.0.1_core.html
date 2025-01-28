@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndyOS</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #desktop {
+            flex: 1;
+            background: linear-gradient(135deg, #87cefa, #4682b4);
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            padding: 20px;
+            gap: 20px;
+            position: relative;
+        }
+
+        .icon {
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .icon img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .taskbar {
+            height: 40px;
+            background-color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .taskbar .open-apps {
+            display: flex;
+            gap: 10px;
+        }
+
+        .taskbar .open-app {
+            padding: 5px 10px;
+            background: #444;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .taskbar .open-app:hover {
+            background: #666;
+        }
+
+        .window {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            width: 600px;
+            height: 400px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            resize: both;
+            overflow: auto;
+            z-index: 10;
+        }
+
+        .window-header {
+            background-color: #222;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            cursor: move;
+        }
+
+        .window-header .close {
+            cursor: pointer;
+            color: red;
+        }
+
+        .window-header .minimize {
+            cursor: pointer;
+            color: yellow;
+            margin-right: 10px;
+        }
+
+        .window-body {
+            flex: 1;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        /* Settings app styles */
+        .settings {
+            font-size: 16px;
+        }
+
+        .settings h2 {
+            margin: 0 0 10px 0;
+        }
+
+        .settings label {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="desktop">
+        <div class="icon" onclick="openWindow('app2')">
+            <img src="https://via.placeholder.com/60" alt="360 Search">
+            <p>360 Search</p>
+        </div>
+        <div class="icon" onclick="openWindow('app3')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Bilibili_Logo_2019.svg/512px-Bilibili_Logo_2019.svg.png" alt="Bilibili">
+            <p>Bilibili</p>
+        </div>
+        <div class="icon" onclick="openWindow('app4')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Weibo_logo_2017.png" alt="Weibo">
+            <p>Weibo</p>
+        </div>
+        <div class="icon" onclick="openWindow('app8')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/QQ_logo_2019.svg" alt="QQ Mail">
+            <p>QQ Mail</p>
+        </div>
+        <div class="icon" onclick="openWindow('settings')">
+            <img src="https://via.placeholder.com/60" alt="Settings">
+            <p>Settings</p>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <div class="start-menu">4ndyOS</div>
+        <div class="open-apps" id="openApps"></div>
+        <div id="clock"></div>
+    </div>
+
+    <div id="app2" class="window">
+        <div class="window-header">
+            <span>360 Search</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app2')">_</span>
+                <span class="close" onclick="closeWindow('app2')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://m.so.com/" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="app3" class="window">
+        <div class="window-header">
+            <span>Bilibili</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app3')">_</span>
+                <span class="close" onclick="closeWindow('app3')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://www.bilibili.com" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="app4" class="window">
+        <div class="window-header">
+            <span>Weibo</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app4')">_</span>
+                <span class="close" onclick="closeWindow('app4')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://www.weibo.com" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="app8" class="window">
+        <div class="window-header">
+            <span>QQ Mail</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app8')">_</span>
+                <span class="close" onclick="closeWindow('app8')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://mail.qq.com" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="settings" class="window">
+        <div class="window-header">
+            <span>Settings</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('settings')">_</span>
+                <span class="close" onclick="closeWindow('settings')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="settings">
+                <h2>Settings</h2>
+                <label for="bgColor">Change Background:</label>
+                <input type="color" id="bgColor" onchange="changeBackground(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const openApps = document.getElementById('openApps');
+
+        const appNames = {
+            app2: "360 Search",
+            app3: "Bilibili",
+            app4: "Weibo",
+            app8: "QQ Mail",
+            settings: "Settings"
+        };
+
+        function openWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'flex';
+            addTaskbarApp(appId);
+        }
+
+        function closeWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'none';
+            removeTaskbarApp(appId);
+        }
+
+        function minimizeWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'none';
+        }
+
+        function addTaskbarApp(appId) {
+            if (!document.getElementById(`task-${appId}`)) {
+                const task = document.createElement('div');
+                task.id = `task-${appId}`;
+                task.className = 'open-app';
+                task.textContent = appNames[appId] || appId;
+                task.onclick = () => restoreWindow(appId);
+                openApps.appendChild(task);
+            }
+        }
+
+        function removeTaskbarApp(appId) {
+            const task = document.getElementById(`task-${appId}`);
+            if (task) task.remove();
+        }
+
+        function restoreWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'flex';
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString();
+        }
+
+        function changeBackground(color) {
+            document.getElementById('desktop').style.background = color;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
