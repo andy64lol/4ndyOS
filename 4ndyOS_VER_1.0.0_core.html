@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndyOS</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0078d7;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #desktop {
+            flex: 1;
+            background: #f0f0f0; 
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            padding: 20px;
+            gap: 20px;
+            position: relative;
+        }
+
+        .icon {
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            background: white; 
+            border: 1px solid #ccc; 
+            border-radius: 5px;
+            padding: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .icon img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .taskbar {
+            height: 40px;
+            background-color: #333; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            color: white;
+            font-size: 14px;
+            border-top: 2px solid #0078d7; 
+        }
+
+        .taskbar .open-apps {
+            display: flex;
+            gap: 10px;
+        }
+
+        .taskbar .open-app {
+            padding: 5px 10px;
+            background: #444;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .taskbar .open-app:hover {
+            background: #666;
+        }
+
+        .taskbar .shutdown {
+            padding: 5px 10px;
+            background: red;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            position: relative;
+        }
+
+        .taskbar .shutdown-menu {
+            display: none;
+            position: absolute;
+            background: #444;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            right: 0;
+            top: 40px;
+        }
+
+        .taskbar .shutdown-menu div {
+            padding: 5px 10px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .taskbar .shutdown-menu div:hover {
+            background: #666;
+        }
+
+        .window {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            width: 600px;
+            height: 400px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid #ccc; 
+            border-radius: 5px;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            resize: both;
+            overflow: auto;
+            z-index: 10;
+        }
+
+        .window-header {
+            background-color: #0078d7; 
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            cursor: move;
+        }
+
+        .window-header .close {
+            cursor: pointer;
+            color: red;
+        }
+
+        .window-header .minimize {
+            cursor: pointer;
+            color: yellow;
+            margin-right: 10px;
+        }
+
+        .window-body {
+            flex: 1;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        .settings {
+            font-size: 16px;
+        }
+
+        .settings h2 {
+            margin: 0 0 10px 0;
+        }
+
+        .settings label {
+            margin-right: 10px;
+        }
+
+        .settings button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .settings button:hover {
+            background-color: #0056a1;
+        }
+
+        .version-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="desktop">
+        <div class="icon" onclick="openWindow('app2')">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-O7f4GOYuoAtHnpGFBv4DEt36_nGC77WDrA&s" alt="360 Search">
+            <p>360 Search</p>
+        </div>
+        <div class="icon" onclick="openWindow('app3')">
+            <img src="https://cdn6.aptoide.com/imgs/4/b/0/4b03ddcd40093dcda90662187d0007e3_icon.png" alt="Bilibili">
+            <p>Bilibili</p>
+        </div>
+        <div class="icon" onclick="openWindow('app8')">
+            <img src="https://play-lh.googleusercontent.com/i_lfkfxkGt_v47PUT195nWFcMQEhH0KEGki-oIs4B50n78ILEuYt5mHySwZTEyOe1A" alt="QQ Mail">
+            <p>QQ Mail</p>
+        </div>
+        <div class="icon" onclick="openWindow('terminal')">
+            <img src="https://cdn-icons-png.flaticon.com/512/11442/11442079.png" alt="Terminal">
+            <p>Terminal</p>
+        </div>
+        <div class="icon" onclick="openWindow('settings')">
+            <img src="https://icons.iconarchive.com/icons/dtafalonso/android-lollipop/512/Settings-icon.png" alt="Settings">
+            <p>Settings</p>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <div class="start-menu" onclick="toggleShutdownMenu()">4ndyOS</div>
+        <div class="open-apps" id="openApps"></div>
+        <div class="shutdown" onclick="toggleShutdownMenu()">Shutdown</div>
+        <div class="shutdown-menu" id="shutdownMenu">
+            <div onclick="shutdown()">Shutdown</div>
+            <div onclick="restart()">Restart</div>
+        </div>
+        <div id="clock"></div>
+    </div>
+
+    <div id="app2" class="window">
+        <div class="window-header">
+            <span>360 Search</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app2')">_</span>
+                <span class="close" onclick="closeWindow('app2')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://m.so.com/" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="app3" class="window">
+        <div class="window-header">
+            <span>Bilibili</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app3')">_</span>
+                <span class="close" onclick="closeWindow('app3')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://www.bilibili.com" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="app8" class="window">
+        <div class="window-header">
+            <span>QQ Mail</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app8')">_</span>
+                <span class="close" onclick="closeWindow('app8')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://mail.qq.com" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="terminal" class="window">
+        <div class="window-header">
+            <span>Terminal</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('terminal')">_</span>
+                <span class="close" onclick="closeWindow('terminal')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://andy64lol.github.io/4ndyOS.github.io/4ndyOS_VER_1.0.0_m4trix.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="settings" class="window">
+        <div class="window-header">
+            <span>Settings</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('settings')">_</span>
+                <span class="close" onclick="closeWindow('settings')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="settings">
+                <h2>Settings</h2>
+                <div>
+                    <h3>Background</h3>
+                    <label for="bgColor">Change Background Color:</label>
+                    <input type="color" id="bgColor" onchange="changeBackground(this.value)">
+                    <label for="bgUpload">Upload Background Image:</label>
+                    <input type="file" id="bgUpload" accept="image/*" onchange="uploadBackground(event)">
+                </div>
+                <div>
+                    <h3>Window Settings</h3>
+                    <label for="windowSize">Window Size:</label>
+                    <input type="text" id="windowSize" placeholder="Width x Height">
+                    <label for="outlineColor">Outline Color:</label>
+                    <input type="color" id="outlineColor" onchange="changeOutlineColor(this.value)">
+                </div>
+                <div>
+                    <h3>Screen Settings</h3>
+                    <label for="screenResolution">Screen Resolution:</label>
+                    <input type="text" id="screenResolution" placeholder="e.g., 1920x1080">
+                </div>
+                <div>
+                    <h3>Apps Settings</h3>
+                    <p>Manage your applications here.</p>
+                </div>
+                <button onclick="saveSettings()">Save Changes</button>
+                <div class="version-info">Version: 4ndyOS_VER_1.0.0_core</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const openApps = document.getElementById('openApps');
+        const shutdownMenu = document.getElementById('shutdownMenu');
+
+        const appNames = {
+            app2: "360 Search",
+            app3: "Bilibili",
+            app8: "QQ Mail",
+            terminal: "Terminal",
+            settings: "Settings"
+        };
+
+        function openWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'flex';
+            addTaskbarApp(appId);
+            dragElement(app);
+        }
+
+        function closeWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'none';
+            removeTaskbarApp(appId);
+        }
+
+        function minimizeWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'none';
+        }
+
+        function addTaskbarApp(appId) {
+            if (!document.getElementById(`task-${appId}`)) {
+                const task = document.createElement('div');
+                task.id = `task-${appId}`;
+                task.className = 'open-app';
+                task.textContent = appNames[appId] || appId;
+                task.onclick = () => restoreWindow(appId);
+                openApps.appendChild(task);
+            }
+        }
+
+        function removeTaskbarApp(appId) {
+            const task = document.getElementById(`task-${appId}`);
+            if (task) task.remove();
+        }
+
+        function restoreWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'flex';
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString();
+        }
+
+        function changeBackground(color) {
+            document.getElementById('desktop').style.background = color;
+        }
+
+        function uploadBackground(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('desktop').style.backgroundImage = `url(${e.target.result})`;
+                document.getElementById('desktop').style.backgroundSize = 'cover';
+            };
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function changeOutlineColor(color) {
+            const windows = document.querySelectorAll('.window');
+            windows.forEach(win => {
+                win.style.borderColor = color;
+            });
+        }
+
+        function shutdown() {
+            window.location.href = "index.html"; 
+        }
+
+        function restart() {
+           
+            alert("Restart functionality is not implemented yet,wait 'till the update 1.1.o");
+        }
+
+        function toggleShutdownMenu() {
+            shutdownMenu.style.display = shutdownMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function saveSettings() {
+           
+            alert("Settings saved!");
+        }
+
+        function dragElement(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            const header = elmnt.querySelector('.window-header');
+            if (header) {
+                header.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
