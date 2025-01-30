@@ -35,6 +35,11 @@
             border-radius: 5px;
             padding: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .icon:hover {
+            transform: scale(1.05);
         }
 
         .icon img {
@@ -43,7 +48,7 @@
         }
 
         .taskbar {
-            height: 40px;
+            height: 50px;
             background-color: #333; 
             display: flex;
             align-items: center;
@@ -89,7 +94,7 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
             z-index: 100;
             right: 0;
-            top: 40px;
+            top: 50px;
         }
 
         .taskbar .shutdown-menu div {
@@ -162,7 +167,7 @@
             margin-top: 10px;
             padding: 5px 10px;
             background-color: #0078d7;
-            color: white;
+            color : white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -259,7 +264,7 @@
             <span>Terminal</span>
             <span>
                 <span class="minimize" onclick="minimizeWindow('terminal')">_</span>
-                <span class="close" onclick="closeWindow('terminal')">X</span>
+                <span class="close" onclick="closeWindow ('terminal')">X</span>
             </span>
         </div>
         <div class="window-body">
@@ -383,7 +388,7 @@
             const windows = document.querySelectorAll('.window');
             windows.forEach(win => {
                 win.style.borderColor = color;
-            });
+ });
         }
 
         function shutdown() {
@@ -391,8 +396,7 @@
         }
 
         function restart() {
-           
-            alert("Restart functionality is not implemented yet,wait 'till the 1.1.0 update of 4ndyOS core.");
+            alert("Restart functionality is not implemented yet, wait 'till the update 1.1.0");
         }
 
         function toggleShutdownMenu() {
@@ -400,7 +404,6 @@
         }
 
         function saveSettings() {
-           
             alert("Settings saved!");
         }
 
