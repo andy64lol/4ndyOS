@@ -1,7 +1,6 @@
 # 4ndyOS Emulation
 
-Welcome to **4ndyOS Emulation**, a web-based interface for launching different versions of 4ndyOS. This project provides an interactive way to explore various builds of 4ndyOS, featuring a hacker-style aesthetic with a retro terminal-inspired design.
-
+Welcome to **4ndyOS Emulation**, a web-based interface for launching different versions of 4ndyOS. This project provides an interactive way to explore various builds of 4ndyOS.
 ## Features
 - **Multiple Versions**: Launch different versions of 4ndyOS, including Core and M4trix editions.
 - **Web-Based Interface**: No installation needed—simply open the page and start using 4ndyOS.
