@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f4f8;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #notes-container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+        }
+
+        select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: none;
+        }
+
+        textarea {
+            height: 300px;
+            background-color: #e9ecef;
+            resize: none;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #import-container {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="notes-container">
+        <select id="noteSlot">
+            <option value="0">Slot 1</option>
+            <option value="1">Slot 2</option>
+            <option value="2">Slot 3</option>
+            <option value="3">Slot 4</option>
+            <option value="4">Slot 5</option>
+            <option value="5">Slot 6</option>
+            <option value="6">Slot 7</option>
+            <option value="7">Slot 8</option>
+            <option value="8">Slot 9</option>
+            <option value="9">Slot 10</option>
+        </select>
+        <textarea id="note" placeholder="Write your notes here..."></textarea>
+        <button id="save">Save Note</button>
+        <button id="export">Export as .txt</button>
+        <button id="showImport">Import .txt</button>
+    </div>
+
+    <div id="import-container">
+        <h3>Import .txt File</h3>
+        <input type="file" id="importFile" accept=".txt">
+        <select id="importSlot">
+            <option value="0">Slot 1</option>
+            <option value="1">Slot 2</option>
+            <option value="2">Slot 3</option>
+            <option value="3">Slot 4</option>
+            <option value="4">Slot 5</option>
+            <option value="5">Slot 6</option>
+            <option value="6">Slot 7</option>
+            <option value="7">Slot 8</option>
+            <option value="8">Slot 9</option>
+            <option value="9">Slot 10</option>
+        </select>
+        <button id="importConfirm">Import</button>
+        <button id="importCancel">Cancel</button>
+    </div>
+
+    <script>
+        const note = document.getElementById('note');
+        const saveButton = document.getElementById('save');
+        const exportButton = document.getElementById('export');
+        const noteSlot = document.getElementById('noteSlot');
+        const showImport = document.getElementById('showImport');
+        const importContainer = document.getElementById('import-container');
+        const importFile = document.getElementById('importFile');
+        const importSlot = document.getElementById('importSlot');
+        const importConfirm = document.getElementById('importConfirm');
+        const importCancel = document.getElementById('importCancel');
+
+        function loadNote() {
+            note.value = localStorage.getItem(`noteSlot${noteSlot.value}`) || '';
+        }
+
+        saveButton.addEventListener('click', () => {
+            localStorage.setItem(`noteSlot${noteSlot.value}`, note.value);
+            alert('Note saved!');
+        });
+
+        exportButton.addEventListener('click', () => {
+            const blob = new Blob([note.value], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `note_slot_${parseInt(noteSlot.value) + 1}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        showImport.addEventListener('click', () => {
+            importContainer.style.display = 'flex';
+        });
+
+        importCancel.addEventListener('click', () => {
+            importContainer.style.display = 'none';
+        });
+
+        importConfirm.addEventListener('click', () => {
+            const file = importFile.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    localStorage.setItem(`noteSlot${importSlot.value}`, e.target.result);
+                    alert('Note imported successfully!');
+                    if (noteSlot.value === importSlot.value) {
+                        loadNote();
+                    }
+                    importContainer.style.display = 'none';
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        noteSlot.addEventListener('change', loadNote);
+        loadNote();
+    </script>
+</body>
+</html>
