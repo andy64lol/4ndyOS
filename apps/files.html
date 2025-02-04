@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Storage App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .file-slot {
+            background: #fff;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-slot input {
+            width: 60%;
+            padding: 5px;
+        }
+        .file-slot button {
+            padding: 5px 10px;
+        }
+        .file-list {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .message {
+            text-align: center;
+            color: green;
+        }
+        .upload {
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Storage App</h1>
+    <div class="upload">
+        <input type="file" id="fileInput" accept=".txt">
+        <button onclick="uploadFile()">Upload</button>
+    </div>
+    <div class="file-list" id="fileList"></div>
+    <div class="message" id="message"></div>
+    <script>
+        const fileList = document.getElementById('fileList');
+        const message = document.getElementById('message');
+        const maxFiles = 20;
+
+        function loadFiles() {
+            fileList.innerHTML = '';
+            for (let i = 0; i < maxFiles; i++) {
+                const fileName = localStorage.getItem(`file_${i}`);
+                const fileSlot = document.createElement('div');
+                fileSlot.className = 'file-slot';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = fileName ? fileName : '';
+                input.placeholder = `File ${i + 1}`;
+                input.readOnly = true;
+                const viewButton = document.createElement('button');
+                viewButton.innerText = 'View';
+                viewButton.onclick = () => viewFile(i);
+                const downloadButton = document.createElement('button');
+                downloadButton.innerText = 'Download';
+                downloadButton.onclick = () => downloadFile(i);
+                const deleteButton = document.createElement('button');
+                deleteButton.innerText = 'Delete';
+                deleteButton.onclick = () => deleteFile(i);
+                fileSlot.appendChild(input);
+                fileSlot.appendChild(viewButton);
+                fileSlot.appendChild(downloadButton);
+                fileSlot.appendChild(deleteButton);
+                fileList.appendChild(fileSlot);
+            }
+        }
+
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                message.innerText = 'Please select a file to upload.';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const fileContent = event.target.result;
+                for (let i = 0; i < maxFiles; i++) {
+                    if (!localStorage.getItem(`file_${i}`)) {
+                        localStorage.setItem(`file_${i}`, file.name);
+                        localStorage.setItem(`fileContent_${i}`, fileContent);
+                        message.innerText = `File "${file.name}" uploaded successfully.`;
+                        loadFiles();
+                        return;
+                    }
+                }
+                message.innerText = 'No available slots to upload the file.';
+            };
+            reader.readAsText(file);
+        }
+
+        function viewFile(index) {
+            const fileContent = localStorage.getItem(`fileContent_${index}`);
+            if (fileContent) {
+                alert(`Content of File ${index + 1}:\n\n${fileContent}`);
+            } else {
+                message.innerText = 'No file found.';
+            }
+        }
+
+        function downloadFile(index) {
+            const fileName = localStorage.getItem(`file_${index}`);
+            const fileContent = localStorage.getItem(`fileContent_${index}`);
+            if (fileName && fileContent) {
+                const blob = new Blob([fileContent], { type: ' text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                message.innerText = `File "${fileName}" downloaded successfully.`;
+            } else {
+                message.innerText = 'No file found to download.';
+            }
+        }
+
+        function deleteFile(index) {
+            localStorage.removeItem(`file_${index}`);
+            localStorage.removeItem(`fileContent_${index}`);
+            loadFiles();
+            message.innerText = `File ${index + 1} deleted successfully.`;
+        }
+
+        loadFiles();
+    </script>
+</body>
+</html>
