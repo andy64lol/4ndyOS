@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Epic Clicker Game</title>
     <style>
+        /* CSS remains the same */
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -122,16 +123,19 @@
     <audio id="upgrade-sound" src="https://www.myinstants.com/media/sounds/level-up.mp3"></audio>
 
     <script>
+        // Constants
+        const UPGRADE_MULTIPLIER = 1.5;
+        const MIN_AUTO_SPEED = 100;
+
+        // DOM Elements
         const clickButton = document.getElementById('click-button');
-        const upgradeButton = document.getElementById('upgrade-button');
-        const autoClickerButton = document.getElementById('auto-clicker-button');
-        const autoSpeedButton = document.getElementById('auto-speed-button');
         const counter = document.getElementById('counter');
         const autoSpeedDisplay = document.getElementById('auto-speed-display');
         const clickSound = document.getElementById('click-sound');
         const upgradeSound = document.getElementById('upgrade-sound');
         const autoClickerEmoji = document.getElementById('auto-clicker');
 
+        // Game State
         let count = parseInt(localStorage.getItem("count")) || 0;
         let clickValue = parseInt(localStorage.getItem("clickValue")) || 1;
         let autoClicker = parseInt(localStorage.getItem("autoClicker")) || 0;
@@ -141,16 +145,68 @@
         let autoSpeed = parseInt(localStorage.getItem("autoSpeed")) || 1000;
         let autoClickerInterval;
 
+        // Initialize game
+        startAutoClicker();
+        updateCounter();
+
+        // Event Delegation for Buttons
+        document.querySelector('.game-container').addEventListener('click', (e) => {
+            if (e.target.id === 'click-button') handleClick();
+            else if (e.target.id === 'upgrade-button') handleUpgrade();
+            else if (e.target.id === 'auto-clicker-button') handleAutoClickerUpgrade();
+            else if (e.target.id === 'auto-speed-button') handleAutoSpeedUpgrade();
+        });
+
+        // Functions
+        function handleClick() {
+            count += clickValue;
+            clickSound.play();
+            showClickEffect();
+            updateCounter();
+        }
+
+        function handleUpgrade() {
+            if (count >= upgradeCost) {
+                count -= upgradeCost;
+                clickValue++;
+                upgradeCost = Math.floor(upgradeCost * UPGRADE_MULTIPLIER);
+                upgradeSound.play();
+                updateCounter();
+            }
+        }
+
+        function handleAutoClickerUpgrade() {
+            if (count >= autoClickerCost) {
+                count -= autoClickerCost;
+                autoClicker++;
+                autoClickerCost = Math.floor(autoClickerCost * UPGRADE_MULTIPLIER);
+                upgradeSound.play();
+                updateCounter();
+                startAutoClicker();
+            }
+        }
+
+        function handleAutoSpeedUpgrade() {
+            if (count >= autoSpeedCost && autoSpeed > MIN_AUTO_SPEED) {
+                count -= autoSpeedCost;
+                autoSpeed = Math.max(autoSpeed - 100, MIN_AUTO_SPEED);
+                autoSpeedCost = Math.floor(autoSpeedCost * UPGRADE_MULTIPLIER);
+                upgradeSound.play();
+                updateCounter();
+                startAutoClicker();
+            }
+        }
+
         function updateCounter() {
             counter.textContent = count;
-            upgradeButton.textContent = `Upgrade Click (+${clickValue} per click) - Cost: ${upgradeCost}`;
-            autoClickerButton.textContent = `Upgrade Auto-Clicker (+${autoClicker} per sec) - Cost: ${autoClickerCost}`;
-            autoSpeedButton.textContent = `Upgrade Auto-Speed (Interval: ${autoSpeed}ms) - Cost: ${autoSpeedCost}`;
+            document.getElementById('upgrade-button').textContent = `Upgrade Click (+${clickValue} per click) - Cost: ${upgradeCost}`;
+            document.getElementById('auto-clicker-button').textContent = `Upgrade Auto-Clicker (+${autoClicker} per sec) - Cost: ${autoClickerCost}`;
+            document.getElementById('auto-speed-button').textContent = `Upgrade Auto-Speed (Interval: ${autoSpeed}ms) - Cost: ${autoSpeedCost}`;
             autoSpeedDisplay.textContent = autoSpeed;
 
-            upgradeButton.disabled = count < upgradeCost;
-            autoClickerButton.disabled = count < autoClickerCost;
-            autoSpeedButton.disabled = count < autoSpeedCost || autoSpeed <= 100;
+            document.getElementById('upgrade-button').disabled = count < upgradeCost;
+            document.getElementById('auto-clicker-button').disabled = count < autoClickerCost;
+            document.getElementById('auto-speed-button').disabled = count < autoSpeedCost || autoSpeed <= MIN_AUTO_SPEED;
 
             saveProgress();
         }
@@ -177,44 +233,13 @@
         }
 
         function showClickEffect() {
-            let effect = document.createElement("div");
+            const effect = document.createElement("div");
             effect.textContent = `+${clickValue}`;
             effect.classList.add("click-effect");
             effect.style.left = `${Math.random() * 50 + 25}%`;
             document.body.appendChild(effect);
             setTimeout(() => effect.remove(), 1000);
         }
-
-        clickButton.addEventListener('click', () => {
-            count += clickValue;
-            clickSound.play();
-            showClickEffect();
-            updateCounter();
-        });
-
-        upgradeButton.addEventListener('click', () => {
-            if (count >= upgradeCost) {
-                count -= upgradeCost;
-                clickValue++;
-                upgradeCost = Math.floor(upgradeCost * 1.5);
-                upgradeSound.play();
-                updateCounter();
-            }
-        });
-
-        autoClickerButton.addEventListener('click', () => {
-            if (count >= autoClickerCost) {
-                count -= autoClickerCost;
-                autoClicker++;
-                autoClickerCost = Math.floor(autoClickerCost * 1.5);
-                upgradeSound.play();
-                updateCounter();
-                startAutoClicker();
-            }
-        });
-
-        startAutoClicker();
-        updateCounter();
     </script>
 </body>
 </html>
