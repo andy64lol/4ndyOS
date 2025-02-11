@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Clicker Game</title>
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            overflow: hidden;
+        }
+
+        .game-container {
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+        }
+
+        h1 {
+            color: #007acc;
+            font-size: 2em;
+            text-shadow: 2px 2px #005f99;
+        }
+
+        #counter {
+            font-size: 3em;
+            font-weight: bold;
+            color: #222;
+            animation: pulse 1s infinite;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: 0.3s;
+            margin: 10px;
+        }
+
+        #click-button {
+            background-color: #007acc;
+            color: white;
+            font-size: 1.5em;
+            animation: pulse 1s infinite;
+        }
+
+        #click-button:active {
+            transform: scale(0.9);
+        }
+
+        .upgrade-button {
+            background-color: #0083b0;
+            color: white;
+            font-size: 1em;
+            padding: 10px 20px;
+        }
+
+        .upgrade-button:hover {
+            background-color: #006c8a;
+        }
+
+        .disabled {
+            background-color: gray !important;
+            cursor: not-allowed;
+        }
+
+        #auto-clicker {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 2em;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .click-effect {
+            position: absolute;
+            font-size: 2em;
+            color: #007acc;
+            font-weight: bold;
+            animation: rise 1s ease-in-out;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Epic Clicker Game</h1>
+        <div id="counter">0</div>
+        <button id="click-button">💙 Click Me! 💙</button>
+        <button id="upgrade-button" class="upgrade-button">Upgrade Click (+1 per click) - Cost: 10</button>
+        <button id="auto-clicker-button" class="upgrade-button">Upgrade Auto-Clicker (+1/sec) - Cost: 100</button>
+        <button id="auto-speed-button" class="upgrade-button">Upgrade Auto-Speed (Interval: 1000ms) - Cost: 500</button>
+        <p>Auto-click speed: <span id="auto-speed-display">1000</span>ms</p>
+        <div id="auto-clicker">🤖</div>
+    </div>
+    
+    <audio id="click-sound" src="https://www.myinstants.com/media/sounds/button-click.mp3"></audio>
+    <audio id="upgrade-sound" src="https://www.myinstants.com/media/sounds/level-up.mp3"></audio>
+
+    <script>
+        const clickButton = document.getElementById('click-button');
+        const upgradeButton = document.getElementById('upgrade-button');
+        const autoClickerButton = document.getElementById('auto-clicker-button');
+        const autoSpeedButton = document.getElementById('auto-speed-button');
+        const counter = document.getElementById('counter');
+        const autoSpeedDisplay = document.getElementById('auto-speed-display');
+        const clickSound = document.getElementById('click-sound');
+        const upgradeSound = document.getElementById('upgrade-sound');
+        const autoClickerEmoji = document.getElementById('auto-clicker');
+
+        let count = parseInt(localStorage.getItem("count")) || 0;
+        let clickValue = parseInt(localStorage.getItem("clickValue")) || 1;
+        let autoClicker = parseInt(localStorage.getItem("autoClicker")) || 0;
+        let upgradeCost = parseInt(localStorage.getItem("upgradeCost")) || 10;
+        let autoClickerCost = parseInt(localStorage.getItem("autoClickerCost")) || 100;
+        let autoSpeedCost = parseInt(localStorage.getItem("autoSpeedCost")) || 500;
+        let autoSpeed = parseInt(localStorage.getItem("autoSpeed")) || 1000;
+        let autoClickerInterval;
+
+        function updateCounter() {
+            counter.textContent = count;
+            upgradeButton.textContent = `Upgrade Click (+${clickValue} per click) - Cost: ${upgradeCost}`;
+            autoClickerButton.textContent = `Upgrade Auto-Clicker (+${autoClicker} per sec) - Cost: ${autoClickerCost}`;
+            autoSpeedButton.textContent = `Upgrade Auto-Speed (Interval: ${autoSpeed}ms) - Cost: ${autoSpeedCost}`;
+            autoSpeedDisplay.textContent = autoSpeed;
+
+            upgradeButton.disabled = count < upgradeCost;
+            autoClickerButton.disabled = count < autoClickerCost;
+            autoSpeedButton.disabled = count < autoSpeedCost || autoSpeed <= 100;
+
+            saveProgress();
+        }
+
+        function saveProgress() {
+            localStorage.setItem("count", count);
+            localStorage.setItem("clickValue", clickValue);
+            localStorage.setItem("autoClicker", autoClicker);
+            localStorage.setItem("upgradeCost", upgradeCost);
+            localStorage.setItem("autoClickerCost", autoClickerCost);
+            localStorage.setItem("autoSpeedCost", autoSpeedCost);
+            localStorage.setItem("autoSpeed", autoSpeed);
+        }
+
+        function startAutoClicker() {
+            clearInterval(autoClickerInterval);
+            if (autoClicker > 0) {
+                autoClickerEmoji.style.opacity = "1";
+                autoClickerInterval = setInterval(() => {
+                    count += autoClicker;
+                    updateCounter();
+                }, autoSpeed);
+            }
+        }
+
+        function showClickEffect() {
+            let effect = document.createElement("div");
+            effect.textContent = `+${clickValue}`;
+            effect.classList.add("click-effect");
+            effect.style.left = `${Math.random() * 50 + 25}%`;
+            document.body.appendChild(effect);
+            setTimeout(() => effect.remove(), 1000);
+        }
+
+        clickButton.addEventListener('click', () => {
+            count += clickValue;
+            clickSound.play();
+            showClickEffect();
+            updateCounter();
+        });
+
+        upgradeButton.addEventListener('click', () => {
+            if (count >= upgradeCost) {
+                count -= upgradeCost;
+                clickValue++;
+                upgradeCost = Math.floor(upgradeCost * 1.5);
+                upgradeSound.play();
+                updateCounter();
+            }
+        });
+
+        autoClickerButton.addEventListener('click', () => {
+            if (count >= autoClickerCost) {
+                count -= autoClickerCost;
+                autoClicker++;
+                autoClickerCost = Math.floor(autoClickerCost * 1.5);
+                upgradeSound.play();
+                updateCounter();
+                startAutoClicker();
+            }
+        });
+
+        startAutoClicker();
+        updateCounter();
+    </script>
+</body>
+</html>
