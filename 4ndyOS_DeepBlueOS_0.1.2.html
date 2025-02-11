@@ -252,7 +252,7 @@
         <button class="app-icon" style="background-image:url('icons/bilibili.png');" aria-label="Open Bilibili" onclick="openApp('bilibili')"></button>
         <button class="app-icon" style="background-image:url('icons/clicker.png');" aria-label="Open Clicker Game" onclick="openApp('clicker')"></button>
         <button class="app-icon" style="background-image:url('icons/user.png');" aria-label="Open User" onclick="openApp('user')"></button>
-        <button class="app-icon" style="background-image:url('icons/shutdown.png');" aria-label="Open Shutdown Menu" onclick="openShutdownMenu()"></button>
+        <button class="app-icon" style="background-image:url('icons/shutdown.png');" aria-label="Open Shutdown Menu" onclick="openShutdownMenu() "></button>
     </div>
 
     <div id="shutdown-menu" role="dialog" aria-labelledby="shutdown-title" aria-hidden="true">
@@ -275,34 +275,15 @@
     <div id="reboot-animation" aria-live="assertive">Rebooting...</div>
 
     <script>
-     
         function setRandomBackground() {
             const randomNum = Math.floor(Math.random() * 4) + 1; 
             const paddedNum = String(randomNum).padStart(3, '0'); 
             const imageUrl = `wallpapers/wallpaper_${paddedNum}.png`; 
             document.body.style.backgroundImage = `url('${imageUrl}')`; 
-            localStorage.setItem('selectedWallpaper', imageUrl); 
         }
 
-      
-        function loadSavedBackground() {
-            const savedWallpaper = localStorage.getItem('selectedWallpaper');
-            if (savedWallpaper) {
-                document.body.style.backgroundImage = `url('${savedWallpaper}')`;
-            } else {
-                setRandomBackground();
-            }
-        }
-       
         document.addEventListener('DOMContentLoaded', () => {
-            loadSavedBackground();
-            updateTime();
-            setInterval(updateTime, 1000);
-            initializeTheme();
-        });
-        let isRebooting = false;
-
-        document.addEventListener('DOMContentLoaded', () => {
+            setRandomBackground(); // Set a random wallpaper on load
             updateTime();
             setInterval(updateTime, 1000);
             initializeTheme();
@@ -313,7 +294,7 @@
         }
 
         function initializeTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedTheme = 'light'; // Default theme
             changeTheme(savedTheme);
             document.getElementById('theme').value = savedTheme;
         }
@@ -403,7 +384,6 @@
         function changeTheme(theme) {
             document.body.classList.remove('dark-theme', 'light-theme');
             document.body.classList.add(`${theme}-theme`);
-            localStorage.setItem('theme', theme);
         }
     </script>
 </body>
