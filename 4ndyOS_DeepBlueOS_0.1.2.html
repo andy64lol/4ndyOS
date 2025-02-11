@@ -277,7 +277,7 @@
     <script>
      
         function setRandomBackground() {
-            const randomNum = Math.floor(Math.random() * 10) + 1; 
+            const randomNum = Math.floor(Math.random() * 4) + 1; 
             const paddedNum = String(randomNum).padStart(3, '0'); 
             const imageUrl = `wallpapers/wallpaper_${paddedNum}.png`; 
             document.body.style.backgroundImage = `url('${imageUrl}')`; 
