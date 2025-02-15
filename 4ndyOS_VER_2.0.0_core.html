@@ -246,7 +246,6 @@
             background: darkred;
         }
 
-        /* Modal styles */
         .modal {
             display: none; 
             position: fixed; 
@@ -498,16 +497,16 @@
     </div>
 
     <script>
-        // Keep track of the highest z-index used
+       
         let highestZIndex = 1000;
 
-        // Window management
+        
         let activeWindow = null;
         let isDragging = false;
         let initialX;
         let initialY;
 
-        // Load settings on startup
+        
         window.addEventListener('load', loadSettings);
 
         function openWindow(appId) {
@@ -527,30 +526,30 @@
         }
 
         function addToTaskbar(appId) {
-            // Check if app is already in taskbar
+            
             const openApps = document.getElementById('openApps');
             const existingApp = Array.from(openApps.children).find(child => 
                 child.getAttribute('data-app-id') === appId
             );
             
             if (existingApp) {
-                // App already in taskbar, just make window visible
+                
                 document.getElementById(appId).style.display = 'flex';
                 return;
             }
             
-            // Add new app to taskbar
+            
             const app = document.createElement('div');
             app.className = 'open-app';
             app.setAttribute('data-app-id', appId);
             
-            // Find the correct icon image
+            
             let iconSrc;
             const iconElement = document.querySelector(`.icon img[alt="${document.querySelector(`#${appId} .window-header span`).textContent.trim()}"]`);
             if (iconElement) {
                 iconSrc = iconElement.src;
             } else {
-                // Fallback to a generic icon
+                
                 iconSrc = "https://cdn-icons-png.flaticon.com/512/1077/1077114.png";
             }
             
@@ -577,13 +576,13 @@
             }
         }
 
-        // Start menu
+        
         function toggleStartMenu() {
             const startMenu = document.getElementById('startMenu');
             startMenu.style.display = startMenu.style.display === 'none' ? 'flex' : 'none';
         }
 
-        // Shutdown modal
+    
         function showShutdownMenu() {
             document.getElementById('shutdownModal').style.display = 'block';
             document.getElementById('startMenu').style.display = 'none';
@@ -600,10 +599,16 @@
 
         function turnOff() {
             alert('Shutting down...');
+            
             document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">System Powered Off</div>';
+            
+            
+            setTimeout(function() {
+                window.location.href = 'index.html';
+            }, 2000);
         }
 
-        // Clock
+        
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').textContent = 
@@ -612,15 +617,14 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Window stack management
+        
         function updateWindowStack(windowId) {
             const window = document.getElementById(windowId);
             highestZIndex += 1;
             window.style.zIndex = highestZIndex;
         }
 
-        // Update all open windows function when needed
-        function resetWindowStack() {
+                function resetWindowStack() {
             const windows = document.querySelectorAll('.window');
             windows.forEach((window, index) => {
                 if (window.style.display !== 'none') {
@@ -630,7 +634,7 @@
             highestZIndex = 1000 + windows.length;
         }
 
-        // Drag and drop windows
+        
         document.addEventListener('mousedown', (e) => {
             if (e.target.closest('.window-header')) {
                 const window = e.target.closest('.window');
@@ -639,7 +643,7 @@
                 activeWindow = window;
                 isDragging = true;
                 
-                // Bring window to front
+                
                 updateWindowStack(window.id);
             }
         });
@@ -650,7 +654,7 @@
                 let newX = e.clientX - initialX;
                 let newY = e.clientY - initialY;
                 
-                // Keep window within viewport bounds
+                
                 newX = Math.max(0, Math.min(newX, window.innerWidth - activeWindow.offsetWidth));
                 newY = Math.max(0, Math.min(newY, window.innerHeight - activeWindow.offsetHeight));
                 
@@ -664,22 +668,22 @@
             activeWindow = null;
         });
 
-        // Settings functionality
+        
         function loadSettings() {
-            // Background color
+            
             const bgColor = localStorage.getItem('bgColor');
             if (bgColor) {
                 document.getElementById('desktop').style.background = bgColor;
                 document.getElementById('bgColor').value = bgColor;
             }
             
-            // Background image
+            
             const bgImage = localStorage.getItem('bgImage');
             if (bgImage) {
                 document.getElementById('desktop').style.backgroundImage = `url(${bgImage})`;
             }
             
-            // Window outline color
+            
             const outlineColor = localStorage.getItem('outlineColor');
             if (outlineColor) {
                 document.querySelectorAll('.window').forEach(window => {
@@ -713,7 +717,7 @@
         }
 
         function changeScreenResolution(resolution) {
-            // Implement with caution - changing body dimensions can break layout
+            
             const [width, height] = resolution.split('x');
             if (width && height) {
                 alert('Screen resolution changes will take effect after restart');
@@ -722,35 +726,34 @@
         }
 
         function saveSettings() {
-            // Save background color
+            
             const bgColor = document.getElementById('bgColor').value;
             localStorage.setItem('bgColor', bgColor);
             
-            // Get background image from style
+            
             const bgImage = document.getElementById('desktop').style.backgroundImage;
             if (bgImage && bgImage !== 'none') {
-                // Extract URL from "url(...)" format
                 const urlMatch = bgImage.match(/url\(["']?([^"']*)["']?\)/);
                 if (urlMatch && urlMatch[1]) {
                     localStorage.setItem('bgImage', urlMatch[1]);
                 }
             }
             
-            // Save window outline color
+            
             const outlineColor = document.getElementById('outlineColor').value;
             localStorage.setItem('outlineColor', outlineColor);
             
             alert('Settings saved!');
         }
 
-        // Close start menu when clicking outside
+        
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#startMenu') && !e.target.closest('.start-menu-icon')) {
                 document.getElementById('startMenu').style.display = 'none';
             }
         });
 
-        // Handle window clicks to bring to front
+        
         document.querySelectorAll('.window').forEach(window => {
             window.addEventListener('mousedown', () => {
                 updateWindowStack(window.id);
