@@ -19,7 +19,7 @@ Our first OS to start looking computer-ish.
 Our first OS,based on DOS.
 - DeepBlueOS:
 
-Our attempt to create a ChromeOS-Android like OS
+Our attempt to create a ChromeOS-Android like OS.
 
 ---
 
