@@ -1,4 +1,4 @@
-# 4ndyOS Emulation
+# *4ndyOS Emulation*
 
 Welcome to **4ndyOS Emulation**, a web-based interface for launching different versions of 4ndyOS. This project provides an interactive way to explore various builds of 4ndyOS.
 ## Features
