@@ -11,11 +11,14 @@ Simply visit the following link to access 4ndyOS:
 👉 [4ndyOS Emulation](https://andy64lol.github.io/4ndyOS.github.io/index.html)
 
 ## All editions:
-- Core
+- Core:
+
 Our first OS to start looking computer-ish.
-- M4trix
+- M4trix:
+
 Our first OS,based on DOS.
-- DeepBlueOS
+- DeepBlueOS:
+
 Our attempt to create a ChromeOS-Android like OS
 ---
 
@@ -32,13 +35,6 @@ Our attempt to create a ChromeOS-Android like OS
 This project is open-source under the **MIT License**.
 
 ---
-
-
-
-
-
-
-
 
 🚀 **Developed by Andy,a student who never sleeps...ZZZ**
 
