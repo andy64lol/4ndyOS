@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndyOS CyberDyne</title>
+    <link href="https://fonts.googleapis.com/css2?family=Iceland&display=swap" rel="stylesheet">
+    <style>
+        /* (Keep all existing CSS styles the same) */
+    </style>
+</head>
+<body>
+    <div id="desktop">
+        <div class="icon" onclick="openWindow('terminal')">
+            <img src="icons/HackerTerminal.png" alt="Terminal">
+            <p>Terminal</p>
+        </div>
+        <div class="icon" onclick="openWindow('hijack')">
+            <img src="icons/Hijack.png" alt="4NDY_H1J4CK.EXE">
+            <p>4NDY_H1J4CK.EXE</p>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <div class="start-menu-icon" onclick="toggleStartMenu()">4</div>
+        <div class="open-apps" id="openApps"></div>
+        <div id="clock"></div>
+    </div>
+
+    <div class="start-menu" id="startMenu">
+        <div class="app-item" onclick="openWindow('terminal')">Terminal</div>
+        <div class="app-item" onclick="openWindow('hijack')">4NDY_H1J4CK.EXE</div>
+        <div class="shutdown-button" onclick="showShutdownMenu()">Turn Off</div>
+    </div>
+
+    <div id="terminal" class="window">
+        <div class="window-header">
+            <span>Terminal</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('terminal')">_</span>
+                <span class="close" onclick="closeWindow('terminal')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/CyberDyneTerminal.html" style="width: 100%; height: 100%; border: none; background: #000;"></iframe>
+        </div>
+    </div>
+
+    <div id="hijack" class="window">
+        <div class="window-header">
+            <span>4NDY_H1J4CK.EXE</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('hijack')">_</span>
+                <span class="close" onclick="closeWindow('hijack')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/4ndyH1j4ck.html" style="width: 100%; height: 100%; border: none; background: #000;"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const openApps = document.getElementById('openApps');
+        const startMenu = document.getElementById('startMenu');
+
+        function openWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'flex';
+            addTaskbarApp(appId);
+            dragElement(app);
+        }
+
+        function closeWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'none';
+            removeTaskbarApp(appId);
+        }
+
+        function minimizeWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'none';
+        }
+
+        function addTaskbarApp(appId) {
+            if (!document.getElementById(`task-${appId}`)) {
+                const task = document.createElement('div');
+                task.id = `task-${appId}`;
+                task.className = 'open-app';
+                const icon = document.createElement('img');
+                icon.src = document.querySelector(`.icon[onclick*='${appId}'] img`).src;
+                icon.style.filter = "invert(100%) sepia(100%) saturate(10000%) hue-rotate(120deg)";
+                task.appendChild(icon);
+                task.onclick = () => restoreWindow(appId);
+                openApps.appendChild(task);
+            }
+        }
+
+        function removeTaskbarApp(appId) {
+            const task = document.getElementById(`task-${appId}`);
+            if (task) task.remove();
+        }
+
+        function restoreWindow(appId) {
+            const app = document.getElementById(appId);
+            app.style.display = 'flex';
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString();
+        }
+
+        function toggleStartMenu() {
+            startMenu.style.display = startMenu.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function showShutdownMenu() {
+            if (confirm('Shut down 4ndyOS?')) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function dragElement(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            const header = elmnt.querySelector('.window-header');
+            if (header) {
+                header.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!startMenu.contains(e.target) && !document.querySelector('.start-menu-icon').contains(e.target)) {
+                startMenu.style.display = 'none';
+            }
+        });
+
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
