@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyberdyne Terminal vX.23</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+    :root {
+      --hacker-green: #0f0;
+      --cyber-cyan: #00ffff;
+      --neon-purple: #bc13fe;
+    }
+
+    body {
+      background-color: #0a0a0a;
+      color: var(--hacker-green);
+      font-family: 'VT323', monospace;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: flex-end;
+    }
+
+    #terminal-container {
+      flex-grow: 1;
+      width: 90%;
+      max-width: 1000px;
+      margin: 20px auto;
+      border: 2px solid var(--hacker-green);
+      border-radius: 10px;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+      overflow: hidden;
+      background: #000;
+    }
+
+    #terminal-header {
+      background: linear-gradient(90deg, #000, #002200, #000);
+      color: var(--hacker-green);
+      padding: 10px;
+      font-size: 1.5em;
+      border-bottom: 2px solid var(--hacker-green);
+      text-shadow: 0 0 10px var(--hacker-green);
+    }
+
+    #terminal {
+      height: 60vh;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    #input-line {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background-color: #001100;
+      border-top: 2px solid var(--hacker-green);
+    }
+
+    #user-label {
+      color: var(--neon-purple);
+      margin-right: 10px;
+      text-shadow: 0 0 8px var(--neon-purple);
+    }
+
+    #input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--hacker-green);
+      font-family: 'VT323', monospace;
+      font-size: 1.2em;
+      outline: none;
+      padding: 5px;
+    }
+
+    .output-line {
+      white-space: pre-wrap;
+      margin: 8px 0;
+      line-height: 1.4;
+    }
+
+    .system-msg { color: var(--cyber-cyan); }
+    .success-msg { color: var(--hacker-green); }
+    .error-msg { color: #f00; }
+    .warning-msg { color: #ff0; }
+
+    @keyframes scanline {
+      0% { background-position: 0 1000%; }
+      100% { background-position: 0 0; }
+    }
+
+    .glitch-effect {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glitch-effect::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.1) 50%);
+      background-size: 100% 4px;
+      animation: scanline 6s linear infinite;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal-container" class="glitch-effect">
+    <div id="terminal-header">CYBERDYNE SYSTEM TERMINAL vX.23</div>
+    <div id="terminal"></div>
+    <div id="input-line">
+      <span id="user-label">ROOT@CYBERDYNE:</span>
+      <input type="text" id="input" autofocus>
+    </div>
+  </div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const input = document.getElementById('input');
+    let bitcoinBalance = 0;
+    let dollarBalance = 10000;
+    let bitcoinPrice = Math.floor(Math.random() * (70000 - 30000) + 30000);
+
+    const prefixes = ['ghost', 'dark', 'cyber', 'void', 'neon', 'shadow', 'phantom',  
+'1887', '1945', '1999', '2000', '2024',  
+'Swat', 'Jimmy', 'user', 'admin', 'root', 'unknown', 'hacker',  
+'stealth', 'nightmare', 'revenant', 'specter', 'echo', 'wraith', 'reaper',  
+'glitch', 'virus', 'malware', 'trojan', 'firewall', 'quantum', 'matrix',  
+'omega', 'alpha', 'delta', 'sigma', 'zero', 'binary', 'byte', 'pixel',  
+'voidwalker', 'blackout', 'redshift', 'darknet', 'deepweb', 'shodan',  
+'overlord', 'warrior', 'assassin', 'ninja', 'samurai', 'ronin',  
+'storm', 'tempest', 'thunder', 'blizzard', 'frost', 'inferno', 'ember',  
+'striker', 'vortex', 'eclipse', 'nebula', 'cosmos', 'galaxy', 'starlight',  
+'joker', 'gambit', 'ace', 'jackal', 'wolf', 'falcon', 'dragon', 'serpent',  
+'doom', 'venom', 'chaos', 'rage', 'wrath', 'havoc', 'anarchy', 'riot',  
+'iron', 'titan', 'goliath', 'colossus', 'sentinel', 'vanguard', 'warlord',  
+'cipher', 'enigma', 'paradox', 'riddle', 'mystic', 'seer', 'oracle',  
+'alphaX', 'darkReaper', 'ghost_99', 'voidShadow', 'neonPhantom',  
+'user1887', 'swat_1945', 'cyberWarrior', 'stealth_omega', 'binary_hacker',  
+'root_access', 'deep_void', 'matrix_glitch', 'firestorm', 'nightfall',  
+'oblivion', 'black_moon', 'red_dragon', 'frozen_heart', 'stormbringer',  
+'hellfire', 'warbringer', 'silent_strike', 'lone','Alejandro', 'Alex', 'Aleksandr', 'Aleksander', 'Alessandro', 'Sasha',  
+'Mohamed', 'Muhammad', 'Mohammed', 'Mahmoud', 'Mehmet', 'Musa',  
+'John', 'Jon', 'Johann', 'Johannes', 'Juan', 'Jean', 'Giovanni', 'Ivan', 'Hans',  
+'James', 'Jaime', 'Jakub', 'Jacob', 'Jakov', 'Yakub',  
+'William', 'Wilhelm', 'Guillaume', 'Liam', 'Guglielmo',  
+'David', 'Dawid', 'Davide', 'Daoud', 'Dávid',  
+'Daniel', 'Danilo', 'Daniil', 'Dani', 'Danel', 'Daniyar',  
+'Robert', 'Roberto', 'Rubén', 'Robbie', 'Rupert', 'Róbert',  
+'Michael', 'Mikhail', 'Mikael', 'Miguel', 'Michel', 'Michele', 'Mihai',  
+'Thomas', 'Tomás', 'Tomasz', 'Tamás', 'Tomislav', 'Tomi', 'Toma',  
+'Joseph', 'Jose', 'Giuseppe', 'Yusuf', 'Iosif', 'Josip',  
+'Peter', 'Pietro', 'Piotr', 'Petar', 'Péter', 'Pedro', 'Petros',  
+'Samuel', 'Samu', 'Samir', 'Samuele', 'Samuil',  
+'Richard', 'Ricardo', 'Rikard', 'Richárd', 'Ryszard',  
+'Edward', 'Eduardo', 'Edvard', 'Edwin', 'Edgar',  
+'Henry', 'Henrik', 'Enrique', 'Heinrich', 'Hendrik',  
+'Andrew', 'Andrey', 'Andrzej', 'Andrea', 'Andrés', 'András',  
+'Nicholas', 'Nikolai', 'Nico', 'Niklas', 'Nikola', 'Nicolas', 'Nikolaus',  
+'Anthony', 'Antonio', 'Anton', 'Antoine', 'Anatoly', 'Antanas',  
+'Matthew', 'Matteo', 'Matthias', 'Mateusz', 'Matías', 'Mathieu',  
+'Lucas', 'Luca', 'Lukas', 'Łukasz', 'Luciano', 'Luc',  
+'Alexander', 'Aleksandr', 'Alejandro', 'Alexis', 'Alessio', 'Sándor',  
+'Victor', 'Viktor', 'Víctor', 'Wiktor', 'Vittorio', 'Vyacheslav',  
+'Charles', 'Carlos', 'Carl', 'Karl', 'Károly',  
+'Stephen', 'Stefan', 'Steven', 'Stefano', 'István', 'Stepan',  
+'Christopher', 'Christoph', 'Cristóbal', 'Kristoffer', 'Krystof',  
+'Benjamin', 'Benjamín', 'Benoît', 'Benedek',  
+'Francis', 'Francesco', 'François', 'Francisco', 'Franek',  
+'Adrian', 'Adrián', 'Adriano', 'Adrien', 'Adrijan',  
+'Gabriel', 'Gábor', 'Gabrijel', 'Gavril', 'Jibril',  
+'Emmanuel', 'Emanuele', 'Emanuel', 'Manuel', 'Imanuel',  
+'Leo', 'Leon', 'Leonardo', 'Leonid', 'Levente',  
+'Simon', 'Simone', 'Szymon', 'Šimon', 'Shimon',  
+'Raphael', 'Rafael', 'Rafał', 'Raffaele',  
+'Isaac', 'Isaak', 'Ishaq', 'Isak',  
+'Theodore', 'Teodor', 'Teodoro', 'Fyodor',  
+'Arthur', 'Artur', 'Arturo', 'Artem',  
+'Adam', 'Adem', 'Ádám', 'Adamo',  
+'Patrick', 'Patrik', 'Patricio', 'Pádraig',  
+'Oliver', 'Olivier', 'Olaf', 'Oliwer',  
+'Julian', 'Julián', 'Julius', 'Julien',  
+'Maximilian', 'Maximiliano', 'Maksym', 'Maxime',  
+'Frederick', 'Friedrich', 'Federico', 'Fredrik',  
+'Louis', 'Luis', 'Ludwig', 'Luigi',  
+'Mark', 'Marko', 'Marco', 'Marek', 'Márk',  
+'Eric', 'Erik', 'Érico', 'Erich',  
+'Vincent', 'Vincenzo', 'Vince', 'Vinsent',  
+'Boris', 'Borys', 'Borislav',  
+'Ivan', 'Iván', 'Ivano', 'Ioan', 'Ivica',  
+'Oscar', 'Oskari', 'Oszkár', 'Óscar',  
+'Felix', 'Félix', 'Felice', 'Feliks',  
+'Christian', 'Cristian', 'Kristian', 'Krystian',  
+'Sebastian', 'Sebastián', 'Sebastiaan', 'Sebastijan',  
+'Eugene', 'Eugen', 'Evgeny', 'Yevhen',  
+'Gerald', 'Gerard', 'Gérard', 'Gellért',  
+'Albert', 'Alberto', 'Albrecht', 'Albertus',  
+'Edmund', 'Edmond', 'Edmundo',  
+'Jerome', 'Jerónimo', 'Jérôme',  
+'Claude', 'Claudio', 'Klaudio', 'Klod',  
+'Victor', 'Viktor', 'Víctor', 'Wiktor',  
+'Salvador', 'Salvatore', 'Salvadoro',  
+'Noah', 'Noé', 'Noa', 'Nuh',  
+'Elias', 'Elías', 'Ilyas', 'Eliyahu',  
+'Arthur', 'Arturo', 'Artturi',  
+'Hector', 'Héctor', 'Hektor',  
+'Abraham', 'Avraham', 'Ibrahim',  
+'Silas', 'Sylas', 'Silvio',  
+'Roman', 'Román', 'Romain',  
+'Matias', 'Matti', 'Mateo',  
+'Lorenzo', 'Laurent', 'Lorenz',  
+'Jonathan', 'Yonatan', 'Jónatan',  
+'Emanuel', 'Manuel', 'Imanuel',  
+'Tristan', 'Tristán', 'Tristano',  
+'Leonard', 'Leonardo', 'Leonid',  
+'Edgar', 'Edgardo', 'Ede',  
+'August', 'Augusto', 'Agustín',  
+'Bruno', 'Brunon', 'Brunetti',  
+'Gustav', 'Gustavo', 'Gusztáv',  
+'Marcel', 'Marcelino', 'Marceau',  
+'Casper', 'Kaspar', 'Gaspar',  
+'Ignatius', 'Ignacio', 'Ignaz',  
+'Hugo', 'Hugues', 'Ugo',  
+'Abel', 'Ábel', 'Abilio',  
+'Zachary', 'Zacharias', 'Zack',  
+'Felipe', 'Philippe', 'Filip',  
+'Andrei', 'Andre', 'Andres',  
+'Dimitri', 'Dmitry', 'Dimitar',  
+'Gideon', 'Gédéon', 'Gidi',  
+'Samuel', 'Samu', 'Samuele',  
+'Elijah', 'Elias', 'Eliyahu',  
+'Nathaniel', 'Natan', 'Nathanael',  
+'Moses', 'Moshe', 'Moisés',  
+'Jacob', 'Jakub', 'Yakov'];
+    const suffixes = ['_x', '_root', '_hack', '_1337', '_anon', '_bot', '_user',  
+'_admin', '_dev', '_coder', '_sys', '_sysadmin', '_ghost', '_null', '_void',  
+'_exe', '_script', '_shell', '_h4x', '_elite', '_shadow', '_dark', '_light',  
+'_fire', '_ice', '_storm', '_thunder', '_wind', '_earth', '_water', '_air',  
+'_omega', '_alpha', '_beta', '_gamma', '_delta', '_sigma', '_theta', '_lambda',  
+'_phoenix', '_dragon', '_wolf', '_tiger', '_eagle', '_hawk', '_lion', '_snake',  
+'_blackhat', '_whitehat', '_greyhat', '_hacker', '_breaker', '_fixer', '_destroyer', '_creator',  
+'_gamer', '_pro', '_noob', '_newbie', '_veteran', '_warrior', '_knight', '_samurai',  
+'_ronin', '_assassin', '_ninja', '_merc', '_agent', '_spy', '_stealth', '_shadow',  
+'_revenant', '_reborn', '_undead', '_zombie', '_spectre', '_phantom', '_ghost', '_wraith',  
+'_demon', '_angel', '_fallen', '_hellfire', '_heavenly', '_divine', '_sacred', '_cursed',  
+'_quantum', '_cyber', '_data', '_bit', '_byte', '_gig', '_tera', '_peta',  
+'_glitch', '_error', '_bug', '_crash', '_overload', '_burnout', '_flood', '_corrupt',  
+'_secure', '_insecure', '_rootkit', '_exploit', '_payload', '_malware', '_ransom', '_trojan',  
+'_python', '_java', '_csharp', '_cplusplus', '_swift', '_kotlin', '_rust', '_go',  
+'_ai', '_ml', '_neural', '_deep', '_botnet', '_matrix', '_algorithm', '_entropy',  
+'_infinity', '_void', '_zero', '_one', '_null', '_existence', '_alternate', '_parallel',  
+'_darknet', '_onion', '_tor', '_vpn', '_proxy', '_tunnel', '_secure', '_encrypt',  
+'_dystopia', '_utopia', '_rebel', '_resistance', '_chaos', '_anarchy', '_order', '_balance',  
+'_omegaX', '_prime', '_alphaX', '_zenith', '_nexus', '_horizon', '_vertex', '_apex',  
+'_legion', '_army', '_faction', '_guild', '_clan', '_brotherhood', '_syndicate', '_cartel',  
+'_archive', '_library', '_chronicle', '_codex', '_index', '_log', '_database', '_manifest',  
+'_ai9000', '_r2d2', '_c3po', '_hal', '_skynet', '_t800', '_t1000', '_cyborg',  
+'_mecha', '_android', '_borg', '_neuralink', '_singularity', '_synthetic', '_replicant', '_augment'];
+    const domains = ['@gmail.com', '@outlook.com', '@yahoo.com', '@protonmail.com', '@4ndymail.com', '@vipguest.org',  
+'@hotmail.com', '@icloud.com', '@aol.com', '@zoho.com', '@mail.com', '@tutanota.com',  
+'@yandex.com', '@gmx.com', '@inbox.com', '@fastmail.com', '@mail.ru', '@seznam.cz',  
+'@hushmail.com', '@163.com', '@qq.com', '@sina.com', '@weibo.com', '@yahoo.co.uk',  
+'@mailbox.org', '@lavabit.com', '@runbox.com', '@tutanota.de', '@guerrillamail.com',  
+'@10minutemail.com', '@dispostable.com', '@trashmail.com', '@tempmail.com', '@mailinator.com',  
+'@spamgourmet.com', '@mailsac.com', '@discard.email', '@protonmail.ch', '@securemail.com',  
+'@tmail.com', '@maildrop.cc', '@mailfence.com', '@openmailbox.org', '@simplelogin.com',  
+'@posteo.de', '@ctemplar.com', '@protonmail.me', '@airmail.cc', '@aquaemail.com',  
+'@freenom.com', '@neomailbox.com', '@privacy.com', '@ghostmail.com', '@cryptomail.com',  
+'@scryptmail.com', '@harakirimail.com', '@me.com', '@outlook.co.uk', '@eclipsemail.com',  
+'@bluemail.com', '@icloud.co.uk', '@slipmail.com', '@zmail.com', '@aethermail.com',  
+'@pacificmail.com', '@zenmail.com', '@mailme.com', '@truemail.com', '@stormmail.com',  
+'@wildmail.com', '@boxmail.com', '@anonmail.com', '@quickmail.com', '@freeemail.com',  
+'@securebox.com', '@darkmail.com', '@bmail.com', '@fastpost.com', '@instantmail.com',  
+'@cybermail.com', '@stealthmail.com', '@encryptedmail.com', '@cloakmail.com', '@protectedmail.com',  
+'@shieldmail.com', '@fortmail.com', '@safehousemail.com', '@encryptedbox.com',  
+'@mailguard.com', '@safeguardmail.com', '@shieldbox.com', '@maskedmail.com'];
+    const locations = [
+     'New York,USA', 'Los Angeles,USA', 'Chicago,USA', 'Houston,USA', 'San Francisco,USA',  
+'Toronto,Canada', 'Vancouver,Canada', 'Montreal,Canada', 'Mexico City,Mexico', 'Guadalajara,Mexico',  
+
+'São Paulo,Brazil', 'Rio de Janeiro,Brazil', 'Brasília,Brazil', 'Buenos Aires,Argentina',  
+'Santiago,Chile', 'Bogotá,Colombia', 'Medellín,Colombia', 'Lima,Peru', 'Caracas,Venezuela',  
+'Quito,Ecuador', 'La Paz,Bolivia', 'Asunción,Paraguay', 'Montevideo,Uruguay',  
+
+'London,UK', 'Birmingham,UK', 'Manchester,UK', 'Edinburgh,UK',  
+'Berlin,Germany', 'Munich,Germany', 'Frankfurt,Germany', 'Hamburg,Germany',  
+'Paris,France', 'Lyon,France', 'Marseille,France',  
+'Madrid,Spain', 'Barcelona,Spain', 'Valencia,Spain',  
+'Rome,Italy', 'Milan,Italy', 'Naples,Italy',  
+'Prague,Czechia', 'Warsaw,Poland', 'Krakow,Poland',  
+'Amsterdam,Netherlands', 'Rotterdam,Netherlands',  
+'Vienna,Austria', 'Athens,Greece', 'Lisbon,Portugal',  
+'Dublin,Ireland', 'Helsinki,Finland', 'Oslo,Norway', 'Stockholm,Sweden', 'Copenhagen,Denmark',  
+'Zurich,Switzerland', 'Geneva,Switzerland', 'Brussels,Belgium', 'Moscow,Russia',  
+'Kaliningrad,Russia', 'Saint Petersburg,Russia', 'Kiev,Ukraine', 'Minsk,Belarus',  
+'Belgrade,Serbia', 'Bucharest,Romania', 'Sofia,Bulgaria',  
+
+'Tokyo,Japan', 'Osaka,Japan', 'Nagoya,Japan', 'Sapporo,Japan', 'Fukuoka,Japan',  
+'Beijing,China', 'Shanghai,China', 'Guangzhou,China', 'Shenzhen,China', 'Chengdu,China',  
+'Seoul,South Korea', 'Busan,South Korea', 'Incheon,South Korea',  
+'Bangkok,Thailand', 'Chiang Mai,Thailand',  
+'New Delhi,India', 'Mumbai,India', 'Bangalore,India', 'Kolkata,India', 'Chennai,India',  
+'Jakarta,Indonesia', 'Surabaya,Indonesia',  
+'Manila,Philippines', 'Cebu,Philippines',  
+'Kuala Lumpur,Malaysia', 'Penang,Malaysia',  
+'Taipei,Taiwan', 'Hanoi,Vietnam', 'Ho Chi Minh City,Vietnam',  
+'Ulaanbaatar,Mongolia', 'Dhaka,Bangladesh', 'Karachi,Pakistan', 'Lahore,Pakistan',  
+'Riyadh,Saudi Arabia', 'Jeddah,Saudi Arabia', 'Dubai,UAE', 'Abu Dhabi,UAE',  
+
+'Cairo,Egypt', 'Lagos,Nigeria', 'Abuja,Nigeria', 'Johannesburg,South Africa', 'Cape Town,South Africa',  
+'Nairobi,Kenya', 'Addis Ababa,Ethiopia', 'Casablanca,Morocco', 'Marrakech,Morocco',  
+'Algiers,Algeria', 'Tunis,Tunisia', 'Accra,Ghana', 'Dakar,Senegal',  
+
+'Sydney,Australia', 'Melbourne,Australia', 'Brisbane,Australia', 'Perth,Australia', 'Adelaide,Australia',  
+'Auckland,New Zealand', 'Wellington,New Zealand', 'Christchurch,New Zealand',  
+
+'Unknown,Unknown'
+    ];
+
+    const commands = {
+      help: () => `
+        CYBERDYNE CMD vX.23 HELP:
+        [CORE COMMANDS]
+        //help - Show this message
+        //clear - Clear terminal
+        //calc [expression] - Solve math
+        
+        [CYBER OPS]
+        //leak - Leak user data
+        //mine - Mine Bitcoin
+        //brute - Brute force attack
+        //hack - Hack bank account
+        //geoip - Get random IP info
+        //ddos [target] - Launch DDoS attack
+        //phish - Generate phishing link
+        //scan [ip] - Scan IP
+        //sendvirus [IP] - Deploy malware
+        
+        [FINANCE]
+        //funds - Show balance
+        //buy [amount] - Buy Bitcoin 
+        //sell [amount] - Sell Bitcoin
+        
+        
+      `,
+
+      clear: () => terminal.innerHTML = '',
+      
+      calc: (args) => {
+        try {
+          return `RESULT: ${math.evaluate(args.join(' '))}`;
+        } catch {
+          return 'ERROR: Invalid expression';
+        }
+      },
+
+      buy: (args) => {
+        if (!args[0]) return 'ERROR: Specify amount (e.g. //buy 0.5)';
+        const amount = parseFloat(args[0]);
+        if (isNaN(amount)) return 'ERROR: Invalid amount';
+        
+        bitcoinPrice = Math.floor(Math.random() * (100000 - 30000) + 30000);
+        const cost = amount * bitcoinPrice;
+        
+        if (cost > dollarBalance) return `ERROR: Need $${cost.toFixed(2)} (Current: $${dollarBalance.toFixed(2)})`;
+        
+        dollarBalance -= cost;
+        bitcoinBalance += amount;
+        return `BOUGHT ${amount} BTC @ $${bitcoinPrice} | NEW BALANCE: $${dollarBalance.toFixed(2)}`;
+      },
+
+      sell: (args) => {
+        if (!args[0]) return 'ERROR: Specify amount (e.g. //sell 0.5)';
+        const amount = parseFloat(args[0]);
+        if (isNaN(amount)) return 'ERROR: Invalid amount';
+        
+        if (amount > bitcoinBalance) return `ERROR: Only ${bitcoinBalance.toFixed(4)} BTC available`;
+        
+        bitcoinPrice = Math.floor(Math.random() * (100000 - 30000) + 30000);
+        const earnings = amount * bitcoinPrice;
+        
+        dollarBalance += earnings;
+        bitcoinBalance -= amount;
+        return `SOLD ${amount} BTC @ $${bitcoinPrice} | NEW BALANCE: $${dollarBalance.toFixed(2)}`;
+      },
+
+      funds: () => `BALANCE: $${dollarBalance.toFixed(2)} | BTC: ${bitcoinBalance.toFixed(4)}`,
+
+      sendvirus: (args) => {
+        if (!args[0]) return 'ERROR: Specify IP (e.g. //sendvirus 192.168.1.1)';
+        const ip = args[0];
+        if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(ip)) return 'ERROR: Invalid IP format';
+        
+        addLine(`INITIATING VIRUS DEPLOYMENT TO ${ip}...`, 'warning');
+        setTimeout(() => {
+          addLine('[1/3] Bypassing firewall...', 'system');
+          setTimeout(() => {
+            addLine('[2/3] Deploying payload...', 'system');
+            setTimeout(() => {
+              addLine(`[3/3] SUCCESS! ${ip} compromised`, 'success');
+              dollarBalance += Math.random() * 10000;
+            }, 2000);
+          }, 2000);
+        }, 1000);
+        return '';
+      },
+
+      leak: () => {
+        const users = Array.from({length: 15}, () => ({
+          username: generateUsername(),
+          email: generateEmail(),
+          ip: generateIP(),
+          location: generateLocation()
+        }));
+        
+        users.forEach(user => {
+          addLine(`[LEAK] ${user.username} | ${user.email} | ${user.ip} | ${user.location}`);
+        });
+        return `DATA LEAK COMPLETE: ${users.length} RECORDS EXPOSED`;
+      },
+
+      mine: () => {
+        const mined = Math.random() * 0.01;
+        bitcoinBalance += mined;
+        return `MINED ${mined.toFixed(4)} BTC | TOTAL: ${bitcoinBalance.toFixed(4)} BTC`;
+      },
+
+      brute: () => {
+        const password = generatePassword();
+        return `CRACKED PASSWORD: ${password}`;
+      },
+
+      hack: () => {
+        const stolen = Math.random() * 7500;
+        dollarBalance += stolen;
+        return `SUCCESSFUL TRANSFER: $${stolen.toFixed(2)} | TOTAL: $${dollarBalance.toFixed(2)}`;
+      },
+
+      geoip: () => {
+        const ip = generateIP();
+        const loc = generateLocation();
+        return `IP: ${ip} | LOCATION: ${loc}`;
+      },
+
+      ddos: (args) => {
+        const target = args[0] || 'example.com';
+        return `LAUNCHING DDoS ATTACK ON ${target}...\n[+] 10,000 BOTS ENGAGED\n[+] TARGET UNDER FIRE`;
+      },
+
+      phish: () => {
+        const link = `https://${generateUsername()}.${['com', 'net', 'org'][Math.floor(Math.random() * 3)]}/login`;
+        return `PHISHING LINK GENERATED: ${link}`;
+      },
+
+      scan: (args) => {
+        const ip = args[0] || generateIP();
+        return `SCANNING ${ip}...\n[+] PORT 80 OPEN\n[+] PORT 22 OPEN\n[+] VULNERABILITY DETECTED: CVE-2023-${Math.floor(Math.random() * 5000)}`;
+      },
+    };
+
+    function generateUsername() {
+      return `${prefixes[Math.floor(Math.random() * prefixes.length)]}${suffixes[Math.floor(Math.random() * suffixes.length)]}${Ma.floor(Math.random() * 1000)}`;
+    }
+
+    function generateEmail() {
+      return `${generateUsername().toLowerCase()}${domains[Math.floor(Math.random() * domains.length)]}`;
+    }
+
+    function generateIP() {
+      return Array.from({length: 4}, () => Math.floor(Math.random() * 256)).join('.');
+    }
+
+    function generateLocation() {
+      return locations[Math.floor(Math.random() * locations.length)];
+    }
+
+    function generatePassword() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ$%&*#!@1234567890abcdefghijklmnopqrstuvwxyzñ!?:.,';
+      return Array.from({length: 16}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+
+    function addLine(text, type = 'system') {
+      const line = document.createElement('div');
+      line.className = `output-line ${type}-msg`;
+      line.textContent = text;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const [cmd, ...args] = input.value.trim().split(' ');
+        input.value = '';
+        
+        if (!cmd.startsWith('//')) return addLine('ERROR: Commands must start with //', 'error');
+        
+        const command = cmd.slice(2).toLowerCase();
+        if (!commands[command]) return addLine(`ERROR: Unknown command '${command}'`, 'error');
+        
+        try {
+          const result = commands[command](args);
+          if (typeof result === 'string') addLine(result, 'success');
+        } catch (error) {
+          addLine(`SYSTEM ERROR: ${error.message}`, 'error');
+        }
+      }
+    });
+
+    // Initialization
+    addLine('CYBERDYNE SYSTEM ONLINE...', 'system');
+    addLine('Initializing neural network...', 'system');
+    addLine('Cryptographic protocols enabled', 'success');
+    addLine('Type //help for command list', 'system');
+  </script>
+</body>
+</html>
