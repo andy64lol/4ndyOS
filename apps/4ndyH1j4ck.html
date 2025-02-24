@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4NDY-H1J4CK v2.0</title>
+    <style>
+        body {
+            background: radial-gradient(circle, #001100, #000);
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            padding: 2rem;
+            text-shadow: 0 0 10px #0f03;
+        }
+        #terminal {
+            width: 100%;
+            height: 400px;
+            overflow-y: auto;
+            border: 3px solid #0f0;
+            padding: 20px;
+            background: #000;
+            box-shadow: 0 0 30px #0f03;
+            position: relative;
+            margin: 2rem 0;
+        }
+        #terminal::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 0;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(transparent 50%, #0f01 51%);
+            background-size: 100% 4px;
+            animation: scanline 4s linear infinite;
+        }
+        @keyframes scanline {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(100%); }
+        }
+        .cyber-button {
+            background: #002200;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 12px 24px;
+            margin: 8px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .cyber-button:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 30px #0f03;
+            transform: translateY(-2px);
+            cursor: pointer;
+        }
+        .cyber-button::before {
+            content: '>';
+            position: absolute;
+            left: -20px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        .cyber-button:hover::before {
+            left: 10px;
+            opacity: 1;
+        }
+        .input-field {
+            background: #000;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 10px;
+            margin: 10px;
+            font-size: 1.1rem;
+        }
+        .log-entry {
+            border-left: 3px solid #0f0;
+            padding-left: 10px;
+            margin: 8px 0;
+            animation: logAppear 0.5s ease-out;
+        }
+        @keyframes logAppear {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; border-bottom: 3px solid #0f0; padding-bottom: 1rem;">
+        [4NDY-H1J4CK v2.0]
+    </h1>
+    <div style="text-align: center">
+        <input class="input-field" type="text" id="serverIp" placeholder="TARGET IP">
+        <input class="input-field" type="text" id="serverPort" placeholder="PORT">
+        <button class="cyber-button" onclick="startHijack()">INITIATE BREACH</button>
+    </div>
+    <div id="attackOptions" class="hidden" style="text-align: center; margin: 2rem 0">
+        <button class="cyber-button" onclick="mitmAttack()">MITM EXPLOIT</button>
+        <button class="cyber-button" onclick="dnsSpoof()">DNS SPOOFING</button>
+        <button class="cyber-button" onclick="ransomwareDeploy()">CRYPTOLOCKER DEPLOY</button>
+        <button class="cyber-button" onclick="zeroDayExploit()">ZERO-DAY EXPLOIT</button>
+        <button class="cyber-button" onclick="phishingCampaign()">PHISHING BLAST</button>
+        <button class="cyber-button" onclick="botnetActivate()">BOTNET ACTIVATION</button>
+        <button class="cyber-button" onclick="sslStrip()">SSL STRIPPING</button>
+        <button class="cyber-button" onclick="bruteForce()">BRUTE FORCE</button>
+        <button class="cyber-button" onclick="credHarvest()">CREDENTIAL HARVEST</button>
+        <button class="cyber-button" onclick="iotCompromise()">IOT BREACH</button>
+        <button class="cyber-button" onclick="endHijack()">END HIJACKING</button>
+    </div>
+    <div id="terminal"></div>
+    <script>
+        function logMessage(message) {
+            const terminal = document.getElementById("terminal");
+            const logEntry = document.createElement("div");
+            logEntry.className = "log-entry";
+            logEntry.innerHTML = `[${new Date().toLocaleTimeString()}] > ${message}`;
+            terminal.appendChild(logEntry);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        function startHijack() {
+            const ip = document.getElementById("serverIp").value;
+            const port = document.getElementById("serverPort").value;
+            if (!ip || !port) {
+                logMessage("ERROR: TARGET COORDINATES REQUIRED!");
+                return;
+            }
+            logMessage(`INITIALIZING CYBER ATTACK SEQUENCE ON ${ip}:${port}`);
+            setTimeout(() => logMessage("BYPPASSING FIREWALL... [██████░░░░] 60%"), 1500);
+            setTimeout(() => logMessage("EXPLOITING VULNERABILITY CVE-2024-1337..."), 3000);
+            setTimeout(() => logMessage("ROOT ACCESS OBTAINED [██████████] 100%"), 4500);
+            setTimeout(() => {
+                logMessage("<< TARGET COMPROMISED >>");
+                document.getElementById("attackOptions").classList.remove("hidden");
+            }, 6000);
+        }
+        function endHijack() {
+            logMessage("TERMINATING HIJACKING SEQUENCE...");
+            setTimeout(() => logMessage("CLEANING TRACES..."), 1500);
+            setTimeout(() => logMessage("DISCONNECTING FROM TARGET..."), 3000);
+            setTimeout(() => {
+                logMessage("HIJACKING SESSION ENDED.");
+                document.getElementById("attackOptions").classList.add("hidden");
+            }, 4500);
+        }
+        function mitmAttack() {
+            logMessage("DEPLOYING MITM EXPLOIT...");
+            setTimeout(() => logMessage("INTERCEPTING TRAFFIC..."), 1500);
+            setTimeout(() => logMessage("MITM ATTACK SUCCESSFUL."), 3000);
+        }
+        function dnsSpoof() {
+            logMessage("INITIATING DNS SPOOFING...");
+            setTimeout(() => logMessage("REDIRECTING DNS REQUESTS..."), 1500);
+            setTimeout(() => logMessage("DNS SPOOFING SUCCESSFUL."), 3000);
+        }
+        function ransomwareDeploy() {
+            logMessage("DEPLOYING CRYPTOLOCKER PAYLOAD...");
+            setTimeout(() => logMessage("ENCRYPTING FILES..."), 1500);
+            setTimeout(() => logMessage("RANSOMWARE DEPLOYED."), 3000);
+        }
+        function zeroDayExploit() {
+            logMessage("EXECUTING ZERO-DAY EXPLOIT...");
+            setTimeout(() => logMessage("EXPLOITING UNPATCHED VULNERABILITY..."), 1500);
+            setTimeout(() => logMessage("ZERO-DAY EXPLOIT SUCCESSFUL."), 3000);
+        }
+        function phishingCampaign() {
+            logMessage("LAUNCHING PHISHING CAMPAIGN...");
+            setTimeout(() => logMessage("SENDING MALICIOUS LINKS..."), 1500);
+            setTimeout(() => logMessage("PHISHING CAMPAIGN SUCCESSFUL."), 3000);
+        }
+        function botnetActivate() {
+            logMessage("ACTIVATING BOTNET NETWORK...");
+            setTimeout(() => logMessage("CONNECTING TO ZOMBIE DEVICES..."), 1500);
+            setTimeout(() => logMessage("BOTNET ACTIVATED."), 3000);
+        }
+        function sslStrip() {
+            logMessage("INITIATING SSL STRIPPING...");
+            setTimeout(() => logMessage("DOWNGRADING HTTPS CONNECTIONS..."), 1500);
+            setTimeout(() => logMessage("SSL STRIPPING SUCCESSFUL."), 3000);
+        }
+        function bruteForce() {
+            logMessage("STARTING BRUTE FORCE ATTACK...");
+            setTimeout(() => logMessage("CRACKING CREDENTIALS..."), 1500);
+            setTimeout(() => logMessage("BRUTE FORCE SUCCESSFUL."), 3000);
+        }
+        function credHarvest() {
+            logMessage("INITIATING CREDENTIAL HARVEST...");
+            setTimeout(() => logMessage("COLLECTING LOGIN DATA..."), 1500);
+            setTimeout(() => logMessage("CREDENTIALS HARVESTED."), 3000);
+        }
+        function iotCompromise() {
+            logMessage("COMPROMISING IoT DEVICES...");
+            setTimeout(() => logMessage("EXPLOITING WEAK PASSWORDS..."), 1500);
+            setTimeout(() => logMessage("IoT DEVICES COMPROMISED."), 3000);
+        }
+    </script>
+</body>
+</html>
