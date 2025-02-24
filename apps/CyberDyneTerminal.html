@@ -8,65 +8,77 @@
     @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
     :root {
       --hacker-green: #0f0;
-      --cyber-cyan: #00ffff;
-      --neon-purple: #bc13fe;
+      --dark-green: #002200;
+      --light-green: #00cc00;
+      --terminal-bg: #000;
     }
 
     body {
-      background-color: #0a0a0a;
+      background-color: var(--terminal-bg);
       color: var(--hacker-green);
       font-family: 'VT323', monospace;
       margin: 0;
-      padding: 0;
+      padding: 20px;
       display: flex;
-      flex-direction: column;
       height: 100vh;
-      justify-content: flex-end;
+      overflow: hidden;
     }
 
-    #terminal-container {
-      flex-grow: 1;
-      width: 90%;
-      max-width: 1000px;
-      margin: 20px auto;
+    .left-panel, .right-panel {
       border: 3px solid var(--hacker-green);
       border-radius: 10px;
+      background: var(--terminal-bg);
       box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
       overflow: hidden;
-      background: #000;
+      display: flex;
+      flex-direction: column;
     }
 
-    #terminal-header {
-      background: linear-gradient(90deg, #000, #002200, #000);
+    .left-panel {
+      flex: 2;
+      margin-right: 20px;
+    }
+
+    .right-panel {
+      flex: 1;
+    }
+
+    .panel-header {
+      background: linear-gradient(90deg, var(--terminal-bg), var(--dark-green), var(--terminal-bg));
       color: var(--hacker-green);
       padding: 10px;
       font-size: 1.5em;
       border-bottom: 2px solid var(--hacker-green);
       text-shadow: 0 0 10px var(--hacker-green);
+      text-align: center;
     }
 
-    #terminal {
-      height: 60vh;
+    .terminal {
+      flex: 1;
       padding: 20px;
       overflow-y: auto;
       background-color: rgba(0, 0, 0, 0.9);
+      background-image: 
+        linear-gradient(transparent 95%, rgba(0, 255, 0, 0.1) 95%),
+        linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px);
+      background-size: 100% 20px, 10px 100%;
     }
 
-    #input-line {
+    .input-line {
       display: flex;
       align-items: center;
-      padding: 30px;
-      background-color: #001100;
+      padding: 15px;
+      background-color: var(--dark-green);
       border-top: 2px solid var(--hacker-green);
     }
 
-    #user-label {
+    .user-label {
       color: var(--hacker-green);
       margin-right: 10px;
       text-shadow: 0 0 8px var(--hacker-green);
     }
 
-    #input {
+    .input {
       flex: 1;
       background: transparent;
       border: none;
@@ -84,46 +96,70 @@
     }
 
     .system-msg { color: var(--hacker-green); }
-    .success-msg { color: var(--hacker-green); }
-    .error-msg { color: #f00; }
-    .warning-msg { color: #ff0; }
+    .success-msg { color: var(--light-green); }
+    .error-msg { color: #ff4444; }
+    .warning-msg { color: #ffff44; }
 
-    @keyframes scanline {
-      0% { background-position: 0 1000%; }
-      100% { background-position: 0 0; }
+    .status-panel {
+      padding: 15px;
+      border: 2px solid var(--hacker-green);
+      border-radius: 5px;
+      background: var(--dark-green);
+      margin: 10px;
     }
 
-    .glitch-effect {
-      position: relative;
+    .status-panel h3 {
+      color: var(--hacker-green);
+      text-shadow: 0 0 8px var(--hacker-green);
+      margin: 0 0 10px 0;
+    }
+
+    .status-item {
+      margin: 5px 0;
+    }
+
+    .status-bar {
+      height: 10px;
+      background: var(--terminal-bg);
+      border: 1px solid var(--hacker-green);
+      border-radius: 5px;
       overflow: hidden;
     }
 
-    .glitch-effect::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
+    .status-bar-fill {
       height: 100%;
-      background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.1) 50%);
-      background-size: 100% 4px;
-      animation: scanline 6s linear infinite;
-      pointer-events: none;
+      background: var(--hacker-green);
+      width: 50%;
     }
   </style>
 </head>
 <body>
-  <div id="terminal-container" class="glitch-effect">
-    <div id="terminal-header">CYBERDYNE SYSTEM TERMINAL vX.23</div>
-    <div id="terminal"></div>
-    <div id="input-line">
-      <span id="user-label">ROOT@CYBERDYNE:</span>
-      <input type="text" id="input" autofocus>
+  <div class="left-panel">
+    <div class="panel-header">CYBERDYNE SYSTEM TERMINAL vX.23</div>
+    <div class="terminal" id="terminal">
+    </div>
+    <div class="input-line">
+      <span class="user-label">ROOT@CYBERDYNE:</span>
+      <input type="text" class="input" id="input" autofocus>
     </div>
   </div>
-
+  <div class="right-panel">
+    <div class="panel-header">SYSTEM STATUS</div>
+    <div class="status-panel">
+      <h3>CPU USAGE</h3>
+      <div class="status-item"><div class="status-bar"><div class="status-bar-fill" style="width: 70%;"></div></div></div>
+    </div>
+    <div class="status-panel">
+      <h3>MEMORY USAGE</h3>
+      <div class="status-item"><div class="status-bar"><div class="status-bar-fill" style="width: 50%;"></div></div></div>
+    </div>
+    <div class="status-panel">
+      <h3>NETWORK USAGE</h3>
+      <div class="status-item"><div class="status-bar"><div class="status-bar-fill" style="width: 90%;"></div></div></div>
+    </div>
+  </div>
   <script>
-    const terminal = document.getElementById('terminal');
+      const terminal = document.getElementById('terminal');
     const input = document.getElementById('input');
     let bitcoinBalance = 0;
     let dollarBalance = 10000;
@@ -519,6 +555,6 @@
     addLine('Initializing neural network...', 'system');
     addLine('Cryptographic protocols enabled', 'success');
     addLine('Type //help for command list', 'system');
-  </script>
+ </script>
 </body>
 </html>
