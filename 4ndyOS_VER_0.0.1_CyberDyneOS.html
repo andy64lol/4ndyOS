@@ -301,11 +301,12 @@
             startMenu.style.display = startMenu.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        function showShutdownMenu() {
+      function showShutdownMenu() {
             if (confirm('Shut down 4ndyOS?')) {
-                window.close();
+                window.location.href = 'index.html';
             }
         }
+
 
         function dragElement(elmnt) {
             let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
