@@ -6,7 +6,212 @@
     <title>4ndyOS CyberDyne</title>
     <link href="https://fonts.googleapis.com/css2?family=Iceland&display=swap" rel="stylesheet">
     <style>
-        /* (Keep all existing CSS styles the same) */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #desktop {
+            flex: 1;
+            background: #000;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            padding: 20px;
+            gap: 20px;
+            position: relative;
+        }
+
+        .icon {
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            padding: 5px;
+            box-shadow: 0 0 10px #0f0;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #0f0;
+        }
+
+        .icon img {
+            width: 60px;
+            height: 60px;
+            filter: invert(100%) sepia(100%) saturate(10000%) hue-rotate(120deg);
+        }
+
+        .icon p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        .taskbar {
+            height: 50px;
+            background-color: #111;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: #0f0;
+            font-size: 14px;
+            border-top: 2px solid #0f0;
+            position: relative;
+        }
+
+        .start-menu-icon {
+            width: 40px;
+            height: 40px;
+            background: #000;
+            color: #0f0;
+            font-family: 'Iceland', sans-serif;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s;
+            border: 2px solid #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .start-menu-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #0f0;
+        }
+
+        .taskbar .open-apps {
+            display: flex;
+            gap: 10px;
+            flex-grow: 1;
+            align-items: center;
+        }
+
+        .open-app {
+            width: 40px;
+            height: 40px;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .open-app img {
+            max-width: 30px;
+            max-height: 30px;
+        }
+
+        .window {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            width: 600px;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 20px #0f0;
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            resize: both;
+            overflow: auto;
+            z-index: 10;
+            animation: fadeIn 0.3s;
+        }
+
+        .window-header {
+            background-color: #111;
+            color: #0f0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            cursor: move;
+            border-bottom: 2px solid #0f0;
+        }
+
+        .window-header .close {
+            cursor: pointer;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .window-header .minimize {
+            cursor: pointer;
+            color: #0f0;
+            margin-right: 10px;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .window-body {
+            flex: 1;
+            padding: 10px;
+            overflow: auto;
+            color: #0f0;
+        }
+
+        .start-menu {
+            position: absolute;
+            bottom: 60px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            box-shadow: 0 0 20px #0f0;
+            display: none;
+            flex-direction: column;
+            z-index: 100;
+            animation: fadeIn 0.3s;
+        }
+
+        .start-menu .app-item {
+            padding: 10px;
+            cursor: pointer;
+            color: #0f0;
+            transition: all 0.3s;
+        }
+
+        .start-menu .app-item:hover {
+            background: rgba(0, 255, 0, 0.1);
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .shutdown-button {
+            background: rgba(255, 0, 0, 0.3);
+            color: #f00;
+            text-align: center;
+            border-radius: 5px;
+            margin: 5px;
+            padding: 5px;
+            transition: all 0.3s;
+            text-shadow: 0 0 5px #f00;
+        }
+
+        .shutdown-button:hover {
+            background: rgba(255, 0, 0, 0.5);
+        }
+
+        #terminal .window-body {
+            background-color: #000;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
