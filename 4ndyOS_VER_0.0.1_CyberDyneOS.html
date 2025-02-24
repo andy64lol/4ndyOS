@@ -48,7 +48,7 @@
         .icon img {
             width: 60px;
             height: 60px;
-            filter: invert(100%) sepia(100%) saturate(10000%) hue-rotate(60deg);
+            filter: invert(100%) sepia(100%) saturate(10000%) hue-rotate(120deg);
         }
 
         .icon p {
@@ -251,7 +251,6 @@
         function minimizeWindow(appId) {
             const app = document.getElementById(appId);
             app.style.display = 'none';
-            addTaskbarApp(appId);
         }
 
         function addTaskbarApp(appId) {
@@ -261,7 +260,7 @@
                 task.className = 'open-app';
                 const icon = document.createElement('img');
                 icon.src = document.querySelector(`.icon[onclick*='${appId}'] img`).src;
-                icon.style.filter = "invert(100%) sepia(100%) saturate(10000%) hue-rotate(60deg)";
+                icon.style.filter = "invert(100%) sepia(100%) saturate(10000%) hue-rotate(120deg)";
                 task.appendChild(icon);
                 task.onclick = () => restoreWindow(appId);
                 openApps.appendChild(task);
@@ -276,7 +275,6 @@
         function restoreWindow(appId) {
             const app = document.getElementById(appId);
             app.style.display = 'flex';
-            removeTaskbarApp(appId);
         }
 
         function updateClock() {
@@ -285,7 +283,13 @@
         }
 
         function toggleStartMenu() {
-            startMenu.style.display = startMenu.style.display === 'block' ? 'none' : 'block';
+            startMenu.style.display = startMenu.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function showShutdownMenu() {
+            if (confirm('Shut down 4ndyOS?')) {
+                window.close();
+            }
         }
 
         function dragElement(elmnt) {
@@ -320,6 +324,12 @@
                 document.onmousemove = null;
             }
         }
+
+        document.addEventListener('click', (e) => {
+            if (!startMenu.contains(e.target) && !document.querySelector('.start-menu-icon').contains(e.target)) {
+                startMenu.style.display = 'none';
+            }
+        });
 
         setInterval(updateClock, 1000);
         updateClock();
