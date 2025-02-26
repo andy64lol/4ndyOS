@@ -224,6 +224,11 @@
             <img src="icons/Hijack.png" alt="4NDY_H1J4CK.EXE">
             <p>4_H1J4CK.EXE</p>
         </div>
+        <div class="icon" onclick="openWindow('vpn')">
+            <img src="icons/VPN.png" alt="4ndyVPN">
+            <p>4ndyVPN</p>
+        </div>
+      </div>
     </div>
 
     <div class="taskbar">
@@ -235,6 +240,7 @@
     <div class="start-menu" id="startMenu">
         <div class="app-item" onclick="openWindow('terminal')">Terminal</div>
         <div class="app-item" onclick="openWindow('hijack')">4_H1J4CK.EXE</div>
+        <div class="app-item" onclick="openWindow('vpn')">4ndyVPN</div>
         <div class="shutdown-button" onclick="showShutdownMenu()">Turn Off</div>
     </div>
 
@@ -261,6 +267,18 @@
         </div>
         <div class="window-body">
             <iframe src="apps/4ndyH1j4ck.html" style="width: 100%; height: 100%; border: none; background: #000;"></iframe>
+        </div>
+    </div>
+    <div id="vpn" class="window">
+        <div class="window-header">
+            <span>4ndyVPN</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('vpn')">_</span>
+                <span class="close" onclick="closeWindow('vpn')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/4ndyVPN.html" style="width: 100%; height: 100%; border: none; background: #000;"></iframe>
         </div>
     </div>
 
