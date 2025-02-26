@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndyVPN</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 10px;
+        }
+        h1 {
+            text-shadow: 0 0 5px #0f0;
+        }
+        button {
+            background-color: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0c0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #0f0;
+            text-align: left;
+        }
+        th {
+            background-color: #0f0;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>4ndyVPN</h1>
+    <p>Welcome to 4ndyVPN. Secure your connection and browse anonymously.</p>
+    <button onclick="connectVPN()">Connect</button>
+    <button onclick="disconnectVPN()">Disconnect</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>IP Address</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="status">Disconnected</td>
+                <td id="ipAddress">-</td>
+                <td id="location">-</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const locations = [
+'New York,USA', 'Los Angeles,USA', 'Chicago,USA', 'Houston,USA', 'San Francisco,USA',  
+'Toronto,Canada', 'Vancouver,Canada', 'Montreal,Canada', 'Mexico City,Mexico', 'Guadalajara,Mexico',  
+
+'São Paulo,Brazil', 'Rio de Janeiro,Brazil', 'Brasília,Brazil', 'Buenos Aires,Argentina',  
+'Santiago,Chile', 'Bogotá,Colombia', 'Medellín,Colombia', 'Lima,Peru', 'Caracas,Venezuela',  
+'Quito,Ecuador', 'La Paz,Bolivia', 'Asunción,Paraguay', 'Montevideo,Uruguay',  
+
+'London,UK', 'Birmingham,UK', 'Manchester,UK', 'Edinburgh,UK',  
+'Berlin,Germany', 'Munich,Germany', 'Frankfurt,Germany', 'Hamburg,Germany',  
+'Paris,France', 'Lyon,France', 'Marseille,France',  
+'Madrid,Spain', 'Barcelona,Spain', 'Valencia,Spain',  
+'Rome,Italy', 'Milan,Italy', 'Naples,Italy',  
+'Prague,Czechia', 'Warsaw,Poland', 'Krakow,Poland',  
+'Amsterdam,Netherlands', 'Rotterdam,Netherlands',  
+'Vienna,Austria', 'Athens,Greece', 'Lisbon,Portugal',  
+'Dublin,Ireland', 'Helsinki,Finland', 'Oslo,Norway', 'Stockholm,Sweden', 'Copenhagen,Denmark',  
+'Zurich,Switzerland', 'Geneva,Switzerland', 'Brussels,Belgium', 'Moscow,Russia',  
+'Kaliningrad,Russia', 'Saint Petersburg,Russia', 'Kiev,Ukraine', 'Minsk,Belarus',  
+'Belgrade,Serbia', 'Bucharest,Romania', 'Sofia,Bulgaria',  
+
+'Tokyo,Japan', 'Osaka,Japan', 'Nagoya,Japan', 'Sapporo,Japan', 'Fukuoka,Japan',  
+'Beijing,China', 'Shanghai,China', 'Guangzhou,China', 'Shenzhen,China', 'Chengdu,China',  
+'Seoul,South Korea', 'Busan,South Korea', 'Incheon,South Korea',  
+'Bangkok,Thailand', 'Chiang Mai,Thailand',  
+'New Delhi,India', 'Mumbai,India', 'Bangalore,India', 'Kolkata,India', 'Chennai,India',  
+'Jakarta,Indonesia', 'Surabaya,Indonesia',  
+'Manila,Philippines', 'Cebu,Philippines',  
+'Kuala Lumpur,Malaysia', 'Penang,Malaysia',  
+'Taipei,Taiwan', 'Hanoi,Vietnam', 'Ho Chi Minh City,Vietnam',  
+'Ulaanbaatar,Mongolia', 'Dhaka,Bangladesh', 'Karachi,Pakistan', 'Lahore,Pakistan',  
+'Riyadh,Saudi Arabia', 'Jeddah,Saudi Arabia', 'Dubai,UAE', 'Abu Dhabi,UAE',  
+
+'Cairo,Egypt', 'Lagos,Nigeria', 'Abuja,Nigeria', 'Johannesburg,South Africa', 'Cape Town,South Africa',  
+'Nairobi,Kenya', 'Addis Ababa,Ethiopia', 'Casablanca,Morocco', 'Marrakech,Morocco',  
+'Algiers,Algeria', 'Tunis,Tunisia', 'Accra,Ghana', 'Dakar,Senegal',  
+
+'Sydney,Australia', 'Melbourne,Australia', 'Brisbane,Australia', 'Perth,Australia', 'Adelaide,Australia',  
+'Auckland,New Zealand', 'Wellington,New Zealand', 'Christchurch,New Zealand'
+        ];
+
+        function generateRandomIP() {
+            return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+        }
+
+        function getRandomLocation() {
+            return locations[Math.floor(Math.random() * locations.length)];
+        }
+
+        function generateUserIP() {
+            let userIP = localStorage.getItem('userIP');
+            if (!userIP) {
+                userIP = generateRandomIP();
+                localStorage.setItem('userIP', userIP);
+            }
+            return userIP;
+        }
+
+        function connectVPN() {
+            const statusElement = document.getElementById('status');
+            const ipAddressElement = document.getElementById('ipAddress');
+            const locationElement = document.getElementById('location');
+
+            statusElement.textContent = 'Connecting...';
+            setTimeout(() => {
+                const randomIP = generateRandomIP();
+                const randomLocation = getRandomLocation();
+                
+                localStorage.setItem('vpnIP', randomIP);
+                localStorage.setItem('vpnLocation', randomLocation);
+
+                statusElement.textContent = 'Connected';
+                ipAddressElement.textContent = '??.???.???.??'; 
+                locationElement.textContent = randomLocation;
+            }, 2000);
+        }
+
+        function disconnectVPN() {
+            localStorage.removeItem('vpnIP');
+            localStorage.removeItem('vpnLocation');
+            
+            document.getElementById('status').textContent = 'Disconnected';
+            document.getElementById('ipAddress').textContent = localStorage.getItem('userIP');
+            document.getElementById('location').textContent = '-';
+        }
+
+        window.onload = function() {
+            generateUserIP();
+            const storedVPNIP = localStorage.getItem('vpnIP');
+            const storedVPNLocation = localStorage.getItem('vpnLocation');
+            const statusElement = document.getElementById('status');
+            const ipAddressElement = document.getElementById('ipAddress');
+
+            if (storedVPNIP && storedVPNLocation) {
+                statusElement.textContent = 'Connected';
+                ipAddressElement.textContent = '??.???.???.??';
+                document.getElementById('location').textContent = storedVPNLocation;
+            } else {
+                ipAddressElement.textContent = localStorage.getItem('userIP');
+            }
+        };
+    </script>
+</body>
+</html>
