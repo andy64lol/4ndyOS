@@ -1,173 +1,556 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4ndyVPN</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #0f0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 10px;
-        }
-        h1 {
-            text-shadow: 0 0 5px #0f0;
-        }
-        button {
-            background-color: #0f0;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 5px;
-        }
-        button:hover {
-            background-color: #0c0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #0f0;
-            text-align: left;
-        }
-        th {
-            background-color: #0f0;
-            color: #000;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4ndyVPN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #000 0%, #001a00 100%);
+      color: #0f0;
+      font-family: 'Orbitron', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      background-color: #000;
+      border: 1px solid #0f0;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 800px;
+      width: 90%;
+      box-shadow: 0 0 20px #0f0;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin: 0;
+      text-shadow: 0 0 10px #0f0;
+    }
+    p {
+      margin: 10px 0 0;
+      font-size: 1.1em;
+    }
+    .btn-group {
+      text-align: center;
+      margin: 25px 0;
+    }
+    button {
+      background-color: #0f0;
+      color: #000;
+      border: none;
+      padding: 12px 25px;
+      margin: 0 10px;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    button:hover {
+      background-color: #0c0;
+      transform: scale(1.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #0f0;
+      text-align: center;
+    }
+    th {
+      background-color: #0f0;
+      color: #000;
+    }
+    tr:hover {
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
-    <h1>4ndyVPN</h1>
-    <p>Welcome to 4ndyVPN. Secure your connection and browse anonymously.</p>
-    <button onclick="connectVPN()">Connect</button>
-    <button onclick="disconnectVPN()">Disconnect</button>
-
+  <div class="container">
+    <header>
+      <h1>4ndyVPN</h1>
+      <p>Secure your connection and browse anonymously</p>
+    </header>
+    <div class="btn-group">
+      <button onclick="connectVPN()">Connect</button>
+      <button onclick="disconnectVPN()">Disconnect</button>
+    </div>
     <table>
-        <thead>
-            <tr>
-                <th>Status</th>
-                <th>IP Address</th>
-                <th>Location</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td id="status">Disconnected</td>
-                <td id="ipAddress">-</td>
-                <td id="location">-</td>
-            </tr>
-        </tbody>
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>IP Address</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="status">Disconnected</td>
+          <td id="ipAddress">-</td>
+          <td id="location">-</td>
+        </tr>
+      </tbody>
     </table>
+  </div>
 
-    <script>
-        const locations = [
-'New York,USA', 'Los Angeles,USA', 'Chicago,USA', 'Houston,USA', 'San Francisco,USA',  
-'Toronto,Canada', 'Vancouver,Canada', 'Montreal,Canada', 'Mexico City,Mexico', 'Guadalajara,Mexico',  
+  <script>
+    const locations = [
+      'New York,USA', 'Los Angeles,USA', 'Chicago,USA', 'Houston,USA', 'San Francisco,USA',  
+'Washington D.C.,USA', 'Seattle,USA', 'Miami,USA', 'Atlanta,USA', 'Dallas,USA', 'Boston,USA',  
+'Phoenix,USA', 'Philadelphia,USA', 'San Diego,USA', 'Denver,USA', 'Las Vegas,USA',  
 
-'São Paulo,Brazil', 'Rio de Janeiro,Brazil', 'Brasília,Brazil', 'Buenos Aires,Argentina',  
-'Santiago,Chile', 'Bogotá,Colombia', 'Medellín,Colombia', 'Lima,Peru', 'Caracas,Venezuela',  
-'Quito,Ecuador', 'La Paz,Bolivia', 'Asunción,Paraguay', 'Montevideo,Uruguay',  
+'Toronto,Canada', 'Vancouver,Canada', 'Montreal,Canada', 'Ottawa,Canada', 'Calgary,Canada',  
+'Edmonton,Canada', 'Winnipeg,Canada', 'Quebec City,Canada', 'Halifax,Canada',  
 
-'London,UK', 'Birmingham,UK', 'Manchester,UK', 'Edinburgh,UK',  
-'Berlin,Germany', 'Munich,Germany', 'Frankfurt,Germany', 'Hamburg,Germany',  
-'Paris,France', 'Lyon,France', 'Marseille,France',  
-'Madrid,Spain', 'Barcelona,Spain', 'Valencia,Spain',  
-'Rome,Italy', 'Milan,Italy', 'Naples,Italy',  
-'Prague,Czechia', 'Warsaw,Poland', 'Krakow,Poland',  
-'Amsterdam,Netherlands', 'Rotterdam,Netherlands',  
-'Vienna,Austria', 'Athens,Greece', 'Lisbon,Portugal',  
-'Dublin,Ireland', 'Helsinki,Finland', 'Oslo,Norway', 'Stockholm,Sweden', 'Copenhagen,Denmark',  
-'Zurich,Switzerland', 'Geneva,Switzerland', 'Brussels,Belgium', 'Moscow,Russia',  
-'Kaliningrad,Russia', 'Saint Petersburg,Russia', 'Kiev,Ukraine', 'Minsk,Belarus',  
-'Belgrade,Serbia', 'Bucharest,Romania', 'Sofia,Bulgaria',  
+'Mexico City,Mexico', 'Guadalajara,Mexico', 'Monterrey,Mexico', 'Cancún,Mexico', 'Tijuana,Mexico',  
+'Puebla,Mexico', 'León,Mexico',  
 
-'Tokyo,Japan', 'Osaka,Japan', 'Nagoya,Japan', 'Sapporo,Japan', 'Fukuoka,Japan',  
-'Beijing,China', 'Shanghai,China', 'Guangzhou,China', 'Shenzhen,China', 'Chengdu,China',  
-'Seoul,South Korea', 'Busan,South Korea', 'Incheon,South Korea',  
-'Bangkok,Thailand', 'Chiang Mai,Thailand',  
-'New Delhi,India', 'Mumbai,India', 'Bangalore,India', 'Kolkata,India', 'Chennai,India',  
-'Jakarta,Indonesia', 'Surabaya,Indonesia',  
-'Manila,Philippines', 'Cebu,Philippines',  
+'São Paulo,Brazil', 'Rio de Janeiro,Brazil', 'Brasília,Brazil', 'Salvador,Brazil', 'Fortaleza,Brazil',  
+'Recife,Brazil', 'Curitiba,Brazil', 'Porto Alegre,Brazil',  
+
+'Buenos Aires,Argentina', 'Córdoba,Argentina', 'Rosario,Argentina',  
+'Santiago,Chile', 'Valparaíso,Chile', 'Concepción,Chile',  
+'Bogotá,Colombia', 'Medellín,Colombia', 'Cali,Colombia',  
+'Lima,Peru', 'Arequipa,Peru',  
+'Caracas,Venezuela', 'Maracaibo,Venezuela',  
+'Quito,Ecuador', 'Guayaquil,Ecuador',  
+'La Paz,Bolivia', 'Santa Cruz,Bolivia',  
+'Asunción,Paraguay',  
+'Montevideo,Uruguay',  
+
+'London,UK', 'Birmingham,UK', 'Manchester,UK', 'Edinburgh,UK', 'Glasgow,UK', 'Liverpool,UK', 'Bristol,UK',  
+'Berlin,Germany', 'Munich,Germany', 'Frankfurt,Germany', 'Hamburg,Germany', 'Cologne,Germany', 'Düsseldorf,Germany',  
+'Paris,France', 'Lyon,France', 'Marseille,France', 'Nice,France', 'Toulouse,France',  
+'Madrid,Spain', 'Barcelona,Spain', 'Valencia,Spain', 'Seville,Spain', 'Bilbao,Spain',  
+'Rome,Italy', 'Milan,Italy', 'Naples,Italy', 'Florence,Italy', 'Turin,Italy',  
+'Prague,Czechia', 'Warsaw,Poland', 'Krakow,Poland', 'Gdańsk,Poland',  
+'Amsterdam,Netherlands', 'Rotterdam,Netherlands', 'Utrecht,Netherlands',  
+'Vienna,Austria', 'Salzburg,Austria',  
+'Athens,Greece', 'Thessaloniki,Greece',  
+'Lisbon,Portugal', 'Porto,Portugal',  
+'Dublin,Ireland', 'Cork,Ireland',  
+'Helsinki,Finland', 'Tampere,Finland',  
+'Oslo,Norway', 'Bergen,Norway',  
+'Stockholm,Sweden', 'Gothenburg,Sweden',  
+'Copenhagen,Denmark', 'Aarhus,Denmark',  
+'Zurich,Switzerland', 'Geneva,Switzerland', 'Basel,Switzerland',  
+'Brussels,Belgium', 'Antwerp,Belgium',  
+'Moscow,Russia', 'Saint Petersburg,Russia', 'Novosibirsk,Russia', 'Yekaterinburg,Russia',  
+'Kaliningrad,Russia',  
+'Kiev,Ukraine', 'Odessa,Ukraine',  
+'Minsk,Belarus',  
+'Belgrade,Serbia',  
+'Bucharest,Romania', 'Cluj-Napoca,Romania',  
+'Sofia,Bulgaria',  
+'Istanbul,Turkey', 'Ankara,Turkey', 'Izmir,Turkey',  
+
+'Tokyo,Japan', 'Osaka,Japan', 'Nagoya,Japan', 'Sapporo,Japan', 'Fukuoka,Japan', 'Hiroshima,Japan',  
+'Beijing,China', 'Shanghai,China', 'Guangzhou,China', 'Shenzhen,China', 'Chengdu,China', 'Wuhan,China', 'Nanjing,China',  
+'Seoul,South Korea', 'Busan,South Korea', 'Incheon,South Korea', 'Daegu,South Korea',  
+'Bangkok,Thailand', 'Chiang Mai,Thailand', 'Pattaya,Thailand',  
+'New Delhi,India', 'Mumbai,India', 'Bangalore,India', 'Kolkata,India', 'Chennai,India', 'Hyderabad,India',  
+'Jakarta,Indonesia', 'Surabaya,Indonesia', 'Bandung,Indonesia',  
+'Manila,Philippines', 'Cebu,Philippines', 'Davao,Philippines',  
 'Kuala Lumpur,Malaysia', 'Penang,Malaysia',  
-'Taipei,Taiwan', 'Hanoi,Vietnam', 'Ho Chi Minh City,Vietnam',  
-'Ulaanbaatar,Mongolia', 'Dhaka,Bangladesh', 'Karachi,Pakistan', 'Lahore,Pakistan',  
-'Riyadh,Saudi Arabia', 'Jeddah,Saudi Arabia', 'Dubai,UAE', 'Abu Dhabi,UAE',  
+'Taipei,Taiwan',  
+'Hanoi,Vietnam', 'Ho Chi Minh City,Vietnam', 'Da Nang,Vietnam',  
+'Ulaanbaatar,Mongolia',  
+'Dhaka,Bangladesh',  
+'Karachi,Pakistan', 'Lahore,Pakistan', 'Islamabad,Pakistan',  
 
-'Cairo,Egypt', 'Lagos,Nigeria', 'Abuja,Nigeria', 'Johannesburg,South Africa', 'Cape Town,South Africa',  
-'Nairobi,Kenya', 'Addis Ababa,Ethiopia', 'Casablanca,Morocco', 'Marrakech,Morocco',  
-'Algiers,Algeria', 'Tunis,Tunisia', 'Accra,Ghana', 'Dakar,Senegal',  
+'Riyadh,Saudi Arabia', 'Jeddah,Saudi Arabia', 'Mecca,Saudi Arabia',  
+'Dubai,UAE', 'Abu Dhabi,UAE',  
+'Cairo,Egypt', 'Alexandria,Egypt',  
+'Lagos,Nigeria', 'Abuja,Nigeria',  
+'Johannesburg,South Africa', 'Cape Town,South Africa', 'Durban,South Africa',  
+'Nairobi,Kenya', 'Mombasa,Kenya',  
+'Addis Ababa,Ethiopia',  
+'Casablanca,Morocco', 'Marrakech,Morocco', 'Rabat,Morocco',  
+'Algiers,Algeria', 'Oran,Algeria',  
+'Tunis,Tunisia',  
+'Accra,Ghana',  
+'Dakar,Senegal',  
 
 'Sydney,Australia', 'Melbourne,Australia', 'Brisbane,Australia', 'Perth,Australia', 'Adelaide,Australia',  
-'Auckland,New Zealand', 'Wellington,New Zealand', 'Christchurch,New Zealand'
-        ];
+'Canberra,Australia', 'Hobart,Australia',  
+'Auckland,New Zealand', 'Wellington,New Zealand', 'Christchurch,New Zealand', 'Queenstown,New Zealand',  
+'Gold Coast,Australia', 'Darwin,Australia', 'Newcastle,Australia', 'Geelong,Australia',  
+'Hamilton,New Zealand', 'Dunedin,New Zealand',  
 
-        function generateRandomIP() {
-            return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
-        }
+'Fiji,Suva', 'Nadi,Fiji',  
+'Port Moresby,Papua New Guinea', 'Honiara,Solomon Islands', 'Apia,Samoa',  
+'Nouméa,New Caledonia', 'Papeete,French Polynesia',  
 
-        function getRandomLocation() {
-            return locations[Math.floor(Math.random() * locations.length)];
-        }
+'Doha,Qatar', 'Kuwait City,Kuwait', 'Manama,Bahrain',  
+'Muscat,Oman', 'Salalah,Oman',  
+'Baghdad,Iraq', 'Basra,Iraq',  
+'Tehran,Iran', 'Mashhad,Iran', 'Isfahan,Iran', 'Shiraz,Iran', 'Tabriz,Iran',  
 
-        function generateUserIP() {
-            let userIP = localStorage.getItem('userIP');
-            if (!userIP) {
-                userIP = generateRandomIP();
-                localStorage.setItem('userIP', userIP);
-            }
-            return userIP;
-        }
+'Yerevan,Armenia', 'Tbilisi,Georgia', 'Baku,Azerbaijan',  
+'Ashgabat,Turkmenistan', 'Dushanbe,Tajikistan', 'Bishkek,Kyrgyzstan', 'Almaty,Kazakhstan', 'Nur-Sultan,Kazakhstan',  
+'Ulaanbaatar,Mongolia',  
 
-        function connectVPN() {
-            const statusElement = document.getElementById('status');
-            const ipAddressElement = document.getElementById('ipAddress');
-            const locationElement = document.getElementById('location');
+'Kathmandu,Nepal',  
+'Thimphu,Bhutan',  
+'Colombo,Sri Lanka', 'Kandy,Sri Lanka',  
+'Male,Maldives',  
 
-            statusElement.textContent = 'Connecting...';
-            setTimeout(() => {
-                const randomIP = generateRandomIP();
-                const randomLocation = getRandomLocation();
-                
-                localStorage.setItem('vpnIP', randomIP);
-                localStorage.setItem('vpnLocation', randomLocation);
+'Harare,Zimbabwe',  
+'Luanda,Angola',  
+'Maputo,Mozambique',  
+'Windhoek,Namibia',  
+'Gaborone,Botswana',  
+'Lilongwe,Malawi',  
+'Kampala,Uganda',  
+'Bujumbura,Burundi',  
+'Kigali,Rwanda',  
+'Brazzaville,Republic of the Congo', 'Kinshasa,Democratic Republic of the Congo',  
+'Libreville,Gabon',  
+'Yaoundé,Cameroon', 'Douala,Cameroon',  
+'Port Harcourt,Nigeria',  
+'Lomé,Togo',  
+'Cotonou,Benin',  
+'Bamako,Mali',  
+'Ouagadougou,Burkina Faso',  
+'Niamey,Niger',  
+'N'Djamena,Chad',  
+'Tripoli,Libya', 'Benghazi,Libya',  
 
-                statusElement.textContent = 'Connected';
-                ipAddressElement.textContent = '??.???.???.??'; 
-                locationElement.textContent = randomLocation;
-            }, 2000);
-        }
+'Anchorage,USA', 'Honolulu,USA', 'San Juan,Puerto Rico',  
+'Guam,USA', 'Saipan,Northern Mariana Islands',  
 
-        function disconnectVPN() {
-            localStorage.removeItem('vpnIP');
-            localStorage.removeItem('vpnLocation');
-            
-            document.getElementById('status').textContent = 'Disconnected';
-            document.getElementById('ipAddress').textContent = localStorage.getItem('userIP');
-            document.getElementById('location').textContent = '-';
-        }
+'Havana,Cuba', 'Santiago de Cuba,Cuba',  
+'San Salvador,El Salvador',  
+'Tegucigalpa,Honduras', 'San Pedro Sula,Honduras',  
+'Managua,Nicaragua',  
+'San José,Costa Rica',  
+'Panama City,Panama',  
+'Belmopan,Belize',  
+'Port-au-Prince,Haiti',  
+'Santo Domingo,Dominican Republic',  
 
-        window.onload = function() {
-            generateUserIP();
-            const storedVPNIP = localStorage.getItem('vpnIP');
-            const storedVPNLocation = localStorage.getItem('vpnLocation');
-            const statusElement = document.getElementById('status');
-            const ipAddressElement = document.getElementById('ipAddress');
+'Kingston,Jamaica', 'Montego Bay,Jamaica',  
+'Bridgetown,Barbados',  
+'Port of Spain,Trinidad and Tobago',  
+'Castries,Saint Lucia',  
+'Basseterre,Saint Kitts and Nevis',  
+'Roseau,Dominica',  
+'St. George's,Grenada',  
+'Kingstown,Saint Vincent and the Grenadines',  
 
-            if (storedVPNIP && storedVPNLocation) {
-                statusElement.textContent = 'Connected';
-                ipAddressElement.textContent = '??.???.???.??';
-                document.getElementById('location').textContent = storedVPNLocation;
-            } else {
-                ipAddressElement.textContent = localStorage.getItem('userIP');
-            }
-        };
-    </script>
+'Andorra la Vella,Andorra',  
+'Vaduz,Liechtenstein',  
+'San Marino,San Marino',  
+'Monaco,Monaco',  
+'Vatican City,Vatican',  
+'Reykjavik,Iceland',  
+'Luxembourg City,Luxembourg',  
+
+'Tirana,Albania',  
+'Podgorica,Montenegro',  
+'Skopje,North Macedonia',  
+'Pristina,Kosovo',  
+
+'Yekaterinburg,Russia', 'Novosibirsk,Russia', 'Kazan,Russia', 'Vladivostok,Russia',  
+'Rostov-on-Don,Russia', 'Sochi,Russia',  
+
+'Haifa,Israel', 'Tel Aviv,Israel', 'Jerusalem,Israel',  
+'Amman,Jordan', 'Petra,Jordan',  
+'Beirut,Lebanon', 'Tripoli,Lebanon',  
+
+'Chișinău,Moldova',  
+'Bratislava,Slovakia', 'Košice,Slovakia',  
+
+'Zagreb,Croatia', 'Split,Croatia', 'Dubrovnik,Croatia',  
+'Ljubljana,Slovenia',  
+'Sarajevo,Bosnia and Herzegovina', 'Banja Luka,Bosnia and Herzegovina',  
+
+'Antananarivo,Madagascar',  
+'Port Louis,Mauritius',  
+'Victoria,Seychelles',  
+
+'Rangoon,Myanmar', 'Mandalay,Myanmar',  
+'Phnom Penh,Cambodia', 'Siem Reap,Cambodia',  
+'Vientiane,Laos', 'Luang Prabang,Laos',  
+'Dili,Timor-Leste',  
+'Port Vila,Vanuatu',  
+
+'Funafuti,Tuvalu',  
+'Majuro,Marshall Islands',  
+'Tarawa,Kiribati',  
+'Palikir,Micronesia',  
+
+'Nouakchott,Mauritania',  
+'Freetown,Sierra Leone',  
+'Monrovia,Liberia',  
+'Bissau,Guinea-Bissau',  
+'Conakry,Guinea',  
+
+'Asmara,Eritrea',  
+'Khartoum,Sudan',  
+'Juba,South Sudan',  
+
+'Muscat,Oman',  
+'Aden,Yemen',  
+
+'Bandar Seri Begawan,Brunei',  
+'Taipei,Taiwan', 'Kaohsiung,Taiwan',  
+
+'Port Moresby,Papua New Guinea',  
+
+'Nukualofa,Tonga',  
+'HongKong,HongKong SAR (China)','Macau,Macau SAR (China)',
+    'Punta Cana,Dominican Republic', 'La Romana,Dominican Republic',  
+'Camagüey,Cuba', 'Holguín,Cuba',  
+'St. John's,Antigua and Barbuda',  
+'The Valley,Anguilla',  
+'Philipsburg,Sint Maarten',  
+'Willemstad,Curaçao',  
+'Oranjestad,Aruba',  
+'Kralendijk,Bonaire',  
+'Gustavia,Saint Barthélemy',  
+'Marigot,Saint Martin',  
+
+'Cayenne,French Guiana',  
+'Paramaribo,Suriname',  
+'Georgetown,Guyana',  
+
+'Puerto Ayacucho,Venezuela',  
+'Maracaibo,Venezuela',  
+'Barquisimeto,Venezuela',  
+'Valencia,Venezuela',  
+
+'Arequipa,Peru', 'Cusco,Peru', 'Trujillo,Peru',  
+'Santa Cruz,Bolivia', 'Sucre,Bolivia',  
+'Concepción,Chile', 'Valparaíso,Chile',  
+'Rosario,Argentina', 'Córdoba,Argentina', 'Mendoza,Argentina',  
+
+'Recife,Brazil', 'Salvador,Brazil', 'Curitiba,Brazil', 'Porto Alegre,Brazil', 'Fortaleza,Brazil',  
+'Manaus,Brazil', 'Belém,Brazil', 'Florianópolis,Brazil',  
+
+'Fort-de-France,Martinique',  
+'Basse-Terre,Guadeloupe',  
+
+'Sevastopol,Crimea', 'Simferopol,Crimea',  
+'Donetsk,Ukraine', 'Lviv,Ukraine', 'Odessa,Ukraine',  
+'Grozny,Chechnya', 'Makhachkala,Dagestan',  
+'Khabarovsk,Russia', 'Irkutsk,Russia',  
+
+'Ghent,Belgium', 'Antwerp,Belgium',  
+'Bruges,Belgium',  
+'Leipzig,Germany', 'Düsseldorf,Germany', 'Stuttgart,Germany',  
+'Cologne,Germany', 'Dresden,Germany',  
+'Strasbourg,France', 'Nice,France', 'Bordeaux,France', 'Toulouse,France',  
+'Seville,Spain', 'Bilbao,Spain', 'Zaragoza,Spain', 'Málaga,Spain',  
+'Palermo,Italy', 'Turin,Italy', 'Florence,Italy', 'Bologna,Italy',  
+'Genoa,Italy', 'Venice,Italy', 'Verona,Italy',  
+
+'Pattaya,Thailand', 'Phuket,Thailand',  
+'Da Nang,Vietnam', 'Nha Trang,Vietnam',  
+'Vientiane,Laos', 'Pakse,Laos',  
+'Medan,Indonesia', 'Makassar,Indonesia', 'Bandung,Indonesia', 'Yogyakarta,Indonesia',  
+'Denpasar,Bali',  
+'George Town,Malaysia', 'Johor Bahru,Malaysia', 'Kuching,Malaysia', 'Kota Kinabalu,Malaysia',  
+'Malacca,Malaysia',  
+
+'Nagano,Japan', 'Kobe,Japan', 'Hiroshima,Japan', 'Sendai,Japan', 'Nagasaki,Japan', 'Okinawa,Japan',  
+'Kanazawa,Japan', 'Kagoshima,Japan',  
+
+'Fukuoka,Japan', 'Takamatsu,Japan',  
+'Kochi,Japan', 'Matsuyama,Japan',  
+'Hakodate,Japan',  
+
+'Xiamen,China', 'Wuhan,China', 'Tianjin,China', 'Nanjing,China', 'Hangzhou,China',  
+'Harbin,China', 'Qingdao,China', 'Chongqing,China', 'Suzhou,China', 'Dalian,China',  
+'Shenyang,China',  
+
+'Gwangju,South Korea', 'Daejeon,South Korea', 'Daegu,South Korea',  
+
+'Mecca,Saudi Arabia', 'Medina,Saudi Arabia',  
+'Tabuk,Saudi Arabia', 'Dammam,Saudi Arabia',  
+
+'Esfahan,Iran', 'Kermanshah,Iran', 'Tabriz,Iran', 'Shiraz,Iran',  
+'Mashhad,Iran',  
+
+'Baku,Azerbaijan',  
+'Yerevan,Armenia',  
+'Ganja,Azerbaijan',  
+
+'Kuwait City,Kuwait',  
+'Muscat,Oman',  
+'Salalah,Oman',  
+
+'Al Ain,UAE',  
+'Fujairah,UAE',  
+'Sharjah,UAE',  
+
+'Nassau,Bahamas',  
+'George Town,Grand Cayman',  
+'Road Town,British Virgin Islands',  
+'Charlotte Amalie,US Virgin Islands',  
+
+'Porto,Portugal', 'Braga,Portugal', 'Coimbra,Portugal', 'Funchal,Madeira', 'Ponta Delgada,Azores',  
+
+'Reykjavik,Iceland',  
+'Torshavn,Faroe Islands',  
+
+'Juba,South Sudan',  
+'Asmara,Eritrea',  
+'Moroni,Comoros',  
+'Gitega,Burundi',  
+'Mbabane,Eswatini',  
+'Maseru,Lesotho',  
+
+'Libreville,Gabon',  
+'Brazzaville,Congo',  
+'Malabo,Equatorial Guinea',  
+
+'Nouakchott,Mauritania',  
+'Khartoum,Sudan',  
+
+'Bandar Seri Begawan,Brunei',  
+
+'Ngerulmud,Palau',  
+'Majuro,Marshall Islands',  
+'Yaren,Nauru',  
+'Tarawa,Kiribati',  
+'Funafuti,Tuvalu',  
+'Nukualofa,Tonga',  
+'Apia,Samoa',  
+'Suva,Fiji',  
+'Port Vila,Vanuatu',  
+
+'Longyearbyen,Svalbard', 
+    'Pyongyang,North Korea', 'Nampo,North Korea', 'Kaesong,North Korea', 'Wonsan,North Korea',  
+'Hamhung,North Korea', 'Chongjin,North Korea', 'Sinuiju,North Korea', 'Rason,North Korea',  
+'Hyesan,North Korea', 'Sariwon,North Korea', 'Kimchaek,North Korea', 'Kanggye,North Korea',
+'Beijing,China', 'Shanghai,China', 'Guangzhou,China', 'Shenzhen,China', 'Tianjin,China',  
+'Chengdu,China', 'Chongqing,China', 'Hangzhou,China', 'Wuhan,China', 'Nanjing,China',  
+'Xi’an,China', 'Harbin,China', 'Shenyang,China', 'Qingdao,China', 'Dalian,China',  
+'Jinan,China', 'Suzhou,China', 'Zhengzhou,China', 'Changsha,China', 'Kunming,China',  
+'Xiamen,China', 'Fuzhou,China', 'Ningbo,China', 'Wuxi,China', 'Shijiazhuang,China',  
+'Ürümqi,China', 'Hohhot,China', 'Taiyuan,China', 'Nanchang,China', 'Hefei,China',  
+'Haikou,China', 'Guilin,China', 'Zhuhai,China', 'Dongguan,China', 'Foshan,China',  
+'Zhongshan,China', 'Jiangmen,China', 'Shantou,China', 'Huizhou,China', 'Zhanjiang,China',  
+'Yangzhou,China', 'Changzhou,China', 'Yantai,China', 'Weihai,China', 'Linyi,China',  
+'Luoyang,China', 'Lanzhou,China', 'Xining,China', 'Yan’an,China', 'Baoji,China',  
+'Yinchuan,China', 'Changchun,China', 'Baotou,China', 'Hulunbuir,China', 'Tongliao,China',  
+'Jilin,China', 'Dandong,China', 'Anshan,China', 'Benxi,China', 'Fushun,China',  
+'Jinzhou,China', 'Yingkou,China', 'Tieling,China', 'Hegang,China', 'Qiqihar,China',  
+'Mudanjiang,China', 'Jixi,China', 'Daqing,China', 'Heihe,China', 'Yanji,China',  
+'Shuangyashan,China', 'Ganzhou,China', 'Ji’an,China', 'Yichun,China', 'Jiujiang,China',  
+'Pingxiang,China', 'Shangrao,China', 'Xiangyang,China', 'Jingzhou,China', 'Huangshi,China',  
+'Yueyang,China', 'Zhuzhou,China', 'Hengyang,China', 'Shaoyang,China', 'Loudi,China',  
+'Yiyang,China', 'Changde,China', 'Chenzhou,China', 'Zhangjiajie,China', 'Huaihua,China',  
+'Fuyang,China', 'Bengbu,China', 'Wuhu,China', 'Anqing,China', 'Chizhou,China',  
+'Huangshan,China', 'Ma’anshan,China', 'Tongling,China', 'Lianyungang,China', 'Huaian,China',  
+'Suqian,China', 'Yancheng,China', 'Zhenjiang,China', 'Taizhou,China', 'Yangzhou,China',  
+'Xuzhou,China', 'Suzhou,China', 'Nantong,China', 'Changshu,China', 'Jiaxing,China',  
+'Huzhou,China', 'Shaoxing,China', 'Jinhua,China', 'Quzhou,China', 'Lishui,China',  
+'Taizhou,China', 'Wenzhou,China', 'Luohe,China', 'Puyang,China', 'Sanmenxia,China',  
+'Shangqiu,China', 'Xinyang,China', 'Xinxiang,China', 'Anyang,China', 'Zhoukou,China',  
+'Zhumadian,China', 'Jingmen,China', 'Ezhou,China', 'Huanggang,China', 'Xiangtan,China',  
+'Chenzhou,China', 'Shaoguan,China', 'Heyuan,China', 'Maoming,China', 'Meizhou,China',  
+'Shanwei,China', 'Yangjiang,China', 'Zhaoqing,China', 'Baise,China', 'Chongzuo,China',  
+'Fangchenggang,China', 'Guigang,China', 'Guilin,China', 'Hechi,China', 'Hezhou,China',  
+'Laibin,China', 'Liuzhou,China', 'Nanning,China', 'Qinzhou,China', 'Wuzhou,China',  
+'Yulin,China', 'Tongren,China', 'Anshun,China', 'Bijie,China', 'Guiyang,China',  
+'Liupanshui,China', 'Zunyi,China', 'Baoshan,China', 'Chuxiong,China', 'Dali,China',  
+'Dehong,China', 'Diqing,China', 'Honghe,China', 'Kunming,China', 'Lijiang,China',  
+'Lincang,China', 'Nujiang,China', 'Pu’er,China', 'Qujing,China', 'Wenshan,China',  
+'Xishuangbanna,China', 'Yuxi,China', 'Zhaotong,China', 'Hami,China', 'Hotan,China',  
+'Karamay,China', 'Kashgar,China', 'Korla,China', 'Shihezi,China', 'Tacheng,China',  
+'Turpan,China', 'Urumqi,China', 'Yining,China', 'Lhasa,China', 'Nagqu,China',  
+'Qamdo,China', 'Shigatse,China', 'Xigaze,China','Madrid,Spain', 'Barcelona,Spain', 'Valencia,Spain', 'Seville,Spain', 'Zaragoza,Spain',  
+'Málaga,Spain', 'Murcia,Spain', 'Palma de Mallorca,Spain', 'Las Palmas de Gran Canaria,Spain',  
+'Bilbao,Spain', 'Alicante,Spain', 'Córdoba,Spain', 'Valladolid,Spain', 'Vigo,Spain',  
+'Gijón,Spain', 'A Coruña,Spain', 'Vitoria-Gasteiz,Spain',  
+'Granada,Spain', 'Elche,Spain', 'Oviedo,Spain', 'Santa Cruz de Tenerife,Spain', 'Badalona,Spain',  
+'Cartagena,Spain', 'Tarragona,Spain', 'Jerez de la Frontera,Spain', 'Sabadell,Spain', 'Móstoles,Spain',  
+'Pamplona,Spain', 'Almería,Spain', 'San Sebastián,Spain', 'Burgos,Spain', 'Santander,Spain',  
+'Albacete,Spain', 'Castellón de la Plana,Spain', 'Logroño,Spain', 'Badajoz,Spain', 'Salamanca,Spain',  
+'Huelva,Spain', 'Lleida,Spain', 'Marbella,Spain', 'León,Spain', 'Cádiz,Spain',  
+'Torrevieja,Spain', 'Santa Coloma de Gramenet,Spain', 'Alcalá de Henares,Spain', 'Jaén,Spain', 'Ferrol,Spain',  
+'Algeciras,Spain', 'Ourense,Spain', 'Lugo,Spain', 'Cáceres,Spain', 'Ceuta,Spain', 'Melilla,Spain',  
+'Ibiza,Spain', 'Mahon,Spain', 'Formentera,Spain', 'Inca,Spain',  
+'San Cristóbal de La Laguna,Spain', 'Puerto del Rosario,Spain', 'Arrecife,Spain', 'San Bartolomé de Tirajana,Spain', 'Telde,Spain',  
+'Getafe,Spain', 'Leganés,Spain', 'San Fernando,Spain', 'Reus,Spain', 'Avilés,Spain',  
+'Palencia,Spain', 'Girona,Spain', 'Toledo,Spain', 'Guadalajara,Spain', 'Segovia,Spain',  
+'Cuenca,Spain', 'Zamora,Spain', 'Ávila,Spain', 'Teruel,Spain', 'Soria,Spain', 'Huesca,Spain'  
+];
+    
+    function generateRandomIP() {
+      return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+    }
+    
+    function getRandomLocation() {
+      return locations[Math.floor(Math.random() * locations.length)];
+    }
+    
+    function generateUserIP() {
+      let userIP = localStorage.getItem('userIP');
+      if (!userIP) {
+        userIP = generateRandomIP();
+        localStorage.setItem('userIP', userIP);
+      }
+      return userIP;
+    }
+    
+    function connectVPN() {
+      const statusElement = document.getElementById('status');
+      const ipAddressElement = document.getElementById('ipAddress');
+      const locationElement = document.getElementById('location');
+    
+      statusElement.textContent = 'Connecting...';
+      setTimeout(() => {
+        const randomIP = generateRandomIP();
+        const randomLocation = getRandomLocation();
+        
+        localStorage.setItem('vpnIP', randomIP);
+        localStorage.setItem('vpnLocation', randomLocation);
+    
+        statusElement.textContent = 'Connected';
+        ipAddressElement.textContent = '??.???.???.??'; 
+        locationElement.textContent = randomLocation;
+      }, 2000);
+    }
+    
+    function disconnectVPN() {
+      localStorage.removeItem('vpnIP');
+      localStorage.removeItem('vpnLocation');
+      
+      document.getElementById('status').textContent = 'Disconnected';
+      document.getElementById('ipAddress').textContent = localStorage.getItem('userIP');
+      document.getElementById('location').textContent = '-';
+    }
+    
+    window.onload = function() {
+      generateUserIP();
+      const storedVPNIP = localStorage.getItem('vpnIP');
+      const storedVPNLocation = localStorage.getItem('vpnLocation');
+      const statusElement = document.getElementById('status');
+      const ipAddressElement = document.getElementById('ipAddress');
+    
+      if (storedVPNIP && storedVPNLocation) {
+        statusElement.textContent = 'Connected';
+        ipAddressElement.textContent = '??.???.???.??';
+        document.getElementById('location').textContent = storedVPNLocation;
+      } else {
+        ipAddressElement.textContent = localStorage.getItem('userIP');
+      }
+    };
+  </script>
 </body>
 </html>
