@@ -23,7 +23,7 @@ Our attempt to create a ChromeOS-Android like OS.
 
 - CyberDyneOS:
 
-Our **NEWEST** OS to simulate Hacker experience LOL. (Note:Our programm only simulates and does not perform any actual illegal action)
+Our **NEWEST** OS to simulate Hacker experience LOL. (Note:Our programm only simulates and does not perform any actual illegal action nor purchase anything real)
 
 ---
 
@@ -31,7 +31,7 @@ Our **NEWEST** OS to simulate Hacker experience LOL. (Note:Our programm only sim
 - Add more versions and updates.
 - Add developer-friendly versions for development in HTML,CSS and JavaScript,but who knows if we will ever add more?
 - Add more apps and improve it.
-- Start focusing on a single language. (Originally intended to be English,now mixed with Spanish LOL)
+- Start focusing on a single language. (Originally intended to be English only)
 - Add our own browser. (Working on it)
 - Never sleep
 
