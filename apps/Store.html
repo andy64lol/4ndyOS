@@ -1,185 +1,344 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberBlack Bazaar - Anonymous Market</title>
-    <style>
-        body {
-            background-color: #0a0a0a;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-        }
-        .store-container {
-            max-width: 900px;
-            margin: auto;
-            padding: 20px;
-            border: 2px solid #00ff00;
-            background-color: #111;
-            box-shadow: 0 0 10px #00ff00;
-        }
-        .item {
-            border: 1px solid #00ff00;
-            padding: 15px;
-            margin: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #222;
-        }
-        button {
-            background-color: #00ff00;
-            color: #0a0a0a;
-            border: none;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #008000;
-        }
-        #notification {
-            display: none;
-            background-color: #008000;
-            color: #ffffff;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-        .footer {
-            margin-top: 40px;
-            font-size: 0.8em;
-            color: #888;
-        }
-        .checkout {
-            margin-top: 20px;
-            background-color: #444;
-            padding: 15px;
-            border-radius: 5px;
-            color: #00ff00;
-        }
-        .checkout button {
-            background-color: #008000;
-        }
-        .legal-disclaimer {
-            margin-top: 40px;
-            background-color: #222;
-            padding: 15px;
-            border-radius: 5px;
-            color: #ff0000;
-            font-size: 0.9em;
-            text-align: left;
-        }
-    </style>
-    <script>
-        let cart = [];
-
-        function purchase(item, price) {
-            cart.push({ item, price });
-            document.getElementById('notification').innerText = item + " added to cart!";
-            document.getElementById('notification').style.display = 'block';
-            updateCart();
-        }
-
-        function updateCart() {
-            const cartList = document.getElementById('cart-list');
-            cartList.innerHTML = '';
-            cart.forEach((entry, index) => {
-                cartList.innerHTML += `<li>${entry.item} - ${entry.price} BTC</li>`;
-            });
-            updateTotal();
-        }
-
-        function updateTotal() {
-            const total = cart.reduce((sum, entry) => sum + entry.price, 0);
-            document.getElementById('total').innerText = `Total: ${total} BTC`;
-        }
-
-        function checkout() {
-            if (cart.length === 0) {
-                alert("Your cart is empty!");
-                return;
-            }
-            alert("Checkout successful! Items: " + cart.map(entry => entry.item).join(", "));
-            cart = [];
-            updateCart();
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberBlack Bazaar 2.0</title>
+  <style>
+    body { 
+      background-color: #0a0a0a; 
+      color: #00ff00; 
+      font-family: 'Courier New', monospace; 
+      margin: 0; 
+      padding: 0; 
+      text-align: center; 
+    }
+    .store-container { 
+      max-width: 900px; 
+      margin: auto; 
+      padding: 20px; 
+      border: 2px solid #00ff00; 
+      background-color: #111; 
+      box-shadow: 0 0 10px #00ff00; 
+    }
+    input[type="text"] {
+      padding: 10px; 
+      width: 80%; 
+      max-width: 400px; 
+      margin-bottom: 20px; 
+      border: 1px solid #00ff00; 
+      background-color: #222; 
+      color: #00ff00; 
+    }
+    .item { 
+      border: 1px solid #00ff00; 
+      padding: 15px; 
+      margin: 15px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      background-color: #222; 
+    }
+    button { 
+      background-color: #00ff00; 
+      color: #0a0a0a; 
+      border: none; 
+      padding: 8px 15px; 
+      cursor: pointer; 
+      font-weight: bold; 
+    }
+    button:hover { 
+      background-color: #008000; 
+    }
+    .remove-btn { 
+      background-color: #ff0000; 
+      color: #fff; 
+      margin-left: 10px; 
+      padding: 4px 8px; 
+      font-size: 0.9em; 
+    }
+    .remove-btn:hover { 
+      background-color: #cc0000; 
+    }
+    .checkout { 
+      margin-top: 20px; 
+      background-color: #444; 
+      padding: 15px; 
+      border-radius: 5px; 
+      color: #00ff00; 
+    }
+    .modal { 
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      overflow: auto; 
+      background-color: rgba(0, 0, 0, 0.8); 
+    }
+    .modal-content { 
+      background-color: #111; 
+      margin: 10% auto; 
+      padding: 20px; 
+      border: 1px solid #00ff00; 
+      width: 80%; 
+      max-width: 500px; 
+      text-align: center; 
+      color: #00ff00; 
+    }
+    .close { 
+      float: right; 
+      font-size: 28px; 
+      font-weight: bold; 
+      cursor: pointer; 
+    }
+    .legal-disclaimer { 
+      margin-top: 40px; 
+      background-color: #222; 
+      padding: 15px; 
+      border-radius: 5px; 
+      color: #ff0000; 
+      font-size: 0.9em; 
+      text-align: left; 
+    }
+  </style>
 </head>
 <body>
-    <div class="store-container">
-        <h1>Welcome to CyberBlack Bazaar</h1>
-        <p>Your anonymous market for rare and exotic goods.</p>
-        
-        <h2>Weaponry</h2>
-        <div class="item">
-            <span>Shadow Blaster X9 - 1200 BTC</span>
-            <button onclick="purchase('Shadow Blaster X9', 1200)">Buy</button>
-        </div>
-        <div class="item">
-            <span>Vortex Rifle Mk II - 3000 BTC</span>
-            <button onclick="purchase('Vortex Rifle Mk II', 3000)">Buy</button>
-        </div>
-        <div class="item">
-            <span>Plasma Longshot 5000 - 5000 BTC</span>
-            <button onclick="purchase('Plasma Longshot 5000', 5000)">Buy</button>
-        </div>
-        
-        <h2>Ammo</h2>
-        <div class="item">
-            <span>Neon Core Ammo (50 Units) - 200 BTC</span>
-            <button onclick="purchase('Neon Core Pack', 200)">Buy</button>
-        </div>
-        <div class="item">
-            <span>Photon Cartridge (100 Rounds) - 500 BTC</span>
-            <button onclick="purchase('Photon Cartridge', 500)">Buy</button>
-        </div>
-        
-        <h2>Exotic Medicine</h2>
-        <div class="item">
-            <span>BetterDream pills - 5000 BTC</span>
-            <button onclick="purchase('BetterDream pills (8)', 5000)">Buy</button>
-        </div>
-        <div class="item">
-            <span>Anti-Headache pills - 1900 BTC</span>
-            <button onclick="purchase('Anti-Headache pills (8)', 1900)">Buy</button>
-        </div>
-        <div class="item">
-            <span>Dandelion Essence - 2590 BTC</span>
-            <button onclick="purchase('Dandelion Essence', 2590)">Buy</button>
-        </div>
-        
-        <h2>Cybernetic Enhancements</h2>
-        <div class="item">
-            <span>Neural Interface - 5000 BTC</span>
-            <button onclick="purchase('Neural Interface', 5000)">Buy</button>
-        </div>
-        <div class="item">
-            <span>ExoSkeleton Armor - 12000 BTC</span>
-            <button onclick="purchase('ExoSkeleton Armor', 12000)">Buy</button>
-        </div>
-        
-        <p>⚠ Payments in cryptocurrency only ⚠</p>
-
-        <div class="checkout">
-            <h3>Cart</h3>
-            <ul id="cart-list"></ul>
-            <p id="total">Total: 0 BTC</p>
-            <button onclick="checkout()">Checkout</button>
-        </div>
-
-        <div id="notification"></div>
+  <div class="store-container">
+    <h1>Welcome to CyberBlack Bazaar 2.0</h1>
+    <p>Your anonymous market for rare and exotic goods.</p>
+    <input type="text" id="search" placeholder="Search items..." onkeyup="filterItems()">
+    
+    <div id="marketplace"></div>
+    
+    <div class="checkout">
+      <h3>Cart</h3>
+      <ul id="cart-list"></ul>
+      <p id="total">Total: 0 BTC</p>
+      <button onclick="showCheckoutModal()">Initiate Transaction</button>
     </div>
-
+    
     <div class="legal-disclaimer">
-        <h3>Legal Disclaimer:</h3>
-        <p>⚠ Some items, such as the BetterDream pills and Anti-Headache pills, may contain substances like caffeine or theine, which can have stimulating effects. Please use with caution and ensure you are in a safe environment when consuming these products. The effects of caffeine and theine can vary based on individual sensitivity, and prolonged usage may lead to side effects like insomnia, increased heart rate, or nervousness.</p>
-        <p>⚠ By purchasing items from CyberBlack Bazaar, you acknowledge that you are fully aware of the effects of these substances and agree to take personal responsibility for their use. The seller is not liable for any adverse reactions or misuse of the products sold here.</p>
+      <h3>Legal Disclaimer:</h3>
+      <p>⚠ Some items may contain substances that can have stimulating effects. Please use with caution and ensure you are in a safe environment when consuming these products. The seller is not liable for any adverse reactions or misuse of the products sold here.</p>
     </div>
+  </div>
 
-    <div class="footer">
-        <p>CyberBlack Bazaar - All rights reserved</p>
+  <div id="checkoutModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Checkout Confirmation</h2>
+      <p id="checkoutSummary"></p>
+      <button onclick="finalizeTransaction()">Confirm Purchase</button>
     </div>
+  </div>
+
+  <script>
+    const marketplaceData = {
+      categories: [
+  {
+    "name": "Neural Interfaces",
+    "products": [
+      { "name": "Cortex Streamer v9.4", "price": 4500 },
+      { "name": "Dreamweaver Implant", "price": 7800 },
+      { "name": "Memory Palace SSD", "price": 12000 },
+      { "name": "Pain Editor 3000", "price": 9500 },
+      { "name": "Synaptic Accelerator", "price": 6800 },
+      { "name": "Empathy Filter", "price": 5500 },
+      { "name": "Oblivion Switch", "price": 15000 },
+      { "name": "NeuroSync Transmitter", "price": 8900 },
+      { "name": "MindMesh Network Hub", "price": 11000 }
+    ]
+  },
+  {
+    "name": "Biohacking",
+    "products": [
+      { "name": "Chimeric DNA Cocktail", "price": 25000 },
+      { "name": "Hemoglobin Optimizer", "price": 4200 },
+      { "name": "Telomere Rewinder", "price": 35000 },
+      { "name": "Metabolic Forge", "price": 8800 },
+      { "name": "Dermal Armor Graft", "price": 6700 },
+      { "name": "Ocular Nightshade", "price": 5300 },
+      { "name": "Adrenaline Symphony", "price": 4900 },
+      { "name": "BioLume Skin Mod", "price": 7200 },
+      { "name": "RegenX Cellular Patch", "price": 9500 }
+    ]
+  },
+  {
+    "name": "Quantum Tools",
+    "products": [
+      { "name": "Entanglement Comms", "price": 45000 },
+      { "name": "Probability Lens", "price": 32000 },
+      { "name": "Waveform Collapser", "price": 28000 },
+      { "name": "Superposition Cloak", "price": 55000 },
+      { "name": "Temporal Glimpse", "price": 95000 },
+      { "name": "Quantum Lockpick", "price": 18000 },
+      { "name": "Schrodinger Case", "price": 12000 },
+      { "name": "Quantum Entangler", "price": 60000 },
+      { "name": "Chrono Stabilizer", "price": 40000 }
+    ]
+  },
+  {
+    "name": "Synthetic Reality",
+    "products": [
+      { "name": "VR Overlay Contacts", "price": 3500 },
+      { "name": "Haptic Ghost Suit", "price": 8200 },
+      { "name": "Reality Fracture", "price": 15000 },
+      { "name": "Simulation Detector", "price": 23000 },
+      { "name": "Digital Afterlife", "price": 45000 },
+      { "name": "Personality Fork", "price": 17000 },
+      { "name": "Perception Filters", "price": 6800 },
+      { "name": "Simulacra Engine", "price": 30000 },
+      { "name": "Virtual Soul Anchor", "price": 50000 }
+    ]
+  },
+  {
+    "name": "Black Protocols",
+    "products": [
+      { "name": "AI Assassin Contract", "price": 75000 },
+      { "name": "Corporate Memory Wipe", "price": 45000 },
+      { "name": "Stock Market Virus", "price": 120000 },
+      { "name": "Celebrity Skin Mask", "price": 25000 },
+      { "name": "Police Backdoor", "price": 95000 },
+      { "name": "Bankruptcy Nanobots", "price": 65000 },
+      { "name": "Voting System Key", "price": 150000 },
+      { "name": "Data Phantom", "price": 80000 },
+      { "name": "Ghost Protocol Suite", "price": 100000 }
+    ]
+  },
+  {
+    "name": "Weaponry",
+    "products": [
+      { "name": "Shadow Blaster X9", "price": 1200 },
+      { "name": "Vortex Rifle Mk II", "price": 3000 },
+      { "name": "Plasma Longshot 5000", "price": 5000 },
+      { "name": "Nano-Edge Katana", "price": 4500 },
+      { "name": "Gravity Hammer", "price": 7500 },
+      { "name": "Sonic Disruptor", "price": 6000 }
+    ]
+  },
+  {
+    "name": "Ammo",
+    "products": [
+      { "name": "Neon Core Ammo (50 Units)", "price": 200 },
+      { "name": "Photon Cartridge (100 Rounds)", "price": 500 },
+      { "name": "Plasma Cells (20 Units)", "price": 800 },
+      { "name": "Cryo Bullets (30 Rounds)", "price": 400 },
+      { "name": "EMP Charges (10 Units)", "price": 1200 }
+    ]
+  },
+  {
+    "name": "Exotic Medicine",
+    "products": [
+      { "name": "BetterDream pills", "price": 5000 },
+      { "name": "Anti-Headache pills", "price": 1900 },
+      { "name": "Dandelion Essence", "price": 2590 },
+      { "name": "NanoHeal Syringe", "price": 3500 },
+      { "name": "MindMend Elixir", "price": 4200 },
+      { "name": "Painless Regeneration Kit", "price": 6000 }
+    ]
+  },
+  {
+    "name": "Cybernetic Enhancements",
+    "products": [
+      { "name": "Neural Interface", "price": 5000 },
+      { "name": "ExoSkeleton Armor", "price": 12000 },
+      { "name": "Optical Enhancer", "price": 8000 },
+      { "name": "NanoMuscle Fibers", "price": 9500 },
+      { "name": "Synaptic Reflex Booster", "price": 7000 },
+      { "name": "Dermal Subroutines", "price": 6500 }
+    ]
+  }
+]
+        
+      
+    };
+
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    function renderMarketplace() {
+      const container = document.getElementById('marketplace');
+      container.innerHTML = marketplaceData.categories.map(category => `
+        <div class="category">
+          <h2>${category.name}</h2>
+          ${category.products.map(product => `
+            <div class="item">
+              <div>
+                <strong>${product.name}</strong>
+              </div>
+              <div>
+                ${product.price} BTC
+                <button onclick="addToCart('${product.name}', ${product.price})">Add to Cart</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      localStorage.setItem('cart', JSON.stringify(cart));
+      showNotification(`Added: ${name}`);
+      updateCartDisplay();
+    }
+
+    function updateCartDisplay() {
+      const cartList = document.getElementById('cart-list');
+      cartList.innerHTML = cart.map((item, index) => `
+        <li>
+          ${item.name} - ${item.price} BTC
+          <button class="remove-btn" onclick="removeCartItem(${index})">Remove</button>
+        </li>
+      `).join('');
+      
+      document.getElementById('total').textContent = `Total: ${cart.reduce((sum, item) => sum + item.price, 0)} BTC`;
+    }
+
+    function removeCartItem(index) {
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartDisplay();
+    }
+
+    function filterItems() {
+      const searchTerm = document.getElementById('search').value.toLowerCase();
+      document.querySelectorAll('.item').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+      });
+    }
+
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 2000);
+    }
+
+    function showCheckoutModal() {
+      const modal = document.getElementById('checkoutModal');
+      modal.style.display = 'block';
+      document.getElementById('checkoutSummary').textContent = `Purchasing ${cart.length} items for ${cart.reduce((sum, i) => sum + i.price, 0)} BTC`;
+    }
+
+    function closeModal() {
+      document.getElementById('checkoutModal').style.display = 'none';
+    }
+
+    function finalizeTransaction() {
+      localStorage.removeItem('cart');
+      cart = [];
+      updateCartDisplay();
+      closeModal();
+      showNotification('Transaction complete.');
+    }
+
+    renderMarketplace();
+    updateCartDisplay();
+  </script>
 </body>
 </html>
