@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberBlack Bazaar - Anonymous Market</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+        .store-container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            border: 2px solid #00ff00;
+            background-color: #111;
+            box-shadow: 0 0 10px #00ff00;
+        }
+        .item {
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #222;
+        }
+        button {
+            background-color: #00ff00;
+            color: #0a0a0a;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #008000;
+        }
+        #notification {
+            display: none;
+            background-color: #008000;
+            color: #ffffff;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 0.8em;
+            color: #888;
+        }
+        .checkout {
+            margin-top: 20px;
+            background-color: #444;
+            padding: 15px;
+            border-radius: 5px;
+            color: #00ff00;
+        }
+        .checkout button {
+            background-color: #008000;
+        }
+        .legal-disclaimer {
+            margin-top: 40px;
+            background-color: #222;
+            padding: 15px;
+            border-radius: 5px;
+            color: #ff0000;
+            font-size: 0.9em;
+            text-align: left;
+        }
+    </style>
+    <script>
+        let cart = [];
+
+        function purchase(item, price) {
+            cart.push({ item, price });
+            document.getElementById('notification').innerText = item + " added to cart!";
+            document.getElementById('notification').style.display = 'block';
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartList = document.getElementById('cart-list');
+            cartList.innerHTML = '';
+            cart.forEach((entry, index) => {
+                cartList.innerHTML += `<li>${entry.item} - ${entry.price} BTC</li>`;
+            });
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const total = cart.reduce((sum, entry) => sum + entry.price, 0);
+            document.getElementById('total').innerText = `Total: ${total} BTC`;
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            alert("Checkout successful! Items: " + cart.map(entry => entry.item).join(", "));
+            cart = [];
+            updateCart();
+        }
+    </script>
+</head>
+<body>
+    <div class="store-container">
+        <h1>Welcome to CyberBlack Bazaar</h1>
+        <p>Your anonymous market for rare and exotic goods.</p>
+        
+        <h2>Weaponry</h2>
+        <div class="item">
+            <span>Shadow Blaster X9 - 1200 BTC</span>
+            <button onclick="purchase('Shadow Blaster X9', 1200)">Buy</button>
+        </div>
+        <div class="item">
+            <span>Vortex Rifle Mk II - 3000 BTC</span>
+            <button onclick="purchase('Vortex Rifle Mk II', 3000)">Buy</button>
+        </div>
+        <div class="item">
+            <span>Plasma Longshot 5000 - 5000 BTC</span>
+            <button onclick="purchase('Plasma Longshot 5000', 5000)">Buy</button>
+        </div>
+        
+        <h2>Ammo</h2>
+        <div class="item">
+            <span>Neon Core Ammo (50 Units) - 200 BTC</span>
+            <button onclick="purchase('Neon Core Pack', 200)">Buy</button>
+        </div>
+        <div class="item">
+            <span>Photon Cartridge (100 Rounds) - 500 BTC</span>
+            <button onclick="purchase('Photon Cartridge', 500)">Buy</button>
+        </div>
+        
+        <h2>Exotic Medicine</h2>
+        <div class="item">
+            <span>BetterDream pills - 5000 BTC</span>
+            <button onclick="purchase('BetterDream pills (8)', 5000)">Buy</button>
+        </div>
+        <div class="item">
+            <span>Anti-Headache pills - 1900 BTC</span>
+            <button onclick="purchase('Anti-Headache pills (8)', 1900)">Buy</button>
+        </div>
+        <div class="item">
+            <span>Dandelion Essence - 2590 BTC</span>
+            <button onclick="purchase('Dandelion Essence', 2590)">Buy</button>
+        </div>
+        
+        <h2>Cybernetic Enhancements</h2>
+        <div class="item">
+            <span>Neural Interface - 5000 BTC</span>
+            <button onclick="purchase('Neural Interface', 5000)">Buy</button>
+        </div>
+        <div class="item">
+            <span>ExoSkeleton Armor - 12000 BTC</span>
+            <button onclick="purchase('ExoSkeleton Armor', 12000)">Buy</button>
+        </div>
+        
+        <p>⚠ Payments in cryptocurrency only ⚠</p>
+
+        <div class="checkout">
+            <h3>Cart</h3>
+            <ul id="cart-list"></ul>
+            <p id="total">Total: 0 BTC</p>
+            <button onclick="checkout()">Checkout</button>
+        </div>
+
+        <div id="notification"></div>
+    </div>
+
+    <div class="legal-disclaimer">
+        <h3>Legal Disclaimer:</h3>
+        <p>⚠ Some items, such as the BetterDream pills and Anti-Headache pills, may contain substances like caffeine or theine, which can have stimulating effects. Please use with caution and ensure you are in a safe environment when consuming these products. The effects of caffeine and theine can vary based on individual sensitivity, and prolonged usage may lead to side effects like insomnia, increased heart rate, or nervousness.</p>
+        <p>⚠ By purchasing items from CyberBlack Bazaar, you acknowledge that you are fully aware of the effects of these substances and agree to take personal responsibility for their use. The seller is not liable for any adverse reactions or misuse of the products sold here.</p>
+    </div>
+
+    <div class="footer">
+        <p>CyberBlack Bazaar - All rights reserved</p>
+    </div>
+</body>
+</html>
