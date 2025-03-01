@@ -10,6 +10,10 @@ Welcome to **4ndyOS Emulation**, a web-based interface for launching different v
 Simply visit the following link to access 4ndyOS:
 👉 [4ndyOS Emulation](https://andy64lol.github.io/4ndyOS.github.io/index.html)
 
+Doesn't work?
+
+Here's an alternative: [4ndyOS Emulation alternative link](https://4ndyos.netlify.app/)
+
 ## All editions:
 - Core:
 
