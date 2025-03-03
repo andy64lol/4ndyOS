@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -141,7 +142,7 @@
             flex-direction: column;
             resize: both;
             overflow: auto;
-            z-index: 10;
+            z -index: 10;
             animation: fadeIn 0.3s;
         }
 
@@ -328,7 +329,7 @@
             <img src="icons/settings.png" alt="Settings">
             <p>Settings</p>
         </div>
-        <div class="icon" onclick="openWindow('4ndyDraw')">
+        <div class="icon" onclick="openWindow('andyDraw')">
             <img src="icons/draw.png" alt="4ndyDraw">
             <p>4ndyDraw</p>
         </div>
@@ -349,7 +350,7 @@
         <div class="app-item" onclick="openWindow('clicker')">Clicker</div>
         <div class="app-item" onclick="openWindow('files')">Files</div>
         <div class="app-item" onclick="openWindow('notes')">Notes</div>
-        <div class="app-item" onclick="openWindow('4ndyDraw')">4ndyDraw</div>
+        <div class="app-item" onclick="openWindow('andyDraw')">4ndyDraw</div>
         <div class="app-item" onclick="openWindow('settings')">Settings</div>
         <div class="shutdown-button" onclick="showShutdownMenu()">Turn Off</div>
     </div>
@@ -457,20 +458,20 @@
             <iframe src="apps/notes.html" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
     </div>
-  
-  <div id="4ndyDraw" class="window">
-    <div class="window-header">
-        <span>4ndyDraw</span>
-        <span>
-            <span class="minimize" onclick="minimizeWindow('4ndyDraw')">_</span>
-            <span class="close" onclick="closeWindow('4ndyDraw')">X</span>
-        </span>
+
+    <div id="andyDraw" class="window">
+        <div class="window-header">
+            <span>4ndyDraw</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('andyDraw')">_</span>
+                <span class="close" onclick="closeWindow('andyDraw')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/draw.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
     </div>
-    <div class="window-body">
-        <iframe src="apps/draw.html" style="width: 100%; height: 100%; border: none;"></iframe>
-    </div>
-</div>
-    
+
     <div id="settings" class="window">
         <div class="window-header">
             <span>Settings</span>
@@ -497,7 +498,8 @@
                 <div>
                     <h3>Screen Settings</h3>
                     <label for="screenResolution">Screen Resolution:</label>
-                    <input type="text" id="screenResolution" placeholder="e.g., 1920x1080" onchange="changeScreenResolution(this.value)">
+                    <input type="text" id="screenResolution" placeholder="e.g., 1920x1080" onchange 
+                    ="changeScreenResolution(this.value)">
                 </div>
                 <button onclick="saveSettings()">Save Changes</button>
                 <div class="version-info">Version: 4ndyOS_VER_2.5.0_core</div>
@@ -515,16 +517,12 @@
     </div>
 
     <script>
-       
         let highestZIndex = 1000;
-
-        
         let activeWindow = null;
         let isDragging = false;
         let initialX;
         let initialY;
 
-        
         window.addEventListener('load', loadSettings);
 
         function openWindow(appId) {
@@ -544,36 +542,24 @@
         }
 
         function addToTaskbar(appId) {
-            
             const openApps = document.getElementById('openApps');
             const existingApp = Array.from(openApps.children).find(child => 
                 child.getAttribute('data-app-id') === appId
             );
             
-            if (existingApp) {
+            if (!existingApp) {
+                const app = document.createElement('div');
+                app.className = 'open-app';
+                app.setAttribute('data-app-id', appId);
                 
-                document.getElementById(appId).style.display = 'flex';
-                return;
-            }
-            
-            
-            const app = document.createElement('div');
-            app.className = 'open-app';
-            app.setAttribute('data-app-id', appId);
-            
-            
-            let iconSrc;
-            const iconElement = document.querySelector(`.icon img[alt="${document.querySelector(`#${appId} .window-header span`).textContent.trim()}"]`);
-            if (iconElement) {
-                iconSrc = iconElement.src;
-            } else {
+                const windowHeader = document.querySelector(`#${appId} .window-header span:first-child`);
+                const altText = windowHeader ? windowHeader.textContent.trim() : appId;
+                const iconElement = document.querySelector(`.icon[onclick*="${appId}"] img`);
                 
-                iconSrc = "https://cdn-icons-png.flaticon.com/512/1077/1077114.png";
+                app.innerHTML = `<img src="${iconElement?.src || 'default-icon.png'}" alt="${altText}">`;
+                app.onclick = () => toggleWindow(appId);
+                openApps.appendChild(app);
             }
-            
-            app.innerHTML = `<img src="${iconSrc}" alt="${appId}">`;
-            app.onclick = () => toggleWindow(appId);
-            openApps.appendChild(app);
         }
 
         function removeFromTaskbar(appId) {
@@ -594,13 +580,11 @@
             }
         }
 
-        
         function toggleStartMenu() {
             const startMenu = document.getElementById('startMenu');
             startMenu.style.display = startMenu.style.display === 'none' ? 'flex' : 'none';
         }
 
-    
         function showShutdownMenu() {
             document.getElementById('shutdownModal').style.display = 'block';
             document.getElementById('startMenu').style.display = 'none';
@@ -617,16 +601,12 @@
 
         function turnOff() {
             alert('Shutting down...');
-            
             document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">System Powered Off</div>';
-            
-            
             setTimeout(function() {
                 window.location.href = 'index.html';
             }, 2000);
         }
 
-        
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').textContent = 
@@ -635,33 +615,20 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        
         function updateWindowStack(windowId) {
             const window = document.getElementById(windowId);
             highestZIndex += 1;
             window.style.zIndex = highestZIndex;
         }
 
-                function resetWindowStack() {
-            const windows = document.querySelectorAll('.window');
-            windows.forEach((window, index) => {
-                if (window.style.display !== 'none') {
-                    window.style.zIndex = 1000 + index;
-                }
-            });
-            highestZIndex = 1000 + windows.length;
-        }
-
-        
         document.addEventListener('mousedown', (e) => {
             if (e.target.closest('.window-header')) {
                 const window = e.target.closest('.window');
-                initialX = e.clientX - parseInt(window.style.left || 0);
-                initialY = e.clientY - parseInt(window.style.top || 0);
+                const rect = window.getBoundingClientRect();
+                initialX = e.pageX - rect.left;
+                initialY = e.pageY - rect.top;
                 activeWindow = window;
                 isDragging = true;
-                
-                
                 updateWindowStack(window.id);
             }
         });
@@ -669,13 +636,13 @@
         document.addEventListener('mousemove', (e) => {
             if (isDragging && activeWindow) {
                 e.preventDefault();
-                let newX = e.clientX - initialX;
-                let newY = e.clientY - initialY;
-                
-                
+                let newX = e.pageX - initialX;
+                let newY = e.pageY - initialY;
+
+                // Boundary checks
                 newX = Math.max(0, Math.min(newX, window.innerWidth - activeWindow.offsetWidth));
                 newY = Math.max(0, Math.min(newY, window.innerHeight - activeWindow.offsetHeight));
-                
+
                 activeWindow.style.left = `${newX}px`;
                 activeWindow.style.top = `${newY}px`;
             }
@@ -686,22 +653,18 @@
             activeWindow = null;
         });
 
-        
         function loadSettings() {
-            
             const bgColor = localStorage.getItem('bgColor');
             if (bgColor) {
                 document.getElementById('desktop').style.background = bgColor;
                 document.getElementById('bgColor').value = bgColor;
             }
-            
-            
+
             const bgImage = localStorage.getItem('bgImage');
             if (bgImage) {
                 document.getElementById('desktop').style.backgroundImage = `url(${bgImage})`;
             }
-            
-            
+
             const outlineColor = localStorage.getItem('outlineColor');
             if (outlineColor) {
                 document.querySelectorAll('.window').forEach(window => {
@@ -718,7 +681,7 @@
         function uploadBackground(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 const imageUrl = e.target.result;
@@ -735,7 +698,6 @@
         }
 
         function changeScreenResolution(resolution) {
-            
             const [width, height] = resolution.split('x');
             if (width && height) {
                 alert('Screen resolution changes will take effect after restart');
@@ -744,34 +706,27 @@
         }
 
         function saveSettings() {
-            
             const bgColor = document.getElementById('bgColor').value;
             localStorage.setItem('bgColor', bgColor);
-            
-            
-            const bgImage = document.getElementById('desktop').style.backgroundImage;
-            if (bgImage && bgImage !== 'none') {
-                const urlMatch = bgImage.match(/url\(["']?([^"']*)["']?\)/);
-                if (urlMatch && urlMatch[1]) {
-                    localStorage.setItem('bgImage', urlMatch[1]);
-                }
-            }
-            
-            
+
             const outlineColor = document.getElementById('outlineColor').value;
             localStorage.setItem('outlineColor', outlineColor);
-            
+
+            // Handle background image separately
+            const bgImage = document.getElementById('desktop').style.backgroundImage;
+            if (bgImage && bgImage !== 'none') {
+                localStorage.setItem('bgImage', bgImage);
+            }
+
             alert('Settings saved!');
         }
 
-        
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#startMenu') && !e.target.closest('.start-menu-icon')) {
                 document.getElementById('startMenu').style.display = 'none';
             }
         });
 
-        
         document.querySelectorAll('.window').forEach(window => {
             window.addEventListener('mousedown', () => {
                 updateWindowStack(window.id);
