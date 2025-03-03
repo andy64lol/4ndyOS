@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndyDraw</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #toolbar {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: #ddd;
+            border-radius: 8px;
+            margin: 10px;
+        }
+        button {
+            padding: 8px;
+            border: 2px solid #333;
+            border-radius: 4px;
+            cursor: pointer;
+            background: white;
+        }
+        button.active {
+            background: #666;
+            color: white;
+        }
+        canvas {
+            border: 2px solid #333;
+            background: white;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+    <h1>4ndyDraw 🎨</h1>
+    <div id="toolbar">
+        <button class="active" data-tool="brush">Brush</button>
+        <button data-tool="eraser">Eraser</button>
+        <input type="color" id="color" value="#000000">
+        <input type="range" id="size" min="1" max="100" value="5">
+        <span id="sizeValue">5px</span>
+        <button id="undo">Undo</button>
+        <button id="redo">Redo</button>
+        <button id="clear">Clear</button>
+        <button id="save">Save As</button>
+    </div>
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let currentTool = 'brush';
+        let undoStack = [];
+        let redoStack = [];
+
+        // Initialize canvas
+        resetCanvas();
+        
+        function resetCanvas() {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            saveState();
+        }
+
+        function saveState() {
+            undoStack.push(canvas.toDataURL());
+            redoStack = [];
+        }
+
+        function restoreState() {
+            if (undoStack.length > 1) {
+                redoStack.push(undoStack.pop());
+                redrawCanvas();
+            }
+        }
+
+        function redoState() {
+            if (redoStack.length > 0) {
+                undoStack.push(redoStack.pop());
+                redrawCanvas();
+            }
+        }
+
+        function redrawCanvas() {
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = undoStack[undoStack.length - 1];
+        }
+
+        // Drawing functions
+        function startDrawing(e) {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+            ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : document.getElementById('color').value;
+            ctx.lineWidth = document.getElementById('size').value;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+        }
+
+        function endDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                saveState();
+                ctx.closePath();
+            }
+        }
+
+        // Save As function
+        function saveAs() {
+            const link = document.createElement('a');
+            link.download = '4ndyPaint.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Event listeners
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', endDrawing);
+        canvas.addEventListener('mouseout', endDrawing);
+
+        document.querySelectorAll('#toolbar button[data-tool]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#toolbar button').forEach(b => 
+                    b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTool = btn.dataset.tool;
+            });
+        });
+
+        document.getElementById('size').addEventListener('input', (e) => {
+            document.getElementById('sizeValue').textContent = `${e.target.value}px`;
+        });
+
+        document.getElementById('undo').addEventListener('click', restoreState);
+        document.getElementById('redo').addEventListener('click', redoState);
+        document.getElementById('clear').addEventListener('click', resetCanvas);
+        document.getElementById('save').addEventListener('click', saveAs);
+    </script>
+</body>
+</html>
