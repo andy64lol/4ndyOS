@@ -639,7 +639,7 @@
                 let newX = e.pageX - initialX;
                 let newY = e.pageY - initialY;
 
-                // Boundary checks
+                
                 newX = Math.max(0, Math.min(newX, window.innerWidth - activeWindow.offsetWidth));
                 newY = Math.max(0, Math.min(newY, window.innerHeight - activeWindow.offsetHeight));
 
@@ -712,7 +712,7 @@
             const outlineColor = document.getElementById('outlineColor').value;
             localStorage.setItem('outlineColor', outlineColor);
 
-            // Handle background image separately
+            
             const bgImage = document.getElementById('desktop').style.backgroundImage;
             if (bgImage && bgImage !== 'none') {
                 localStorage.setItem('bgImage', bgImage);
