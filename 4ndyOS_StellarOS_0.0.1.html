@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarOS</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --text-color: #ecf0f1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--primary-color);
+            color: var(--text-color);
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: var(--secondary-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .power-button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Pages Container */
+        .pages-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            padding: 1rem;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            transition: transform 0.3s ease;
+            opacity: 0;
+            transform: translateX(100%);
+            padding: 1rem;
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Game Cards */
+        .game-card {
+            background: var(--secondary-color);
+            border-radius: 10px;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            transform: scale(1.05);
+        }
+
+        .game-icon {
+            width: 80%;
+            height: 80%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Navigation Controls */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--secondary-color);
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            background: var(--secondary-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .nav-icon:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Settings Page */
+        .settings-page {
+            display: grid;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .setting-item {
+            background: var(--secondary-color);
+            padding: 1rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .theme-preview.selected {
+            border-color: var(--accent-color);
+        }
+
+        .sound-toggle {
+            width: 50px;
+            height: 26px;
+            background: #666;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .sound-toggle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.2s;
+        }
+
+        .sound-toggle.active::after {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body>
+   
+    <div class="top-bar">
+        <h1>StellarOS</h1>
+        <div id="clock"></div>
+        <button class="power-button" onclick="window.location.href='index.html'">Power Off</button>
+    </div>
+
+   
+    <div class="pages-container">
+        
+        <div class="page active" id="page1">
+            <div class="game-card" onclick="window.open('games/thelast.war', '_blank')">
+                <img src="icons/gameicons/the last war" class="game-icon" alt="Snake">
+                <h3>The last war</h3>
+            </div>
+            
+        </div>
+
+       
+        <div class="page settings-page" id="settingsPage">
+            <div class="setting-item">
+                <h3>Themes</h3>
+                <div class="theme-preview default selected" onclick="selectTheme('default')"></div>
+                <div class="theme-preview dark" onclick="selectTheme('dark')"></div>
+                <div class="theme-preview retro" onclick="selectTheme('retro')"></div>
+            </div>
+            <div class="setting-item">
+                <h3>Sound</h3>
+                <div class="sound-toggle" onclick="toggleSound(this)"></div>
+            </div>
+        </div>
+    </div>
+
+   
+    <div class="bottom-bar">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmZmIj48cGF0aCBkPSJNMyAxOGgxOHYtMkgzdjJ6bTAtNWgxOHYtMkgzdjJ6bTAtNWgxOHYtMkgzdjJ6Ii8+PC9zdmc+" 
+             class="nav-icon" alt="Menu" onclick="showMainMenu()">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmZmIj48cGF0aCBkPSJNMTkuMTQgMTIuOTRjLjA0LS4zLjA2LS42MS4wNi0uOTRzLS4wMi0uNjQtLjA2LS45NGwxLjkzLTEuNWMuMTgtLjE0LjIzLS40MS4xMi0uNjJsLTEuODEtMy4xNmMtLjEyLS4yMi0uMzctLjMtLjU5LS4yMmwtMi4yMS44OGMtLjQyLS4zMi0uODgtLjU4LTEuMzgtLjc4TDE0IDIuMzRjLS4wNC0uMjQtLjI0LS40Mi0uNDktLjQySDkuOTljLS4yNSAwLS40NS4xOC0uNDkuNDJsLS4zNCAyLjExYy0uNDkuMi0uOTUuNDctMS4zNy43OWwtMi4yMS0uODhjLS4yMi0uMDgtLjQ3IDAtLjU5LjIyTDIuNzQgOC40M2MtLjEyLjIxLS4wOC40Ny4xMi42MmwxLjkzIDEuNTFjLS4wNC4zLS4wNi42MS0uMDYuOTRzLjAyLjY0LjA2Ljk0TDIuNzQgMTQuNWMtLjE4LjE0LS4yMy40MS0uMTIuNjJsMS44MSAzLjE2Yy4xMi4yMi4zNy4zLjU5LjIybDIuMjEtLjg4Yy40Mi4zMi44OC41OCAxLjM4Ljc4bC4zNCAyLjExYy4wNC4yNC4yNC40Mi40OS40Mmg0LjAyYy4yNSAwIC40NS0uMTguNDktLjQybC4zNC0yLjExYy40OS0uMi45NS0uNDcgMS4zNy0uNzlsMi4yMS44OGMuMjIuMDguNDcgMCAuNTktLjIybDEuODEtMy4xNmMuMTItLjIxLjA4LS40Ny0uMTItLjYybC0xLjkzLTEuNXptLTcuNDggMy42NmMtMS45MyAwLTMuNS0xLjU3LTMuNS0zLjVzMS41Ny0zLjUgMy41LTMuNSAzLjUgMS41NyAzLjUgMy41LTEuNTcgMy41LTMuNSAzLjV6Ii8+PC9zdmc+" 
+             class="nav-icon" alt="Settings" onclick="showSettings()">
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 1; 
+
+        
+        function updateTime() {
+            const clock = document.getElementById('clock');
+            const now = new Date();
+            clock.textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+       
+        function selectTheme(themeName) {
+            document.querySelectorAll('.theme-preview').forEach(theme => {
+                theme.classList.remove('selected');
+            });
+            document.querySelector(`.theme-preview.${themeName}`).classList.add('selected');
+            applyTheme(themeName);
+        }
+
+        function applyTheme(themeName) {
+            const root = document.documentElement;
+            
+            switch(themeName) {
+                case 'dark':
+                    root.style.setProperty('--primary-color', '#1a1a1a');
+                    root.style.setProperty('--secondary-color', '#2a2a2a');
+                    break;
+                case 'retro':
+                    root.style.setProperty('--primary-color', '#2d1b33');
+                    root.style.setProperty('--secondary-color', '#47354f');
+                    root.style.setProperty('--accent-color', '#ffd700');
+                    break;
+                default:
+                    root.style.setProperty('--primary-color', '#2c3e50');
+                    root.style.setProperty('--secondary-color', '#34495e');
+                    root.style.setProperty('--accent-color', '#e74c3c');
+            }
+            localStorage.setItem('stellaros-theme', themeName);
+        }
+
+        
+        function toggleSound(button) {
+            button.classList.toggle('active');
+            const soundEnabled = button.classList.contains('active');
+            localStorage.setItem('stellaros-sound', soundEnabled);
+        }
+
+        
+        function showSettings() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('settingsPage').classList.add('active');
+           
+            const savedTheme = localStorage.getItem('stellaros-theme') || 'default';
+            selectTheme(savedTheme);
+            const soundEnabled = localStorage.getItem('stellaros-sound') === 'true';
+            document.querySelector('.sound-toggle').classList.toggle('active', soundEnabled);
+        }
+
+        function showMainMenu() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page1').classList.add('active');
+        }
+
+       
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('stellaros-theme');
+            if (savedTheme) selectTheme(savedTheme);
+            
+            const soundEnabled = localStorage.getItem('stellaros-sound') === 'true';
+            document.querySelector('.sound-toggle').classList.toggle('active', soundEnabled);
+        }
+    </script>
+</body>
+</html>
