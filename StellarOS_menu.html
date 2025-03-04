@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarOS emulator menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --text-color: #ecf0f1;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            text-align: center;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            margin-top: 30px;
+        }
+
+        h1, h2, h3 {
+            color: var(--accent-color);
+            text-shadow: 0px 0px 10px var(--accent-color);
+        }
+
+        p {
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        .menu-button {
+            display: block;
+            width: 320px;
+            margin: 10px auto;
+            padding: 12px;
+            font-size: 14px;
+            text-align: center;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            border: 3px solid var(--accent-color);
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s ease-in-out;
+            box-shadow: 0px 0px 10px var(--accent-color);
+        }
+
+        .menu-button:hover {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            border-color: var(--secondary-color);
+            box-shadow: 0px 0px 20px var(--accent-color);
+        }
+
+        .hidden {
+            visibility: hidden;
+        }
+
+        .blinking {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            border: 3px solid var(--accent-color);
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s ease-in-out;
+            box-shadow: 0px 0px 10px var(--accent-color);
+        }
+
+        .back-button:hover {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            border-color: var(--secondary-color);
+            box-shadow: 0px 0px 20px var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>StellarOS</h1>
+        <p>Latest Version: 0.0.1</p>
+        <a href="4ndyOS_StellarOS_0.0.1.html" class="back-button">Launch StellarOS 0.0.1</a>
+        <a href="index.html" class="back-button">Back to Home</a>
+        <p class="blinking">█</p>
+
+        
+        <a href="index.html" class="back-button">Back to Home</a>
+    </div>
+</body>
+</html>
