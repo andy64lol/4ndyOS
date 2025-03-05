@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StellarOS</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --text-color: #ecf0f1;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--primary-color);
+            color: var(--text-color);
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* Top Bar Styles */
+        .top-bar {
+            background: var(--secondary-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 100;
+        }
+
+        #clock {
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .power-button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .power-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Main Content Area */
+        .pages-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            padding: 1rem;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.5rem;
+            transition: transform var(--transition-speed) ease, opacity var(--transition-speed) ease;
+            opacity: 0;
+            transform: translateX(100%);
+            padding: 1rem;
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Game Cards */
+        .game-card {
+            background: var(--secondary-color);
+            border-radius: 15px;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .game-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            border: 2px solid transparent;
+            transition: border-color var(--transition-speed) ease;
+        }
+
+        .game-card:hover::after {
+            border-color: var(--accent-color);
+        }
+
+        .game-icon {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-card h3 {
+            margin: 0.5rem;
+            font-size: 0.95rem;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 90%;
+            font-weight: 500;
+        }
+
+        /* Bottom Navigation */
+        .bottom-bar {
+            background: var(--secondary-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-icon {
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all var(--transition-speed) ease;
+            background: transparent;
+        }
+
+        .nav-icon:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.1);
+        }
+
+        
+        .settings-page {
+            display: grid;
+            gap: 2rem;
+            padding: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .setting-item {
+            background: var(--secondary-color);
+            padding: 1.5rem;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .theme-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .theme-preview.selected {
+            border-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        /* Sound Toggle */
+        .sound-toggle {
+            width: 60px;
+            height: 34px;
+            background: #666;
+            border-radius: 17px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+        }
+
+        .sound-toggle.active {
+            background-color: var(--accent-color);
+        }
+
+        .sound-toggle::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: #fff;
+            border-radius: 50%;
+            top: 4px;
+            left: 4px;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .sound-toggle.active::after {
+            transform: translateX(26px);
+        }
+
+        /* Confirmation Dialog */
+        .dialog-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .confirmation-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--secondary-color);
+            padding: 2.5rem;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 0 25px rgba(0,0,0,0.4);
+            min-width: 350px;
+        }
+
+        .confirmation-dialog h3 {
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-card h3 {
+                font-size: 0.85rem;
+            }
+
+            .settings-page {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .nav-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .theme-preview {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 1rem;
+            }
+
+            .game-icon {
+                width: 65%;
+                height: 65%;
+            }
+
+            .bottom-bar {
+                gap: 1.5rem;
+                padding: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dialog-overlay" id="dialogOverlay"></div>
+    
+    <div class="confirmation-dialog" id="confirmationDialog">
+        <h3>Are you sure you want to power off?</h3>
+        <div style="display: flex; gap: 1.5rem; justify-content: center;">
+            <button class="power-button" onclick="confirmPowerOff()">Yes</button>
+            <button class="power-button" onclick="cancelPowerOff()" style="background: var(--secondary-color); border: 2px solid var(--accent-color);">No</button>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <h1>StellarOS</h1>
+        <div id="clock"></div>
+        <button class="power-button" onclick="showPowerConfirmation()" aria-label="Power Off">Power Off</button>
+    </div>
+
+    <div class="pages-container">
+        <div class="page active" id="page1">
+            <div class="game-card" onclick="window.location.href='games/thelastwar.html'" role=" button" aria-label="Play The Last War">
+                <img src="icons/gameicons/thelastwar.svg" class="game-icon" alt="The Last War">
+                <h3>The Last War</h3>
+            </div>
+        </div>
+
+        <div class="page settings-page" id="settingsPage">
+            <div class="setting-item">
+                <h3>Themes</h3>
+                <div class="theme-selector">
+                    <div class="theme-preview default selected" data-theme="default" onclick="selectTheme('default')" style="background: #2c3e50;"></div>
+                    <div class="theme-preview dark" data-theme="dark" onclick="selectTheme('dark')" style="background: #1a1a1a;"></div>
+                    <div class="theme-preview retro" data-theme="retro" onclick="selectTheme('retro')" style="background: #2d1b33;"></div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <h3>Sound</h3>
+                <div class="sound-toggle" onclick="toggleSound()"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmZmIj48cGF0aCBkPSJNMyAxOGgxOHYtMkgzdjJ6bTAtNWgxOHYtMkgzdjJ6bTAtNWgxOHYtMkgzdjJ6Ii8+PC9zdmc+" 
+             class="nav-icon" alt="Menu" onclick="showMainMenu()" aria-label="Menu">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmZmIj48cGF0aCBkPSJNMTkuMTQgMTIuOTRjLjA0LS4zLjA2LS42MS4wNi0uOTRzLS4wMi0uNjQtLjA2LS45NGwxLjkzLTEuNWMuMTgtLjE0LjIzLS40MS4xMi0uNjJsLTEuODEtMy4xNmMtLjEyLS4yMi0uMzctLjMtLjU5LS4yMmwtMi4yMS44OGMtLjQyLS4zMi0uODgtLjU4LTEuMzgtLjc4TDE0IDIuMzRjLS4wNC0uMjQtLjI0LS40Mi0uNDktLjQySDkuOTljLS4yNSAwLS40NS4xOC0uNDkuNDJsLS4zNCAyLjExYy0uNDkuMi0uOTUuNDctMS4zNy43OWwtMi4yMS0uODhjLS4yMi0uMDgtLjQ3IDAtLjU5LjIyTDIuNzQgOC40M2MtLjEyLjIxLS4wOC40Ny4xMi42MmwxLjkzIDEuNTFjLS4wNC4zLS4wNi42MS0uMDYuOTRzLjAyLjY0LjA2Ljk0TDIuNzQgMTQuNWMtLjE4LjE0LS4yMy40MS0uMTIuNjJsMS44MSAzLjE2Yy4xMi4yMi4zNy4zLjU5LjIybDIuMjEtLjg4Yy40Mi4zMi44OC41OCAxLjM4Ljc4bC4zNCAyLjExYy4wNC4yNC4yNC40Mi40OS40Mmg0LjAyYy4yNSAwIC40NS0uMTguNDktLjQybC4zNC0yLjExYy40OS0uMi45NS0uNDcgMS4zNy0uNzlsMi4yMS44OGMuMjIuMDguNDcgMCAuNTktLjIybDEuODEtMy4xNmMuMTItLjIxLj ```html
+            .08LS40Ny0uMTItLjYybC0xLjkzLTEuNXptLTcuNDggMy42NmMtMS45MyAwLTMuNS0xLjU3LTMuNS0zLjVzMS41Ny0zLjUgMy41LTMuNSAzLjUgMS41NyAzLjUgMy41LTEuNTcgMy41LTMuNSAzLjV6Ii8+PC9zdmc+" 
+             class="nav-icon" alt="Settings" onclick="showSettings()" aria-label="Settings">
+    </div>
+
+    <script>
+        const themes = {
+            default: {
+                primary: '#2c3e50',
+                secondary: '#34495e',
+                accent: '#e74c3e'
+            },
+            dark: {
+                primary: '#1a1a1a',
+                secondary: '#2a2a2a',
+                accent: '#e74c3e'
+            },
+            retro: {
+                primary: '#2d1b33',
+                secondary: '#47354f',
+                accent: '#ffd700'
+            }
+        };
+
+        let systemState = {
+            soundEnabled: true,
+            currentTheme: 'default'
+        };
+
+        function loadSettings() {
+            const savedState = localStorage.getItem('stellaros-settings');
+            if (savedState) {
+                systemState = JSON.parse(savedState);
+                applyTheme(systemState.currentTheme);
+                document.querySelector('.sound-toggle').classList.toggle('active', systemState.soundEnabled);
+            }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('stellaros-settings', JSON.stringify(systemState));
+        }
+
+        function selectTheme(themeName) {
+            systemState.currentTheme = themeName;
+            applyTheme(themeName);
+            updateThemePreviews(themeName);
+            saveSettings();
+        }
+
+        function applyTheme(themeName) {
+            const root = document.documentElement;
+            const theme = themes[themeName];
+            
+            root.style.setProperty('--primary-color', theme.primary);
+            root.style.setProperty('--secondary-color', theme.secondary);
+            root.style.setProperty('--accent-color', theme.accent);
+        }
+
+        function updateThemePreviews(selectedTheme) {
+            document.querySelectorAll('.theme-preview').forEach(theme => {
+                theme.classList.toggle('selected', theme.dataset.theme === selectedTheme);
+            });
+        }
+
+        function toggleSound() {
+            systemState.soundEnabled = !systemState.soundEnabled;
+            document.querySelector('.sound-toggle').classList.toggle('active', systemState.soundEnabled);
+            saveSettings();
+        }
+
+        function showPowerConfirmation() {
+            document.getElementById('dialogOverlay').style.display = 'block';
+            document.getElementById('confirmationDialog').style.display = 'block';
+        }
+
+        function confirmPowerOff() {
+            window.location.href = 'StellarOS_menu.html';
+        }
+
+        function cancelPowerOff() {
+            document.getElementById('dialogOverlay').style.display = 'none';
+            document.getElementById('confirmationDialog').style.display = 'none';
+        }
+
+        function updateTime() {
+            const clock = document.getElementById('clock');
+            const now = new Date();
+            clock.textContent = now.toLocaleTimeString();
+        }
+
+        function showSettings() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('settingsPage').classList.add('active');
+            const savedTheme = localStorage.getItem('stellaros-theme') || 'default';
+            selectTheme(savedTheme);
+            const soundEnabled = localStorage.getItem('stellaros-sound') === 'true';
+            document.querySelector('.sound-toggle').classList.toggle('active', soundEnabled);
+        }
+
+        function showMainMenu() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page1').classList.add('active');
+        }
+
+        window.addEventListener('load', () => {
+            loadSettings();
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            document.querySelectorAll('.game-icon').forEach(img => {
+                img.onerror = () => {
+                    img.src = 'assets/fallback.png';
+                };
+            });
+        });
+    </script>
+</body>
+</html>
