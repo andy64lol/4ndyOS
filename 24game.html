@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24 Card Game</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: green; color: white; }
+        .card { display: inline-block; width: 80px; height: 120px; 
+                line-height: 120px; font-size: 24px; background: #d4af37; 
+                margin: 10px; border-radius: 10px; cursor: pointer; 
+                border: 3px solid white; font-weight: bold; box-shadow: 3px 3px 5px black; }
+        .card.selected { border: 3px solid red; }
+        #result { margin-top: 20px; font-size: 20px; font-weight: bold; }
+        #start-screen { display: block; }
+        #game-screen { display: none; }
+        .fade-in { animation: fadeIn 1s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .button { background: #ffcc00; border: none; padding: 10px 20px; 
+                  font-size: 18px; font-weight: bold; cursor: pointer; 
+                  border-radius: 5px; margin: 5px; box-shadow: 2px 2px 5px black; }
+        .button:hover { background: #ffaa00; }
+        #operator-buttons { display: none; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="start-screen">
+        <h1>Welcome to Make 24</h1>
+        <button class="button" onclick="startGame()">Start Game</button>
+        <button class="button" onclick="quitGame()">Quit Game</button>
+        <p>High Score: <span id="high-score">0</span></p>
+    </div>
+    
+    <div id="game-screen">
+        <h1>Make 24</h1>
+        <div id="cards"></div>
+        <br>
+        <div id="operator-buttons">
+            <button class="button" onclick="performOperation('+')">+</button>
+            <button class="button" onclick="performOperation('-')">-</button>
+            <button class="button" onclick="performOperation('*')">*</button>
+            <button class="button" onclick="performOperation('/')">/</button>
+            <button class="button" onclick="performOperation('ʌ')">ʌ</button> <!-- Exponentiation button -->
+            <button class="button" onclick="performOperation('√')">√</button> <!-- Square root button -->
+        </div>
+        <br>
+        <button class="button" onclick="resetSelection()">Unselect Cards</button>
+        <button class="button" onclick="changeCards()">Change Cards (-5 Points)</button>
+        <button class="button" onclick="goBackToMenu()">Go Back to Menu</button>
+        <div id="result"></div>
+        <p>Points: <span id="points">0</span></p>
+    </div>
+
+    <script>
+        let numbers = [];
+        let points = 0;
+        let highScore = localStorage.getItem("highScore") || 0;
+        document.getElementById("high-score").innerText = highScore;
+        
+        function startGame() {
+            document.getElementById("start-screen").style.display = "none";
+            document.getElementById("game-screen").style.display = "block";
+            points = 0; // Reset points when starting a new game
+            document.getElementById("points").innerText = points;
+            generateCards();
+        }
+
+        function generateCards() {
+            let numSet = new Set();
+            while (numSet.size < 4) {
+                numSet.add(Math.floor(Math.random() * 12) + 1);
+            }
+            numbers = Array.from(numSet);
+            renderCards();
+        }
+
+        function renderCards() {
+            document.getElementById("cards").innerHTML = numbers.map((n, i) => 
+                `<div class='card fade-in' onclick='selectCard(${i})' id='card${i}'>${n}</div>`
+            ).join('');
+            document.getElementById("operator-buttons").style.display = "none";
+        }
+
+        let selectedCards = [];
+        function selectCard(index) {
+            let cardElement = document.getElementById(`card${index}`);
+            if (selectedCards.includes(index)) {
+                selectedCards = selectedCards.filter(i => i !== index);
+                cardElement.classList.remove("selected");
+            } else if (selectedCards.length < 2) {
+                selectedCards.push(index);
+                cardElement.classList.add("selected");
+            }
+            
+            document.getElementById("operator-buttons").style.display = selectedCards.length === 2 ? "block" : "none";
+        }
+
+        function resetSelection() {
+            selectedCards.forEach(index => document.getElementById(`card${index}`).classList.remove("selected"));
+            selectedCards = [];
+            document.getElementById("operator-buttons").style.display = "none";
+        }
+
+        function performOperation(operator) {
+            if (selectedCards.length !== 2) return;
+            
+            let num1 = numbers[selectedCards[0]];
+            let num2 = numbers[selectedCards[1]];
+            let result;
+            
+            switch (operator) {
+                case "+": result = num1 + num2; break;
+                case "-":
+                    let x = Math.max(num1, num2);
+                    let y = Math.min(num1, num2);
+                    result = x - y;
+                    break;
+                case "*": result = num1 * num2; break;
+                case "/": 
+                    if (num2 === 0) {
+                        document.getElementById("result").innerText = "Invalid division!";
+                        return;
+                    }
+                    result = num1 / num2;
+                    if (!Number.isInteger(result)) {
+                        // Only allow rounding if the result has decimals
+                        let roundedResult = Math.round(result);
+                        if (roundedResult === 0) {
+                            document.getElementById("result").innerText = "Invalid division! Rounded result is 0.";
+                            return;
+                        }
+                        result = roundedResult;
+                    }
+                    break;
+                case "ʌ": // Exponentiation operation
+                    result = Math.pow(num1, num2);
+                    if (!Number.isInteger(result)) {
+                        result = Math.round(result);
+                    }
+                    break;
+                case "√": // Square root operation
+                    if (num2 < 0) {
+                        document.getElementById("result").innerText = "Invalid square root! Cannot take square root of a negative number.";
+                        return;
+                    }
+                    result = Math.pow(num2, 1 / num1); // x√y = y^(1/x)
+                    if (!Number.isInteger(result)) {
+                        result = Math.round(result);
+                    }
+                    break;
+            }
+            
+            numbers.splice(Math.max(...selectedCards), 1);
+            numbers.splice(Math.min(...selectedCards), 1, result);
+            resetSelection();
+            
+            if (numbers.length === 1) {
+                if (numbers[0] === 24) {
+                    points += 10;
+                    document.getElementById("result").innerText = "Correct! You made 24!";
+                    document.getElementById("points").innerText = points;
+                    if (points > highScore) {
+                        highScore = points;
+                        localStorage.setItem("highScore", highScore);
+                        document.getElementById("high-score").innerText = highScore;
+                    }
+                    setTimeout(generateCards, 2000);
+                } else {
+                    document.getElementById("result").innerText = "You lost! The last card is not 24.";
+                    setTimeout(goBackToMenu, 2000);
+                }
+            } else {
+                renderCards();
+            }
+        }
+
+        function changeCards() {
+            if (points >= 5) {
+                points -= 5;
+                document.getElementById("points").innerText = points;
+                generateCards();
+            } else {
+                document.getElementById("result").innerText = "Not enough points to change cards!";
+            }
+        }
+
+        function goBackToMenu() {
+            document.getElementById("game-screen").style.display = "none";
+            document.getElementById("start-screen").style.display = "block";
+            document.getElementById("result").innerText = "";
+        }
+
+        function quitGame() {
+            window.location.href = "4ndyOS_StellarOS_0.0.3.html";
+        }
+    </script>
+</body>
+</html>
