@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndyPython Editor</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #4caf50;
+        }
+        textarea {
+            width: 90%;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            border: 1px solid #4caf50;
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>4ndyPython Editor</h1>
+        <label for="pythonCode">Python Code:</label>
+        <textarea id="pythonCode" rows="10" placeholder="Write your Python code here...">print("Hello from Python!")</textarea>
+        <br>
+        <button onclick="runPython()">Run Python</button>
+        
+        <h2>Output:</h2>
+        <textarea id="output" rows="10" readonly placeholder="Output will be displayed here..."></textarea>
+    </div>
+
+    <script>
+        let pyodide;
+
+        async function loadPyodideAndRun() {
+            pyodide = await loadPyodide();
+            console.log("Pyodide is ready");
+        }
+        loadPyodideAndRun();
+
+        async function runPython() {
+            let code = document.getElementById("pythonCode").value;
+            let outputElement = document.getElementById("output");
+            
+            if (!pyodide) {
+                outputElement.value = "Pyodide is still loading. Please wait...";
+                return;
+            }
+            
+            try {
+                pyodide.runPython(`import sys\nfrom io import StringIO\nsys.stdout = StringIO()`);
+                await pyodide.runPythonAsync(code);
+                let output = await pyodide.runPython("sys.stdout.getvalue()");
+                outputElement.value = output || "(No output)";
+            } catch (error) {
+                outputElement.value = "Error: " + error;
+            }
+        }
+    </script>
+</body>
+</html>
