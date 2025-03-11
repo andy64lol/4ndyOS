@@ -1,8 +1,8 @@
 [
     {
-        "command": "Calculator",
+        "command": "calc",
         "name": "Calculator",
         "path": "NeoM4trixApps/calculator.html",
-        "description": "calculator"
+        "description": "calculator application"
     }
 ]
