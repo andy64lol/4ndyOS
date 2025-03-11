@@ -197,38 +197,49 @@
             font-size: 16px;
         }
 
+        .app-frame {
+            flex: 1;
+            border: none;
+            background: var(--terminal-bg);
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
         @keyframes crtEffect {
             0% { opacity: 0.9; }
             50% { opacity: 0.7; }
             100% { opacity: 0.9; }
         }
 
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
         .typewriter {
             border-right: 2px solid var(--accent);
             animation: blink 1s step-end infinite;
         }
-
-        @keyframes blink {
-            50% { border-color: transparent; }
-        }
-.app-frame {
-    flex: 1;
-    border: none;
-    background: var(--terminal-bg);
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: calc(100% - 40px);
-    transition: opacity 0.2s;
-  }
-
-  .app-frame.loading {
-    opacity: 0;
-  }
-
-  .app-frame.loaded {
-    opacity: 1;
-  }
     </style>
 </head>
 <body>
@@ -239,7 +250,7 @@
             <p>> PRESS ANY KEY TO REBOOT</p>
         </div>
     </div>
-    
+
     <div class="terminal">
         <div class="title-bar">
             <div class="buttons">
@@ -268,35 +279,37 @@
             let zIndex = 1000;
 
             class WindowManager {
-    static createWindow(app) {
-      const windowId = `window-${Date.now()}`;
-      const windowHTML = `
-        <div class="app-window" id="${windowId}" style="z-index:${zIndex++}">
-          <div class="window-header">
-            <div class="window-title">${app.name}</div>
-            <div class="window-controls">
-              <div class="window-button window-minimize" 
-                   onclick="WindowManager.minimizeWindow('${windowId}')"></div>
-              <div class="window-button window-maximize" 
-                   onclick="WindowManager.maximizeWindow('${windowId}')"></div>
-              <div class="window-button window-close" 
-                   onclick="WindowManager.closeWindow('${windowId}')"></div>
-            </div>
-          </div>
-          <iframe class="app-frame loading" 
-                  src="${app.path}" 
-                  sandbox="allow-forms allow-scripts allow-same-origin allow-modals"
-                  referrerpolicy="strict-origin-when-cross-origin"
-                  loading="eager"
-                  onload="this.classList.replace('loading', 'loaded')"></iframe>
-        </div>`;
-      
-      document.body.insertAdjacentHTML('beforeend', windowHTML);
-      this.makeDraggable(windowId);
-      this.centerWindow(windowId);
-      return windowId;
-    }
-  }
+                static createWindow(app) {
+                    const windowId = `window-${Date.now()}`;
+                    const windowHTML = `
+                        <div class="app-window" id="${windowId}" style="z-index:${zIndex++}">
+                            <div class="window-header">
+                                <div class="window-title">${app.name}</div>
+                                <div class="window-controls">
+                                    <div class="window-button window-minimize" 
+                                         onclick="WindowManager.minimizeWindow('${windowId}')"></div>
+                                    <div class="window-button window-maximize" 
+                                         onclick="WindowManager.maximizeWindow('${windowId}')"></div>
+                                    <div class="window-button window-close" 
+                                         onclick="WindowManager.closeWindow('${windowId}')"></div>
+                                </div>
+                            </div>
+                            <div class="loading">Loading ${app.name}</div>
+                            <iframe class="app-frame" 
+                                    src="${app.path}" 
+                                    name="${app.command}-frame"
+                                    sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
+                                    allow="fullscreen"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    onload="this.previousElementSibling.style.display='none'"
+                                    onerror="this.previousElementSibling.textContent = 'Failed to load ${app.name}'"></iframe>
+                        </div>`;
+                    
+                    document.body.insertAdjacentHTML('beforeend', windowHTML);
+                    this.makeDraggable(windowId);
+                    this.centerWindow(windowId);
+                    return windowId;
+                }
 
                 static makeDraggable(windowId) {
                     const windowEl = document.getElementById(windowId);
@@ -343,7 +356,7 @@
                 }
 
                 static maximizeWindow(windowId) {
-                    const windowEl = document.getElementById(windowId);
+ const windowEl = document.getElementById(windowId);
                     if (windowEl.classList.contains('maximized')) {
                         windowEl.classList.remove('maximized');
                         windowEl.style.width = '800px';
@@ -367,17 +380,21 @@
 
             function getHelpText(apps) {
                 const appList = apps.map(a => `- ${a.command.padEnd(8)} ${a.description}`).join('\n');
-                return `
-Available apps:
-${appList}
+                return `Available apps: ${appList}
 
 System commands:
-- help      Show available commands
-- clear     Clear terminal screen
-- reboot    Restart the system
-- echo      Repeat input text
-- date      Show current date/time
-- about     Display system information`;
+
+help Show available commands
+
+clear Clear terminal screen
+
+reboot Restart the system
+
+echo Repeat input text
+
+date Show current date/time
+
+about Display system information`;
             }
 
             function shutdownSystem() {
@@ -403,7 +420,7 @@ System commands:
                     .then(r => r.json())
                     .then(d => {
                         apps = d;
-                        addOutput('System apps loaded: ' + d.map(a => a.name). join(', '));
+                        addOutput('System apps loaded: ' + d.map(a => a.name).join(', '));
                     })
                     .catch(e => addOutput('Failed to load apps: ' + e.message));
             }
@@ -487,7 +504,8 @@ System commands:
 
             loadApps();
             addOutput('4ndyOS NeoM4trix v2.1 - Type \'help\' for commands');
-            input.addEventListener('keydown', handleKeyDown);
+            input.addEventListener 
+            ('keydown', handleKeyDown);
         })();
     </script>
 </body>
