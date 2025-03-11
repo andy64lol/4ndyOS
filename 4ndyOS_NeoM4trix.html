@@ -90,9 +90,9 @@
         
         function executeCommand(c){
             const[cmd,...args]=c.trim().split(' '),app=apps.find(a=>a.command===cmd.toLowerCase());
-            if(app){createAppWindow(app);return `Launching ${app.name}...`;}
+            if(app){createAppWindow(app);return `${app.name} initialized...`;}
             switch(cmd.toLowerCase()){
-                case'help':return `Available commands:${apps.map(a=>`\n- ${a.command}: ${a.description}`).join('')}\n- help\n- clear\n- shutdown/poweroff/turnoff\n- reboot\n- echo\n- date\n- about`;
+                case'help':return `Available apps:\n${apps.map(a=>`- ${a.command}: ${a.description}`).join('\n')}\n\nSystem commands:\n- help\n- clear\n- shutdown\n- reboot\n- echo\n- date\n- about`;
                 case'clear':output.innerHTML='';return'';
                 case'date':return new Date().toString();
                 case'about':return '4ndyOS NeoM4trix v2.0\nNeoKernel 5.1\nQuantum Matrix 2.0';
@@ -123,13 +123,50 @@
         
         function closeWindow(w){document.getElementById(w)?.remove();}
         function toggleWindow(w){const e=document.getElementById(w);e.style.display=e.style.display==='none'?'flex':'none';}
-        function maximizeWindow(w){const e=document.getElementById(w);e.style.width=e.style.width==='100vw'?'600px':'100vw';e.style.height=e.style.height==='100vh'?'400px':'100vh';e.style.left='0';e.style.top='0';}
-        function centerWindow(w){const e=document.getElementById(w);e.style.left='calc(50% - 300px)';e.style.top='calc(50% - 200px)';}
+        function maximizeWindow(w){
+            const e=document.getElementById(w);
+            if(e.classList.contains('maximized')){
+                e.classList.remove('maximized');
+                e.style.width='600px';
+                e.style.height='400px';
+            }else{
+                e.classList.add('maximized');
+                e.style.width='96vw';
+                e.style.height='90vh';
+            }
+            centerWindow(w);
+        }
+        function centerWindow(w){
+            const e=document.getElementById(w);
+            if(!e.classList.contains('maximized')){
+                e.style.left='calc(50% - 300px)';
+                e.style.top='calc(50% - 200px)';
+            }
+        }
         
         function makeDraggable(w){
-            const e=document.getElementById(w),h=e?.querySelector('.window-header');
-            let p1=0,p2=0,p3=0,p4=0;
-            h.onmousedown=e=>{e.preventDefault();p3=e.clientX;p4=e.clientY;document.onmouseup=()=>{document.onmouseup=document.onmousemove=null;};document.onmousemove=e=>{e.preventDefault();p1=p3-e.clientX;p2=p4-e.clientY;p3=e.clientX;p4=e.clientY;const t=e.offsetTop-p2,l=e.offsetLeft-p1;if(t>0&&t<window.innerHeight-50)e.style.top=t+'px';if(l>0&&l<window.innerWidth-50)e.style.left=l+'px';};};}
+            const windowEl=document.getElementById(w);
+            const header=windowEl.querySelector('.window-header');
+            let isDragging=false,offset=[0,0];
+            
+            header.addEventListener('mousedown',e=>{
+                isDragging=true;
+                offset=[
+                    windowEl.offsetLeft - e.clientX,
+                    windowEl.offsetTop - e.clientY
+                ];
+            });
+            
+            document.addEventListener('mousemove',e=>{
+                e.preventDefault();
+                if(isDragging){
+                    windowEl.style.left=(e.clientX + offset[0])+'px';
+                    windowEl.style.top=(e.clientY + offset[1])+'px';
+                }
+            });
+            
+            document.addEventListener('mouseup',()=>isDragging=false);
+        }
         
         function addCommand(c){const d=document.createElement('div');d.className='command';d.innerHTML=`<span class="prompt">$</span> ${c}`;output.appendChild(d);}
         function addOutput(t){if(!t)return;const d=document.createElement('div');d.className='output-text';d.textContent=t;output.appendChild(d);}
