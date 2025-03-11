@@ -18,9 +18,6 @@
             background: var(--bg-color);
             margin: 0;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             font-family: 'Fira Code', 'Courier New', monospace;
             overflow: hidden;
         }
@@ -32,13 +29,9 @@
             height: 600px;
             border-radius: 8px;
             box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-            position: relative;
+            position: fixed;
             z-index: 1000;
-            transition: transform 0.2s;
-        }
-
-        .terminal:hover {
-            transform: translateY(-2px);
+            transition: all 0.3s ease;
         }
 
         .title-bar {
@@ -48,6 +41,7 @@
             display: flex;
             align-items: center;
             cursor: move;
+            user-select: none;
         }
 
         .buttons {
@@ -76,10 +70,9 @@
         .content {
             padding: 25px;
             color: var(--text);
-            height: 500px;
+            height: calc(100% - 60px);
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
         #output {
@@ -103,7 +96,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            position: relative;
         }
 
         .prompt {
@@ -138,7 +130,7 @@
             overflow: hidden;
             min-width: 300px;
             min-height: 200px;
-            transition: box-shadow 0.2s, transform 0.2s;
+            transition: all 0.3s ease;
         }
 
         .window-header {
@@ -203,7 +195,6 @@
             background: var(--terminal-bg);
             width: 100%;
             height: 100%;
-            transition: opacity 0.3s;
         }
 
         .loading {
@@ -215,30 +206,19 @@
             font-size: 14px;
         }
 
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s infinite;
-        }
-
         @keyframes crtEffect {
             0% { opacity: 0.9; }
             50% { opacity: 0.7; }
             100% { opacity: 0.9; }
         }
 
-        @keyframes blink {
-            50% { border-color: transparent; }
-        }
-
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-
         .typewriter {
             border-right: 2px solid var(--accent);
             animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
         }
     </style>
 </head>
@@ -286,10 +266,6 @@
                             <div class="window-header">
                                 <div class="window-title">${app.name}</div>
                                 <div class="window-controls">
-                                    <div class="window-button window-minimize" 
-                                         onclick="WindowManager.minimizeWindow('${windowId}')"></div>
-                                    <div class="window-button window-maximize" 
-                                         onclick="WindowManager.maximizeWindow('${windowId}')"></div>
                                     <div class="window-button window-close" 
                                          onclick="WindowManager.closeWindow('${windowId}')"></div>
                                 </div>
@@ -297,10 +273,7 @@
                             <div class="loading">Loading ${app.name}</div>
                             <iframe class="app-frame" 
                                     src="${app.path}" 
-                                    name="${app.command}-frame"
-                                    sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
-                                    allow="fullscreen"
-                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    sandbox="allow-scripts allow-same-origin"
                                     onload="this.previousElementSibling.style.display='none'"
                                     onerror="this.previousElementSibling.textContent = 'Failed to load ${app.name}'"></iframe>
                         </div>`;
@@ -346,55 +319,77 @@
                 }
 
                 static closeWindow(windowId) {
-                    document.getElementById(windowId)?.remove();
-                }
-
-                static minimizeWindow(windowId) {
                     const windowEl = document.getElementById(windowId);
-                    windowEl.style.transform = 'translateY(100vh)';
-                    setTimeout(() => windowEl.style.display = 'none', 300);
-                }
-
-                static maximizeWindow(windowId) {
- const windowEl = document.getElementById(windowId);
-                    if (windowEl.classList.contains('maximized')) {
-                        windowEl.classList.remove('maximized');
-                        windowEl.style.width = '800px';
-                        windowEl.style.height = '600px';
-                    } else {
-                        windowEl.classList.add('maximized');
-                        windowEl.style.width = '96vw';
-                        windowEl.style.height = '90vh';
+                    if (windowEl && !windowEl.classList.contains('terminal')) {
+                        windowEl.remove();
                     }
-                    this.centerWindow(windowId);
                 }
 
                 static centerWindow(windowId) {
                     const windowEl = document.getElementById(windowId);
-                    if (!windowEl.classList.contains('maximized')) {
-                        windowEl.style.left = 'calc(50% - ' + (windowEl.offsetWidth / 2) + 'px)';
-                        windowEl.style.top = 'calc(50% - ' + (windowEl.offsetHeight / 2) + 'px)';
-                    }
+                    windowEl.style.left = `${(window.innerWidth - windowEl.offsetWidth) / 2}px`;
+                    windowEl.style.top = `${(window.innerHeight - windowEl.offsetHeight) / 2}px`;
                 }
             }
 
-            function getHelpText(apps) {
-                const appList = apps.map(a => `- ${a.command.padEnd(8)} ${a.description}`).join('\n');
-                return `Available apps: ${appList}
+            // Terminal Dragging
+            function initializeTerminalDrag() {
+                const terminal = document.querySelector('.terminal');
+                const titleBar = terminal.querySelector('.title-bar');
+                let isDragging = false;
+                let offset = [0, 0];
 
-System commands:
+                // Initial position
+                terminal.style.left = `${(window.innerWidth - terminal.offsetWidth) / 2}px`;
+                terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
 
-help Show available commands
+                const startDrag = (e) => {
+                    isDragging = true;
+                    offset = [
+                        terminal.offsetLeft - e.clientX,
+                        terminal.offsetTop - e.clientY
+                    ];
+                    terminal.style.zIndex = zIndex++;
+                };
 
-clear Clear terminal screen
+                const drag = (e) => {
+                    if (isDragging) {
+                        const x = e.clientX + offset[0];
+                        const y = e.clientY + offset[1];
+                        const maxX = window.innerWidth - terminal.offsetWidth;
+                        const maxY = window.innerHeight - terminal.offsetHeight;
 
-reboot Restart the system
+                        terminal.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
+                        terminal.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
+                    }
+                };
 
-echo Repeat input text
+                const stopDrag = () => isDragging = false;
 
-date Show current date/time
+                titleBar.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', stopDrag);
+            }
 
-about Display system information`;
+            function minimizeTerminal() {
+                const terminal = document.querySelector('.terminal');
+                terminal.style.transform = 'translateY(calc(100vh - 100px))';
+                setTimeout(() => terminal.style.opacity = '0.5', 300);
+            }
+
+            function maximizeTerminal() {
+                const terminal = document.querySelector('.terminal');
+                if (terminal.classList.contains('maximized')) {
+                    terminal.classList.remove('maximized');
+                    terminal.style.width = '90%';
+                    terminal.style.height = '600px';
+                } else {
+                    terminal.classList.add('maximized');
+                    terminal.style.width = '96vw';
+                    terminal.style.height = '90vh';
+                }
+                terminal.style.left = `${(window.innerWidth - terminal.offsetWidth) / 2}px`;
+                terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
             }
 
             function shutdownSystem() {
@@ -436,23 +431,25 @@ about Display system information`;
 
                 switch (cmd.toLowerCase()) {
                     case 'help':
-                        return getHelpText(apps);
+                        return `Available commands:
+- help: Show this help
+- clear: Clear terminal
+- reboot: Restart system
+- apps: List available applications
+- echo <text>: Repeat text
+- date: Show current date/time`;
                     case 'clear':
                         output.innerHTML = '';
                         return '';
                     case 'date':
                         return new Date().toString();
-                    case 'about':
-                        return `4ndyOS NeoM4trix v2.1`;
                     case 'echo':
                         return args.join(' ');
-                    case 'shutdown':
-                    case 'poweroff':
-                        shutdownSystem();
-                        return '';
                     case 'reboot':
                         handleReboot();
                         return '';
+                    case 'apps':
+                        return apps.map(a => `${a.command.padEnd(8)} - ${a.description}`).join('\n');
                     default:
                         return `Command not found: ${c}`;
                 }
@@ -490,22 +487,23 @@ about Display system information`;
                         processCommand(input.value);
                         break;
                     case 'ArrowUp':
-                        historyPosition = Math.max(0, Math.min(commandHistory.length, historyPosition - 1));
+                        historyPosition = Math.min(commandHistory.length, historyPosition + 1);
                         input.value = commandHistory[commandHistory.length - historyPosition] || '';
                         e.preventDefault();
                         break;
                     case 'ArrowDown':
-                        historyPosition = Math.max(0, Math.min(commandHistory.length, historyPosition + 1));
+                        historyPosition = Math.max(0, historyPosition - 1);
                         input.value = commandHistory[commandHistory.length - historyPosition] || '';
                         e.preventDefault();
                         break;
                 }
             }
 
+           
+            initializeTerminalDrag();
             loadApps();
             addOutput('4ndyOS NeoM4trix v2.1 - Type \'help\' for commands');
-            input.addEventListener 
-            ('keydown', handleKeyDown);
+            input.addEventListener('keydown', handleKeyDown);
         })();
     </script>
 </body>
