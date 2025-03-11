@@ -4,5 +4,11 @@
         "name": "Calculator",
         "path": "NeoM4trixApps/calculator.html",
         "description": "calculator application"
+    },
+    {
+        "command": "files",
+        "name": "files",
+        "path": "NeoM4trixApps/files.html",
+        "description": "files application"
     }
 ]
