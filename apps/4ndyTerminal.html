@@ -41,8 +41,8 @@
     }
     #input-line span {
       margin-right: 5px;
-      color: #00ffff; /* Color inicial para el modo oscuro */
-      transition: color 0.3s ease; /* Transición suave para el cambio de color */
+      color: #00ffff; 
+      transition: color 0.3s ease;
     }
     #input {
       background: none;
@@ -89,7 +89,7 @@
     const output = document.getElementById('output');
     const input = document.getElementById('input');
     const timeDateElement = document.getElementById('time-date');
-    const userLabel = document.getElementById('user-label'); // Obtener el elemento USER
+    const userLabel = document.getElementById('user-label'); 
     let username = "user";
     let currentMode = "dark";
 
@@ -105,33 +105,32 @@
 
     const commands = {
       h: () =>
-        `4ndyTerminal: Comandos disponibles:
-        //h - Ayuda
-        //c - Limpiar
-        //e [texto] - Escribir texto
-        //length [texto] - Contar caracteres
-        //cw [texto] - Contar palabras
-        //lowercase [texto] - Convertir a minúsculas
-        //searchword [texto],[palabra] - Contar ocurrencias
-        //a - Info del sistema
-        //v - Ver versión
-        //s [expr] - Resolver expresión
-        //w [URL] - Abrir web
-        //r [min] [max] - Random
-        //u [texto] - Uppercase
-        //mode [light/dark/black-white/rgb] - Cambiar modo de visualización
-        //x - Apagar
-        //re - Reiniciar`,
+        `4ndyTerminal: Available commands:
+        //h - help
+        //c - clear the screen
+        //e [text] - write text
+        //length [text] - count characters in the input
+        //cw [text] - count how many words are in the input
+        //lowercase [text] - convert to undercase
+        //searchword [text],[word] - get how many times a certain word is repeated
+        //a - system info
+        //v - version
+        //s [math equation] - solve math equation
+        //w [URL] - open url
+        //r [min] [max] - random number
+        //u [texto] - convert to uppercase
+        //mode [light/dark/black-white] - change theme
+        `,
       c: () => {
         output.innerHTML = "";
         return "";
       },
       e: (args) => `4ndyTerminal: ${args.join(" ")}`,
-      length: (args) => `4ndyTerminal: Número de caracteres: ${args.join(" ").length}`,
+      length: (args) => `4ndyTerminal: ${args.join(" ").length}`,
       cw: (args) => {
         const text = args.join(" ");
         const wordCount = text.split(/\s+/).filter(Boolean).length;
-        return `4ndyTerminal: Número de palabras: ${wordCount}`;
+        return `4ndyTerminal: ${wordCount}`;
       },
       lowercase: (args) => `4ndyTerminal: ${args.join(" ").toLowerCase()}`,
       searchword: (args) => {
@@ -140,28 +139,28 @@
           const text = parts[0].trim();
           const word = parts[1].trim();
           const count = (text.match(new RegExp(word, 'g')) || []).length;
-          return `4ndyTerminal: La palabra '${word}' aparece ${count} veces.`;
+          return `4ndyTerminal: word '${word}' is repeated ${count} times.`;
         }
-        return "4ndyTerminal: Error en comando //searchword. Usa //searchword [texto],[palabra].";
+        return "4ndyTerminal: Error in command //searchword. Use //searchword [texto],[palabra].";
       },
-      a: () => "4ndyTerminal: 4ndyTerminal VER 1.0.0, creado por 4ndy64.",
+      a: () => "4ndyTerminal: 4ndyTerminal VER 1.0.0, created by 4ndy64.",
       v: () => "4ndyTerminal: 4ndyTerminal VER 1.0.0",
       s: (args) => {
         try {
           const expression = args.join(" ");
           const result = math.evaluate(expression);
-          return `4ndyTerminal: Resultado: ${result}`;
+          return `4ndyTerminal: ${result}`;
         } catch (e) {
-          return "4ndyTerminal: Error: expresión inválida.";
+          return "4ndyTerminal: Error:invalid";
         }
       },
       w: (args) => {
         if (!args[0]) {
-          return "4ndyTerminal: Error: URL requerida. Ej: //w example.com";
+          return "4ndyTerminal: Error: URL required. example: //w example.com";
         }
         const url = args[0].startsWith("http") ? args[0] : `https://${args[0]}`;
         openWebWindow(url);
-        return `4ndyTerminal: Abriendo ${url}`;
+        return `4ndyTerminal: opening ${url}`;
       },
       r: (args) => {
         const min = parseInt(args[0], 10) || 0;
@@ -169,21 +168,6 @@
         return `4ndyTerminal: Random: ${Math.floor(Math.random() * (max - min + 1)) + min}`;
       },
       u: (args) => `4ndyTerminal: ${args.join(" ").toUpperCase()}`,
-      re: () => {
-        output.innerHTML = "";
-        return "4ndyTerminal: Terminal reiniciada.";
-      },
-      "/ch": (args) => {
-        if (args[0] === "u" && args[1]) {
-          username = args.slice(1).join(" ");
-          return `4ndyTerminal: Usuario cambiado a '${username}'.`;
-        }
-        return "4ndyTerminal: Uso: /ch u [nombre]";
-      },
-      x: () => {
-        window.location.href = "index.html";
-        return "4ndyTerminal: Apagado. Redirigiendo...";
-      },
       mode: (args) => {
         if (args[0] === "light") {
           document.body.style.backgroundColor = "#ffffff";
@@ -192,11 +176,11 @@
           document.getElementById('input-line').style.backgroundColor = "#e0e0e0";
           document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.1)";
           document.getElementById('terminal').style.borderTopColor = "#0000ff";
-          document.getElementById('input').style.color = "#121212"; // Cambiar color del texto de entrada
-          document.getElementById('input').style.backgroundColor = "#ffffff"; // Cambiar fondo de entrada
-          userLabel.style.color = "#121212"; // Cambiar color de USER
+          document.getElementById('input').style.color = "#121212"; 
+          document.getElementById('input').style.backgroundColor = "#ffffff"; 
+          userLabel.style.color = "#121212"; 
           currentMode = "light";
-          return "4ndyTerminal: Modo claro activado.";
+          return "4ndyTerminal: Changed to light mode.";
         } else if (args[0] === "dark") {
           document.body.style.backgroundColor = "#121212";
           document.body.style.color = "#00ffff";
@@ -204,11 +188,11 @@
           document.getElementById('input-line').style.backgroundColor = "#2e2e2e";
           document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(0, 255, 255, 0.2)";
           document.getElementById('terminal').style.borderTopColor = "#00ffff";
-          document.getElementById('input').style.color = "#00ffff"; // Cambiar color del texto de entrada
-          document.getElementById('input').style.backgroundColor = "transparent"; // Cambiar fondo de entrada
-          userLabel.style.color = "#00ffff"; // Cambiar color de USER
+          document.getElementById('input').style.color = "#00ffff"; 
+          document.getElementById('input').style.backgroundColor = "transparent"; 
+          userLabel.style.color = "#00ffff"; 
           currentMode = "dark";
-          return "4ndyTerminal: Modo oscuro activado.";
+          return "4ndyTerminal:Changed to dark mode.";
         } else if (args[0] === "black-white") {
           document.body.style.backgroundColor = "#000000";
           document.body.style.color = "#FFFFFF";
@@ -216,25 +200,25 @@
           document.getElementById('input-line').style.backgroundColor = "#333333";
           document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(255, 255, 255, 0.2)";
           document.getElementById('terminal').style.borderTopColor = "#FFFFFF";
-          document.getElementById('input').style.color = "#FFFFFF"; // Cambiar color del texto de entrada
-          document.getElementById('input').style.backgroundColor = "#000000"; // Cambiar fondo de entrada
-          userLabel.style.color = "#FFFFFF"; // Cambiar color de USER
+          document.getElementById('input').style.color = "#FFFFFF"; 
+          document.getElementById('input').style.backgroundColor = "#000000"; 
+          userLabel.style.color = "#FFFFFF"; 
           currentMode = "black-white";
-          return "4ndyTerminal: Modo blanco-negro activado.";
-        } else if (args[0] === "rgb") {
-          document.body.style.backgroundColor = "#FF0000"; // Rojo
-          document.body.style.color = "#00FF00"; // Verde
-          document.getElementById('terminal').style.backgroundColor = "#0000FF"; // Azul
-          document.getElementById('input-line').style.backgroundColor = "#FFFF00"; // Amarillo
+          return "4ndyTerminal: Changed to black and white.";
+        } else if (args[0] === "RGB") {
+          document.body.style.backgroundColor = "#FF0000"; 
+          document.body.style.color = "#00FF00"; 
+          document.getElementById('terminal').style.backgroundColor = "#0000FF"; 
+          document.getElementById('input-line').style.backgroundColor = "#FFFF00";
           document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.5)";
-          document.getElementById('terminal').style.borderTopColor = "#FF00FF"; // Magenta
-          document.getElementById('input').style.color = "#FFFFFF"; // Cambiar color del texto de entrada
-          document.getElementById('input').style.backgroundColor = "#000000"; // Cambiar fondo de entrada
-          userLabel.style.color = "#FFFFFF"; // Cambiar color de USER
+          document.getElementById('terminal').style.borderTopColor = "#FF00FF";
+          document.getElementById('input').style.color = "#FFFFFF"; 
+          document.getElementById('input').style.backgroundColor = "#000000";
+          userLabel.style.color = "#FFFFFF";
           currentMode = "rgb";
-          return "4ndyTerminal: Modo RGB activado.";
+          return "4ndyTerminal: BRO JUST FOUND AN EASTER EGG LOL 9999999999999999999999999999999999999999999999999+ OF AURA.";
         }
-        return "4ndyTerminal: Error: Comando inválido para //mode. Usa //mode light, dark o blanco-negro.";
+        return "4ndyTerminal: Error: Invalid commands,try //mode and add the theme you want to use. Not sure? type //h to see all available themes";
       }
     };
 
@@ -255,14 +239,14 @@
       const [command, ...args] = commandLine.split(" ");
       const cmd = commands[command.slice(2)];
 
-      if (/^hola$/i.test(command)) {
-        return `4ndyTerminal: Hola, ${username} ,¿cómo te puedo ayudar hoy?`;
+      if (/^hi$/i.test(command)) {
+        return `4ndyTerminal: Hello, ${username} ,How may I assist you?`;
       }
 
       if (cmd) {
         return cmd(args);
       } else {
-        return `4ndyTerminal: '${command}' no es válido. Usa //h.`;
+        return `4ndyTerminal: '${command}' is not valid. Try //h.`;
       }
     }
 
@@ -300,8 +284,8 @@
     });
 
     async function showWelcomeMessage() {
-      await addOutput("4ndyTerminal: Bienvenido a 4ndyTerminal VER 1.0.0.");
-      await addOutput("4ndyTerminal: Escribe '//h' para comandos.");
+      await addOutput("4ndyTerminal: Welcome to 4ndyTerminal VER 1.0.0.");
+      await addOutput("4ndyTerminal: type '//h' to look the available commands.");
     }
 
     window.onload = async () => {
