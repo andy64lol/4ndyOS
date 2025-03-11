@@ -211,6 +211,24 @@
         @keyframes blink {
             50% { border-color: transparent; }
         }
+.app-frame {
+    flex: 1;
+    border: none;
+    background: var(--terminal-bg);
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: calc(100% - 40px);
+    transition: opacity 0.2s;
+  }
+
+  .app-frame.loading {
+    opacity: 0;
+  }
+
+  .app-frame.loaded {
+    opacity: 1;
+  }
     </style>
 </head>
 <body>
@@ -250,31 +268,35 @@
             let zIndex = 1000;
 
             class WindowManager {
-                static createWindow(app) {
-                    const windowId = `window-${Date.now()}`;
-                    const windowHTML = `
-                        <div class="app-window" id="${windowId}" style="z-index:${zIndex++}">
-                            <div class="window-header">
-                                <div class="window-title">${app.name}</div>
-                                <div class="window-controls">
-                                    <div class="window-button window-minimize" 
-                                         onclick="WindowManager.minimizeWindow('${windowId}')"></div>
-                                    <div class="window-button window-maximize" 
-                                         onclick="WindowManager.maximizeWindow('${windowId}')"></div>
-                                    <div class="window-button window-close" 
-                                         onclick="WindowManager.closeWindow('${windowId}')"></div>
-                                </div>
-                            </div>
-                            <iframe class="app-frame" 
-                                    src="${app.path}" 
-                                    sandbox="allow-scripts allow-same-origin"></iframe>
-                        </div>`;
-                    
-                    document.body.insertAdjacentHTML('beforeend', windowHTML);
-                    this.makeDraggable(windowId);
-                    this.centerWindow(windowId);
-                    return windowId;
-                }
+    static createWindow(app) {
+      const windowId = `window-${Date.now()}`;
+      const windowHTML = `
+        <div class="app-window" id="${windowId}" style="z-index:${zIndex++}">
+          <div class="window-header">
+            <div class="window-title">${app.name}</div>
+            <div class="window-controls">
+              <div class="window-button window-minimize" 
+                   onclick="WindowManager.minimizeWindow('${windowId}')"></div>
+              <div class="window-button window-maximize" 
+                   onclick="WindowManager.maximizeWindow('${windowId}')"></div>
+              <div class="window-button window-close" 
+                   onclick="WindowManager.closeWindow('${windowId}')"></div>
+            </div>
+          </div>
+          <iframe class="app-frame loading" 
+                  src="${app.path}" 
+                  sandbox="allow-forms allow-scripts allow-same-origin allow-modals"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  loading="eager"
+                  onload="this.classList.replace('loading', 'loaded')"></iframe>
+        </div>`;
+      
+      document.body.insertAdjacentHTML('beforeend', windowHTML);
+      this.makeDraggable(windowId);
+      this.centerWindow(windowId);
+      return windowId;
+    }
+  }
 
                 static makeDraggable(windowId) {
                     const windowEl = document.getElementById(windowId);
@@ -352,7 +374,6 @@ ${appList}
 System commands:
 - help      Show available commands
 - clear     Clear terminal screen
-- shutdown  Power off the system
 - reboot    Restart the system
 - echo      Repeat input text
 - date      Show current date/time
@@ -405,10 +426,7 @@ System commands:
                     case 'date':
                         return new Date().toString();
                     case 'about':
-                        return `4ndyOS NeoM4trix v2.1
-NeoKernel 5.1
-Quantum Matrix 2.0
-Hardware Accelerated WebGL`;
+                        return `4ndyOS NeoM4trix v2.1`;
                     case 'echo':
                         return args.join(' ');
                     case 'shutdown':
