@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndyJavascript interpreter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+        h1 {
+            color: #4caf50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .editor-container {
+            margin-bottom: 20px;
+        }
+        .CodeMirror {
+            height: 300px;
+            border: 1px solid #4caf50;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .output-container {
+            background-color: #1e1e1e;
+            padding: 10px;
+            border: 1px solid #4caf50;
+            border-radius: 5px;
+            color: #ffffff;
+            font-family: monospace;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>4ndyJavaScript Interpreter</h1>
+        <div class="editor-container">
+            <textarea id="jsCode" placeholder="Write your JavaScript code here...">console.log("Hello World!");</textarea>
+        </div>
+        <div class="button-container">
+            <button onclick="runJavaScript()">Run JavaScript</button>
+        </div>
+        <h2>Output:</h2>
+        <div class="output-container" id="output"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script>
+
+        const editor = CodeMirror.fromTextArea(document.getElementById('jsCode'), {
+            mode: 'javascript',
+            theme: 'monokai',
+            lineNumbers: true,
+            indentUnit: 4,
+            autofocus: true,
+        });
+
+        function runJavaScript() {
+            const code = editor.getValue();
+            const outputElement = document.getElementById('output');
+            outputElement.innerHTML = '<span style="color: #4caf50;">Running...</span>';
+
+            const originalConsoleLog = console.log;
+            let output = '';
+            console.log = function (message) {
+                output += message + '\n';
+                originalConsoleLog(message);
+            };
+
+            try {
+                eval(code);
+                outputElement.innerHTML = `<pre>${output || "(No output)"}</pre>`;
+            } catch (error) {
+                outputElement.innerHTML = `<span style="color: #ff5555;">Error: ${error}</span>`;
+            } finally {
+                console.log = originalConsoleLog;
+            }
+        }
+    </script>
+</body>
+</html>
