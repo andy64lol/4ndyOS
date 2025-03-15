@@ -1,12 +1,12 @@
 [
     {
-        "command": "run calculator",
+        "command": "cd/calc",
         "name": "Calculator",
         "path": "NeoM4trixApps/calculator.html",
         "description": "calculator application"
     },
     {
-        "command": "run files",
+        "command": "cd/files",
         "name": "files",
         "path": "NeoM4trixApps/files.html",
         "description": "files application"
