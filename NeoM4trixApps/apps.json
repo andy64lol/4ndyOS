@@ -16,5 +16,11 @@
         "name": "notes",
         "path": "NeoM4trixApps/notes.html",
         "description": "simple notes application"
+    },
+    {
+        "command": "4py",
+        "name": "4ndyPython",
+        "path": "NeoM4trixApps/4ndyPython.html",
+        "description": "simple Python editor"
     }
 ]
