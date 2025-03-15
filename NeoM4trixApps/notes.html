@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 80%;
+      max-width: 600px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: azure
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .note {
+      background-color: #e3f2fd;
+      padding: 10px;
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .note textarea {
+      width: 100%;
+      height: 100px;
+      border: none;
+      background-color: transparent;
+      resize: none;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .note textarea:focus {
+      outline: none;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: #ff6b6b;
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    #add-note-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 20px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #add-note-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Notes App</h1>
+    <div class="notes-grid" id="notes-grid">
+     
+    </div>
+    <button id="add-note-btn">Add Note</button>
+  </div>
+
+  <script>
+    const notesGrid = document.getElementById("notes-grid");
+    const addNoteBtn = document.getElementById("add-note-btn");
+
+    let notes = JSON.parse(localStorage.getItem("notes")) || [];
+
+    function renderNotes() {
+      notesGrid.innerHTML = "";
+      notes.forEach((note, index) => {
+        const noteElement = document.createElement("div");
+        noteElement.classList.add("note");
+        noteElement.innerHTML = `
+          <textarea>${note}</textarea>
+          <button class="delete-btn" onclick="deleteNote(${index})">×</button>
+        `;
+        notesGrid.appendChild(noteElement);
+      });
+
+      addNoteBtn.disabled = notes.length >= 20;
+    }
+
+    addNoteBtn.addEventListener("click", () => {
+      if (notes.length < 20) {
+        notes.push("");
+        localStorage.setItem("notes", JSON.stringify(notes));
+        renderNotes();
+      }
+    });
+
+    function deleteNote(index) {
+      notes.splice(index, 1);
+      localStorage.setItem("notes", JSON.stringify(notes));
+      renderNotes();
+    }
+
+    notesGrid.addEventListener("input", (e) => {
+      if (e.target.tagName === "TEXTAREA") {
+        const index = Array.from(notesGrid.children).indexOf(e.target.parentElement);
+        notes[index] = e.target.value;
+        localStorage.setItem("notes", JSON.stringify(notes));
+      }
+    });
+
+    renderNotes();
+  </script>
+</body>
+</html>
