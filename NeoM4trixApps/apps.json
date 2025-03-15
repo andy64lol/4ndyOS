@@ -22,5 +22,11 @@
         "name": "4ndyPython",
         "path": "NeoM4trixApps/4ndyPython.html",
         "description": "simple Python editor"
+    },
+    {
+        "command": "4Js",
+        "name": "4ndyJavascript",
+        "path": "NeoM4trixApps/4ndyJavascript.html",
+        "description": "simple javascript editor"
     }
 ]
