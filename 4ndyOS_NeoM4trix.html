@@ -331,15 +331,12 @@
                     windowEl.style.top = `${(window.innerHeight - windowEl.offsetHeight) / 2}px`;
                 }
             }
-
-            // Terminal Dragging
             function initializeTerminalDrag() {
                 const terminal = document.querySelector('.terminal');
                 const titleBar = terminal.querySelector('.title-bar');
                 let isDragging = false;
                 let offset = [0, 0];
 
-                // Initial position
                 terminal.style.left = `${(window.innerWidth - terminal.offsetWidth) / 2}px`;
                 terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
 
