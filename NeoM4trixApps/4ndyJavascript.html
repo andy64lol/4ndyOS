@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4ndyJavascript interpreter</title>
+    <title>4ndyJavaScript Interpreter</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -83,10 +86,8 @@
         <div class="output-container" id="output"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
     <script>
-
+       
         const editor = CodeMirror.fromTextArea(document.getElementById('jsCode'), {
             mode: 'javascript',
             theme: 'monokai',
@@ -108,7 +109,8 @@
             };
 
             try {
-                eval(code);
+                const transpiledCode = Babel.transform(code, { presets: ['env'] }).code;
+                eval(transpiledCode);
                 outputElement.innerHTML = `<pre>${output || "(No output)"}</pre>`;
             } catch (error) {
                 outputElement.innerHTML = `<span style="color: #ff5555;">Error: ${error}</span>`;
