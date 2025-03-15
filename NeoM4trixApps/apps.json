@@ -10,5 +10,11 @@
         "name": "files",
         "path": "NeoM4trixApps/files.html",
         "description": "files application"
+    },
+    {
+        "command": "notes",
+        "name": "notes",
+        "path": "NeoM4trixApps/notes.html",
+        "description": "simple notes application"
     }
 ]
