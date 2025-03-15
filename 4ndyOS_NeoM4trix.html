@@ -301,29 +301,10 @@
             align-items: center;
             justify-content: center;
         }
+
     </style>
 </head>
 <body>
-    <div class="shutdown-dialog" id="shutdownDialog">
-        <p>Are you sure you want to shut down the system?</p>
-        <div class="shutdown-progress">
-            <div class="shutdown-progress-bar"></div>
-        </div>
-        <div class="dialog-buttons">
-            <button class="dialog-button" onclick="cancelShutdown()">Cancel</button>
-            <button class="dialog-button" style="background: var(--error)" 
-                    onclick="confirmShutdown()">Shut Down</button>
-        </div>
-    </div>
-
-    <div class="shutdown-screen" id="shutdownScreen">
-        <div class="shutdown-message">
-            <h1 class="typewriter">4ndyOS NeoM4trix</h1>
-            <p>> SYSTEM SHUTDOWN COMPLETE</p>
-            <p>> REDIRECTING TO HOME...</p>
-        </div>
-    </div>
-
     <div class="terminal">
         <div class="title-bar">
             <div class="buttons">
@@ -351,6 +332,7 @@
             let apps = [];
             let zIndex = 1000;
             let isMinimized = false;
+            let isShutdownConfirmation = false; 
 
             class WindowManager {
                 static createWindow(app) {
@@ -491,83 +473,24 @@
             }
 
             function shutdownSystem() {
-                document.getElementById('shutdownDialog').style.display = 'block';
+                addOutput('Are you sure? (y/n)');
+                isShutdownConfirmation = true; 
             }
 
             function confirmShutdown() {
-                const dialog = document.getElementById('shutdownDialog');
-                const progressBar = dialog.querySelector('.shutdown-progress-bar');
-                const progressContainer = dialog.querySelector('.shutdown-progress');
-                
-                dialog.querySelector('.dialog-buttons').style.display = 'none';
-                progressContainer.style.display = 'block';
-                progressBar.style.width = '0%';
-                
-                const startTime = Date.now();
-                const duration = 2000; // 2 seconds for shutdown sequence
-                
-                const animateProgress = () => {
-                    const elapsed = Date.now() - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    progressBar.style.width = `${progress * 100}%`;
-
-                    if (progress < 1) {
-                        requestAnimationFrame(animateProgress);
-                    } else {
-                        performShutdown();
-                    }
-                };
-
-                requestAnimationFrame(animateProgress);
-            }
-
-            function performShutdown() {
-                document.getElementById('shutdownDialog').style.display = 'none';
-                const terminal = document.querySelector('.terminal');
-                
-                terminal.classList.remove('maximized');
-                terminal.style.transform = '';
-                terminal.style.opacity = '0';
-                terminal.style.transition = 'all 0.5s ease';
-
-                const windows = document.querySelectorAll('.app-window');
-                let closedWindows = 0;
-                
-                windows.forEach(w => {
-                    WindowManager.closeWindow(w.id);
-                    closedWindows++;
-                });
-
-                const shutdownScreen = document.getElementById('shutdownScreen');
-                shutdownScreen.style.display = 'flex';
-
+                addOutput('Shutting down...');
                 setTimeout(() => {
-                    document.querySelectorAll('.app-window').forEach(w => w.remove());
-                    
-                    setTimeout(() => {
-                        try {
-                            window.location.href = 'index.html';
-                        } catch (e) {
-                            console.error('Redirect failed:', e);
-                            shutdownScreen.innerHTML = `
-                                <div class="shutdown-message">
-                                    <h1>REDIRECT ERROR</h1>
-                                    <p>> MANUAL NAVIGATION REQUIRED</p>
-                                </div>
-                            `;
-                        }
-                    }, 3000);
-                }, Math.max(300, closedWindows * 100));
+                    window.location.href = 'index.html';
+                }, 1000); 
             }
 
             function cancelShutdown() {
-                document.getElementById('shutdownDialog').style.display = 'none';
-                document.querySelector('.shutdown-progress-bar').style.width = '0%';
-                document.querySelector('.dialog-buttons').style.display = 'flex';
+                addOutput('Shutdown canceled.');
+                isShutdownConfirmation = false; 
             }
 
             function loadApps() {
-                fetch('./NeoM4trixApps/apps.json')
+                fetch('https://raw.githubusercontent.com/andy64lol/4ndyOS.github.io/refs/heads/main/NeoM4trixApps/apps.json')
                     .then(r => r.json())
                     .then(d => {
                         apps = d;
@@ -603,7 +526,7 @@
                         return args.join(' ');
                     case 'shutdown':
                         shutdownSystem();
-                        return 'Initiating shutdown sequence...';
+                        return '';
                     case 'apps':
                         return apps.map(a => `${a.command.padEnd(8)} - ${a.description}`).join('\n');
                     default:
@@ -628,6 +551,18 @@
 
             function processCommand(c) {
                 if (!c.trim()) return;
+
+                if (isShutdownConfirmation) {
+                    if (c.toLowerCase() === 'y') {
+                        confirmShutdown();
+                    } else if (c.toLowerCase() === 'n') {
+                        cancelShutdown();
+                    } else {
+                        addOutput('Invalid input. Please type "y" or "n".');
+                    }
+                    return;
+                }
+
                 commandHistory.push(c);
                 historyPosition = 0;
                 addCommand(c);
