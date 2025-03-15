@@ -26,12 +26,20 @@
             background: var(--terminal-bg);
             width: 90%;
             max-width: 1000px;
-            height: 600px;
+            height: 70vh;
+            min-height: 400px;
             border-radius: 8px;
             box-shadow: 0 12px 24px rgba(0,0,0,0.3);
             position: fixed;
             z-index: 1000;
             transition: all 0.3s ease;
+        }
+
+        .terminal.maximized {
+            width: 96vw !important;
+            height: 90vh !important;
+            left: 2vw !important;
+            top: 5vh !important;
         }
 
         .title-bar {
@@ -220,6 +228,11 @@
         @keyframes blink {
             50% { border-color: transparent; }
         }
+
+        .command {
+            color: var(--accent);
+            margin: 8px 0;
+        }
     </style>
 </head>
 <body>
@@ -331,12 +344,18 @@
                     windowEl.style.top = `${(window.innerHeight - windowEl.offsetHeight) / 2}px`;
                 }
             }
+
+            
+            window.WindowManager = WindowManager;
+
+            
             function initializeTerminalDrag() {
                 const terminal = document.querySelector('.terminal');
                 const titleBar = terminal.querySelector('.title-bar');
                 let isDragging = false;
                 let offset = [0, 0];
 
+                
                 terminal.style.left = `${(window.innerWidth - terminal.offsetWidth) / 2}px`;
                 terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
 
@@ -376,25 +395,18 @@
 
             function maximizeTerminal() {
                 const terminal = document.querySelector('.terminal');
+                terminal.classList.toggle('maximized');
                 if (terminal.classList.contains('maximized')) {
-                    terminal.classList.remove('maximized');
-                    terminal.style.width = '90%';
-                    terminal.style.height = '600px';
-                } else {
-                    terminal.classList.add('maximized');
-                    terminal.style.width = '96vw';
-                    terminal.style.height = '90vh';
+                    terminal.style.opacity = '1';
                 }
-                terminal.style.left = `${(window.innerWidth - terminal.offsetWidth) / 2}px`;
-                terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
             }
 
             function shutdownSystem() {
                 document.querySelectorAll('.app-window').forEach(w => w.remove());
-                document.getElementById('shutdownScreen').style.display = 'flex';
-                output.innerHTML = '';
                 addOutput('System shutdown initiated...');
-                document.addEventListener('keydown', handleReboot);
+                const shutdownScreen = document.getElementById('shutdownScreen');
+                shutdownScreen.style.display = 'flex';
+                document.addEventListener('keydown', handleReboot, { once: true });
             }
 
             function handleReboot() {
@@ -408,7 +420,7 @@
             }
 
             function loadApps() {
-                fetch('NeoM4trixApps/apps.json')
+                fetch('./NeoM4trixApps/apps.json')
                     .then(r => r.json())
                     .then(d => {
                         apps = d;
@@ -484,19 +496,21 @@
                         processCommand(input.value);
                         break;
                     case 'ArrowUp':
+                        if (commandHistory.length === 0) return;
                         historyPosition = Math.min(commandHistory.length, historyPosition + 1);
                         input.value = commandHistory[commandHistory.length - historyPosition] || '';
                         e.preventDefault();
                         break;
                     case 'ArrowDown':
                         historyPosition = Math.max(0, historyPosition - 1);
-                        input.value = commandHistory[commandHistory.length - historyPosition] || '';
+                        input.value = historyPosition === 0 
+                            ? ''
+                            : commandHistory[commandHistory.length - historyPosition];
                         e.preventDefault();
                         break;
                 }
             }
 
-           
             initializeTerminalDrag();
             loadApps();
             addOutput('4ndyOS NeoM4trix v2.1 - Type \'help\' for commands');
