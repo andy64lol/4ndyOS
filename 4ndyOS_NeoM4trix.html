@@ -350,6 +350,7 @@
             let historyPosition = 0;
             let apps = [];
             let zIndex = 1000;
+            let isMinimized = false;
 
             class WindowManager {
                 static createWindow(app) {
@@ -440,6 +441,7 @@
                 terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
 
                 const startDrag = (e) => {
+                    if (terminal.classList.contains('maximized')) return;
                     isDragging = true;
                     offset = [
                         terminal.offsetLeft - e.clientX,
@@ -469,13 +471,20 @@
 
             function minimizeTerminal() {
                 const terminal = document.querySelector('.terminal');
-                terminal.style.transform = 'translateY(calc(100vh - 100px))';
-                setTimeout(() => terminal.style.opacity = '0.5', 300);
+                if (isMinimized) {
+                    terminal.style.transform = '';
+                    terminal.style.opacity = '1';
+                } else {
+                    terminal.style.transform = 'translateY(calc(100vh - 100px))';
+                    terminal.style.opacity = '0.5';
+                }
+                isMinimized = !isMinimized;
             }
 
             function maximizeTerminal() {
                 const terminal = document.querySelector('.terminal');
                 terminal.classList.toggle('maximized');
+                terminal.style.zIndex = zIndex++;
                 if (terminal.classList.contains('maximized')) {
                     terminal.style.opacity = '1';
                 }
@@ -554,7 +563,7 @@
                         return `Available commands:
 - help: Show this help
 - clear: Clear terminal
-- reboot: Restart system
+- shutdown: Shut down system
 - apps: List available applications
 - echo <text>: Repeat text
 - date: Show current date/time`;
@@ -565,9 +574,9 @@
                         return new Date().toString();
                     case 'echo':
                         return args.join(' ');
-                    case 'reboot':
-                        handleReboot();
-                        return '';
+                    case 'shutdown':
+                        shutdownSystem();
+                        return 'Initiating shutdown sequence...';
                     case 'apps':
                         return apps.map(a => `${a.command.padEnd(8)} - ${a.description}`).join('\n');
                     default:
@@ -578,7 +587,7 @@
             function addCommand(c) {
                 const d = document.createElement('div');
                 d.className = 'command';
-                d.innerHTML = `<span class="prompt">$</span> ${c}`;
+                d.innerHTML = `<span class="prompt">></span> ${c}`;
                 output.appendChild(d);
             }
 
