@@ -233,14 +233,94 @@
             color: var(--accent);
             margin: 8px 0;
         }
+
+        .shutdown-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--terminal-bg);
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        .shutdown-dialog p {
+            margin: 0 0 15px 0;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .dialog-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .dialog-button:hover {
+            opacity: 0.8;
+        }
+
+        .shutdown-progress {
+            width: 100%;
+            height: 2px;
+            background: #333;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .shutdown-progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .app-window.closing {
+            animation: windowClose 0.3s ease forwards;
+        }
+
+        @keyframes windowClose {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+
+        .window-close {
+            background: var(--error);
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
+    <div class="shutdown-dialog" id="shutdownDialog">
+        <p>Are you sure you want to shut down the system?</p>
+        <div class="shutdown-progress">
+            <div class="shutdown-progress-bar"></div>
+        </div>
+        <div class="dialog-buttons">
+            <button class="dialog-button" onclick="cancelShutdown()">Cancel</button>
+            <button class="dialog-button" style="background: var(--error)" 
+                    onclick="confirmShutdown()">Shut Down</button>
+        </div>
+    </div>
+
     <div class="shutdown-screen" id="shutdownScreen">
         <div class="shutdown-message">
             <h1 class="typewriter">4ndyOS NeoM4trix</h1>
             <p>> SYSTEM SHUTDOWN COMPLETE</p>
-            <p>> PRESS ANY KEY TO REBOOT</p>
+            <p>> REDIRECTING TO HOME...</p>
         </div>
     </div>
 
@@ -280,7 +360,7 @@
                                 <div class="window-title">${app.name}</div>
                                 <div class="window-controls">
                                     <div class="window-button window-close" 
-                                         onclick="WindowManager.closeWindow('${windowId}')"></div>
+                                         onclick="WindowManager.closeWindow('${windowId}')">X</div>
                                 </div>
                             </div>
                             <div class="loading">Loading ${app.name}</div>
@@ -334,7 +414,10 @@
                 static closeWindow(windowId) {
                     const windowEl = document.getElementById(windowId);
                     if (windowEl && !windowEl.classList.contains('terminal')) {
-                        windowEl.remove();
+                        windowEl.classList.add('closing');
+                        setTimeout(() => {
+                            windowEl.remove();
+                        }, 300);
                     }
                 }
 
@@ -345,17 +428,14 @@
                 }
             }
 
-            
             window.WindowManager = WindowManager;
 
-            
             function initializeTerminalDrag() {
                 const terminal = document.querySelector('.terminal');
                 const titleBar = terminal.querySelector('.title-bar');
                 let isDragging = false;
                 let offset = [0, 0];
 
-                
                 terminal.style.left = `${(window.innerWidth - terminal.offsetWidth) / 2}px`;
                 terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
 
@@ -402,21 +482,52 @@
             }
 
             function shutdownSystem() {
-                document.querySelectorAll('.app-window').forEach(w => w.remove());
-                addOutput('System shutdown initiated...');
-                const shutdownScreen = document.getElementById('shutdownScreen');
-                shutdownScreen.style.display = 'flex';
-                document.addEventListener('keydown', handleReboot, { once: true });
+                document.getElementById('shutdownDialog').style.display = 'block';
             }
 
-            function handleReboot() {
-                document.getElementById('shutdownScreen').style.display = 'none';
-                output.innerHTML = '';
-                commandHistory = [];
-                historyPosition = 0;
-                input.value = '';
-                loadApps();
-                addOutput('4ndyOS NeoM4trix v2.1 - Type \'help\' for commands');
+            function confirmShutdown() {
+                const dialog = document.getElementById('shutdownDialog');
+                const progressBar = dialog.querySelector('.shutdown-progress-bar');
+                const progressContainer = dialog.querySelector('.shutdown-progress');
+                
+                dialog.querySelector('.dialog-buttons').style.display = 'none';
+                progressContainer.style.display = 'block';
+                
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    progressBar.style.width = `${Math.min(progress, 100)}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        performShutdown();
+                    }
+                }, 100);
+            }
+
+            function performShutdown() {
+                document.getElementById('shutdownDialog').style.display = 'none';
+                const terminal = document.querySelector('.terminal');
+                
+                document.querySelectorAll('.app-window').forEach(w => {
+                    WindowManager.closeWindow(w.id);
+                });
+
+                terminal.style.opacity = '0';
+                terminal.style.transform = 'scale(0.9)';
+                
+                const shutdownScreen = document.getElementById('shutdownScreen');
+                shutdownScreen.style.display = 'flex';
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
+            }
+
+            function cancelShutdown() {
+                document.getElementById('shutdownDialog').style.display = 'none';
+                document.querySelector('.shutdown-progress-bar').style.width = '0%';
+                document.querySelector('.dialog-buttons').style.display = 'flex';
             }
 
             function loadApps() {
