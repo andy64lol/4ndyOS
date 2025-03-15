@@ -501,36 +501,63 @@
                 
                 dialog.querySelector('.dialog-buttons').style.display = 'none';
                 progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
                 
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += Math.random() * 10;
-                    progressBar.style.width = `${Math.min(progress, 100)}%`;
-                    
-                    if (progress >= 100) {
-                        clearInterval(interval);
+                const startTime = Date.now();
+                const duration = 2000; // 2 seconds for shutdown sequence
+                
+                const animateProgress = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    progressBar.style.width = `${progress * 100}%`;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animateProgress);
+                    } else {
                         performShutdown();
                     }
-                }, 100);
+                };
+
+                requestAnimationFrame(animateProgress);
             }
 
             function performShutdown() {
                 document.getElementById('shutdownDialog').style.display = 'none';
                 const terminal = document.querySelector('.terminal');
                 
-                document.querySelectorAll('.app-window').forEach(w => {
+                terminal.classList.remove('maximized');
+                terminal.style.transform = '';
+                terminal.style.opacity = '0';
+                terminal.style.transition = 'all 0.5s ease';
+
+                const windows = document.querySelectorAll('.app-window');
+                let closedWindows = 0;
+                
+                windows.forEach(w => {
                     WindowManager.closeWindow(w.id);
+                    closedWindows++;
                 });
 
-                terminal.style.opacity = '0';
-                terminal.style.transform = 'scale(0.9)';
-                
                 const shutdownScreen = document.getElementById('shutdownScreen');
                 shutdownScreen.style.display = 'flex';
-                
+
                 setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 3000);
+                    document.querySelectorAll('.app-window').forEach(w => w.remove());
+                    
+                    setTimeout(() => {
+                        try {
+                            window.location.href = 'index.html';
+                        } catch (e) {
+                            console.error('Redirect failed:', e);
+                            shutdownScreen.innerHTML = `
+                                <div class="shutdown-message">
+                                    <h1>REDIRECT ERROR</h1>
+                                    <p>> MANUAL NAVIGATION REQUIRED</p>
+                                </div>
+                            `;
+                        }
+                    }, 3000);
+                }, Math.max(300, closedWindows * 100));
             }
 
             function cancelShutdown() {
