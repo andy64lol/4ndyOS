@@ -28,5 +28,11 @@
         "name": "4ndyJavascript",
         "path": "NeoM4trixApps/4ndyJavascript.html",
         "description": "simple javascript editor"
+    },
+    {
+        "command": "browser",
+        "name": "360 Search Engine",
+        "path": "https://www.so.com/",
+        "description": "Web Browser (experimental)"
     }
 ]
