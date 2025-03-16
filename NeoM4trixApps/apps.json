@@ -31,8 +31,8 @@
     },
     {
         "command": "browser",
-        "name": "360 Search Engine",
-        "path": "https://www.so.com/",
+        "name": "browser",
+        "path": "https://eviltester.github.io/TestingApp/apps/iframe-search/iframe-search.html",
         "description": "Web Browser (experimental)"
     }
 ]
