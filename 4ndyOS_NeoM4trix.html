@@ -301,16 +301,15 @@
             align-items: center;
             justify-content: center;
         }
-
     </style>
 </head>
 <body>
     <div class="terminal">
         <div class="title-bar">
             <div class="buttons">
-                <div class="button close" onclick="shutdownSystem()"></div>
-                <div class="button minimize" onclick="minimizeTerminal()"></div>
-                <div class="button maximize" onclick="maximizeTerminal()"></div>
+                <div class="button close" onclick="processCommand('shutdown')"></div>
+                <div class="button minimize" onclick="processCommand('minimize')"></div>
+                <div class="button maximize" onclick="processCommand('maximize')"></div>
             </div>
             <div class="window-title">4ndyOS NeoM4trix Terminal</div>
         </div>
@@ -332,7 +331,7 @@
             let apps = [];
             let zIndex = 1000;
             let isMinimized = false;
-            let isShutdownConfirmation = false; 
+            let isShutdownConfirmation = false;
 
             class WindowManager {
                 static createWindow(app) {
@@ -474,19 +473,19 @@
 
             function shutdownSystem() {
                 addOutput('Are you sure? (y/n)');
-                isShutdownConfirmation = true; 
+                isShutdownConfirmation = true;
             }
 
             function confirmShutdown() {
                 addOutput('Shutting down...');
                 setTimeout(() => {
                     window.location.href = 'index.html';
-                }, 1000); 
+                }, 1000);
             }
 
             function cancelShutdown() {
                 addOutput('Shutdown canceled.');
-                isShutdownConfirmation = false; 
+                isShutdownConfirmation = false;
             }
 
             function loadApps() {
@@ -514,6 +513,8 @@
 - help: Show this help
 - clear: Clear terminal
 - shutdown: Shut down system
+- minimize: Minimize terminal
+- maximize: Maximize terminal
 - apps: List available applications
 - echo <text>: Repeat text
 - date: Show current date/time`;
@@ -527,6 +528,12 @@
                     case 'shutdown':
                         shutdownSystem();
                         return '';
+                    case 'minimize':
+                        minimizeTerminal();
+                        return 'Terminal minimized.';
+                    case 'maximize':
+                        maximizeTerminal();
+                        return 'Terminal maximized.';
                     case 'apps':
                         return apps.map(a => `${a.command.padEnd(8)} - ${a.description}`).join('\n');
                     default:
