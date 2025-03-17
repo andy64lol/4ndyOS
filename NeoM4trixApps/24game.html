@@ -30,7 +30,6 @@
     <div id="start-screen">
         <h1>Welcome to Make 24</h1>
         <button class="button" onclick="startGame()">Start Game</button>
-        <button class="button" onclick="quitGame()">Quit Game</button>
         <p>High Score: <span id="high-score">0</span></p>
     </div>
     
@@ -43,8 +42,8 @@
             <button class="button" onclick="performOperation('-')">-</button>
             <button class="button" onclick="performOperation('*')">*</button>
             <button class="button" onclick="performOperation('/')">/</button>
-            <button class="button" onclick="performOperation('ʌ')">ʌ</button> <!-- Exponentiation button -->
-            <button class="button" onclick="performOperation('√')">√</button> <!-- Square root button -->
+            <button class="button" onclick="performOperation('ʌ')">ʌ</button> 
+            <button class="button" onclick="performOperation('√')">√</button> 
         </div>
         <br>
         <button class="button" onclick="resetSelection()">Unselect Cards</button>
@@ -126,7 +125,6 @@
                     }
                     result = num1 / num2;
                     if (!Number.isInteger(result)) {
-                        // Only allow rounding if the result has decimals
                         let roundedResult = Math.round(result);
                         if (roundedResult === 0) {
                             document.getElementById("result").innerText = "Invalid division! Rounded result is 0.";
@@ -135,18 +133,18 @@
                         result = roundedResult;
                     }
                     break;
-                case "ʌ": // Exponentiation operation
+                case "ʌ":
                     result = Math.pow(num1, num2);
                     if (!Number.isInteger(result)) {
                         result = Math.round(result);
                     }
                     break;
-                case "√": // Square root operation
+                case "√": 
                     if (num2 < 0) {
                         document.getElementById("result").innerText = "Invalid square root! Cannot take square root of a negative number.";
                         return;
                     }
-                    result = Math.pow(num2, 1 / num1); // x√y = y^(1/x)
+                    result = Math.pow(num2, 1 / num1);
                     if (!Number.isInteger(result)) {
                         result = Math.round(result);
                     }
@@ -192,10 +190,7 @@
             document.getElementById("start-screen").style.display = "block";
             document.getElementById("result").innerText = "";
         }
-
-        function quitGame() {
-            window.location.href = "4ndyOS_StellarOS_0.0.3.html";
-        }
+        
     </script>
 </body>
 </html>
