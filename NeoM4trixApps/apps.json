@@ -1,5 +1,11 @@
 [
     {
+        "command": "readme",
+        "name": "Readme",
+        "path": "NeoM4trixApps/readme.html",
+        "description": "Readme file"
+    },
+    {
         "command": "calc",
         "name": "Calculator",
         "path": "NeoM4trixApps/calculator.html",
