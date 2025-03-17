@@ -13,7 +13,7 @@
     },
     {
         "command": "chess",
-        "name": "chess online",
+        "name": "chess online" ,
         "path": "https://playpager.com/embed/chess/index.html",
         "description": "Online chess game."
     },
