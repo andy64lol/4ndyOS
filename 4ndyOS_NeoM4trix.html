@@ -489,7 +489,7 @@
             }
 
             function loadApps() {
-                fetch('https://raw.githubusercontent.com/andy64lol/4ndyOS.github.io/refs/heads/main/NeoM4trixApps/apps.json')
+                fetch('/NeoM4trixApps/apps.json')
                     .then(r => r.json())
                     .then(d => {
                         apps = d;
