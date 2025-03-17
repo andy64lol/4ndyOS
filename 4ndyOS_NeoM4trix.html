@@ -322,194 +322,194 @@
         </div>
     </div>
 
-    <script>
-        (() => {
-            const input = document.getElementById('command-input');
-            const output = document.getElementById('output');
-            let commandHistory = [];
-            let historyPosition = 0;
-            let apps = [];
-            let zIndex = 1000;
-            let isMinimized = false;
-            let isShutdownConfirmation = false;
+<script>
+    (() => {
+        const input = document.getElementById('command-input');
+        const output = document.getElementById('output');
+        let commandHistory = [];
+        let historyPosition = 0;
+        let apps = [];
+        let zIndex = 1000;
+        let isMinimized = false;
+        let isShutdownConfirmation = false;
 
-            class WindowManager {
-                static createWindow(app) {
-                    const windowId = `window-${Date.now()}`;
-                    const windowHTML = `
-                        <div class="app-window" id="${windowId}" style="z-index:${zIndex++}">
-                            <div class="window-header">
-                                <div class="window-title">${app.name}</div>
-                                <div class="window-controls">
-                                    <div class="window-button window-close" 
-                                         onclick="WindowManager.closeWindow('${windowId}')">X</div>
-                                </div>
+        class WindowManager {
+            static createWindow(app) {
+                const windowId = `window-${Date.now()}`;
+                const windowHTML = `
+                    <div class="app-window" id="${windowId}" style="z-index:${zIndex++}">
+                        <div class="window-header">
+                            <div class="window-title">${app.name}</div>
+                            <div class="window-controls">
+                                <div class="window-button window-close" 
+                                     onclick="WindowManager.closeWindow('${windowId}')">X</div>
                             </div>
-                            <div class="loading">Loading ${app.name}</div>
-                            <iframe class="app-frame" 
-                                    src="${app.path}" 
-                                    sandbox="allow-scripts allow-same-origin"
-                                    onload="this.previousElementSibling.style.display='none'"
-                                    onerror="this.previousElementSibling.textContent = 'Failed to load ${app.name}'"></iframe>
-                        </div>`;
-                    
-                    document.body.insertAdjacentHTML('beforeend', windowHTML);
-                    this.makeDraggable(windowId);
-                    this.centerWindow(windowId);
-                    return windowId;
-                }
-
-                static makeDraggable(windowId) {
-                    const windowEl = document.getElementById(windowId);
-                    const header = windowEl.querySelector('.window-header');
-                    let isDragging = false;
-                    let offset = [0, 0];
-
-                    const startDrag = (e) => {
-                        isDragging = true;
-                        offset = [
-                            windowEl.offsetLeft - e.clientX,
-                            windowEl.offsetTop - e.clientY
-                        ];
-                        windowEl.style.zIndex = zIndex++;
-                    };
-
-                    const drag = (e) => {
-                        if (isDragging) {
-                            const x = e.clientX + offset[0];
-                            const y = e.clientY + offset[1];
-                            const maxX = window.innerWidth - windowEl.offsetWidth;
-                            const maxY = window.innerHeight - windowEl.offsetHeight;
-
-                            windowEl.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
-                            windowEl.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
-                        }
-                    };
-
-                    const stopDrag = () => isDragging = false;
-
-                    header.addEventListener('mousedown', startDrag);
-                    document.addEventListener('mousemove', drag);
-                    document.addEventListener('mouseup', stopDrag);
-                }
-
-                static closeWindow(windowId) {
-                    const windowEl = document.getElementById(windowId);
-                    if (windowEl && !windowEl.classList.contains('terminal')) {
-                        windowEl.classList.add('closing');
-                        setTimeout(() => {
-                            windowEl.remove();
-                        }, 300);
-                    }
-                }
-
-                static centerWindow(windowId) {
-                    const windowEl = document.getElementById(windowId);
-                    windowEl.style.left = `${(window.innerWidth - windowEl.offsetWidth) / 2}px`;
-                    windowEl.style.top = `${(window.innerHeight - windowEl.offsetHeight) / 2}px`;
-                }
+                        </div>
+                        <div class="loading">Loading ${app.name}</div>
+                        <iframe class="app-frame" 
+                                src="${app.path}" 
+                                sandbox="allow-scripts allow-same-origin"
+                                onload="this.previousElementSibling.style.display='none'"
+                                onerror="this.previousElementSibling.textContent = 'Failed to load ${app.name}'"></iframe>
+                    </div>`;
+                
+                document.body.insertAdjacentHTML('beforeend', windowHTML);
+                this.makeDraggable(windowId);
+                this.centerWindow(windowId);
+                return windowId;
             }
 
-            window.WindowManager = WindowManager;
-
-            function initializeTerminalDrag() {
-                const terminal = document.querySelector('.terminal');
-                const titleBar = terminal.querySelector('.title-bar');
+            static makeDraggable(windowId) {
+                const windowEl = document.getElementById(windowId);
+                const header = windowEl.querySelector('.window-header');
                 let isDragging = false;
                 let offset = [0, 0];
 
-                terminal.style.left = `${(window.innerWidth - terminal.offsetWidth) / 2}px`;
-                terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
-
                 const startDrag = (e) => {
-                    if (terminal.classList.contains('maximized')) return;
                     isDragging = true;
                     offset = [
-                        terminal.offsetLeft - e.clientX,
-                        terminal.offsetTop - e.clientY
+                        windowEl.offsetLeft - e.clientX,
+                        windowEl.offsetTop - e.clientY
                     ];
-                    terminal.style.zIndex = zIndex++;
+                    windowEl.style.zIndex = zIndex++;
                 };
 
                 const drag = (e) => {
                     if (isDragging) {
                         const x = e.clientX + offset[0];
                         const y = e.clientY + offset[1];
-                        const maxX = window.innerWidth - terminal.offsetWidth;
-                        const maxY = window.innerHeight - terminal.offsetHeight;
+                        const maxX = window.innerWidth - windowEl.offsetWidth;
+                        const maxY = window.innerHeight - windowEl.offsetHeight;
 
-                        terminal.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
-                        terminal.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
+                        windowEl.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
+                        windowEl.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
                     }
                 };
 
                 const stopDrag = () => isDragging = false;
 
-                titleBar.addEventListener('mousedown', startDrag);
+                header.addEventListener('mousedown', startDrag);
                 document.addEventListener('mousemove', drag);
                 document.addEventListener('mouseup', stopDrag);
             }
 
-            function minimizeTerminal() {
-                const terminal = document.querySelector('.terminal');
-                if (isMinimized) {
-                    terminal.style.transform = '';
-                    terminal.style.opacity = '1';
-                } else {
-                    terminal.style.transform = 'translateY(calc(100vh - 100px))';
-                    terminal.style.opacity = '0.5';
+            static closeWindow(windowId) {
+                const windowEl = document.getElementById(windowId);
+                if (windowEl && !windowEl.classList.contains('terminal')) {
+                    windowEl.classList.add('closing');
+                    setTimeout(() => {
+                        windowEl.remove();
+                    }, 300);
                 }
-                isMinimized = !isMinimized;
             }
 
-            function maximizeTerminal() {
-                const terminal = document.querySelector('.terminal');
-                terminal.classList.toggle('maximized');
+            static centerWindow(windowId) {
+                const windowEl = document.getElementById(windowId);
+                windowEl.style.left = `${(window.innerWidth - windowEl.offsetWidth) / 2}px`;
+                windowEl.style.top = `${(window.innerHeight - windowEl.offsetHeight) / 2}px`;
+            }
+        }
+
+        window.WindowManager = WindowManager;
+
+        function initializeTerminalDrag() {
+            const terminal = document.querySelector('.terminal');
+            const titleBar = terminal.querySelector('.title-bar');
+            let isDragging = false;
+            let offset = [0, 0];
+
+            terminal.style.left = `${(window.innerWidth - terminal.offsetWidth) / 2}px`;
+            terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
+
+            const startDrag = (e) => {
+                if (terminal.classList.contains('maximized')) return;
+                isDragging = true;
+                offset = [
+                    terminal.offsetLeft - e.clientX,
+                    terminal.offsetTop - e.clientY
+                ];
                 terminal.style.zIndex = zIndex++;
-                if (terminal.classList.contains('maximized')) {
-                    terminal.style.opacity = '1';
+            };
+
+            const drag = (e) => {
+                if (isDragging) {
+                    const x = e.clientX + offset[0];
+                    const y = e.clientY + offset[1];
+                    const maxX = window.innerWidth - terminal.offsetWidth;
+                    const maxY = window.innerHeight - terminal.offsetHeight;
+
+                    terminal.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
+                    terminal.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
                 }
+            };
+
+            const stopDrag = () => isDragging = false;
+
+            titleBar.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function minimizeTerminal() {
+            const terminal = document.querySelector('.terminal');
+            if (isMinimized) {
+                terminal.style.transform = '';
+                terminal.style.opacity = '1';
+            } else {
+                terminal.style.transform = 'translateY(calc(100vh - 100px))';
+                terminal.style.opacity = '0.5';
+            }
+            isMinimized = !isMinimized;
+        }
+
+        function maximizeTerminal() {
+            const terminal = document.querySelector('.terminal');
+            terminal.classList.toggle('maximized');
+            terminal.style.zIndex = zIndex++;
+            if (terminal.classList.contains('maximized')) {
+                terminal.style.opacity = '1';
+            }
+        }
+
+        function shutdownSystem() {
+            addOutput('Are you sure? (y/n)');
+            isShutdownConfirmation = true;
+        }
+
+        function confirmShutdown() {
+            addOutput('Shutting down...');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        }
+
+        function cancelShutdown() {
+            addOutput('Shutdown canceled.');
+            isShutdownConfirmation = false;
+        }
+
+        function loadApps(bundlePath = './NeoM4trixApps/apps.json') {
+            fetch(bundlePath)
+                .then(r => r.json())
+                .then(d => {
+                    apps = d;
+                    addOutput('System apps loaded: ' + d.map(a => a.name).join(', '));
+                })
+                .catch(e => addOutput('Failed to load apps: ' + e.message));
+        }
+
+        function executeCommand(c) {
+            const [cmd, ...args] = c.trim().split(' ');
+            const app = apps.find(a => a.command === cmd.toLowerCase());
+            
+            if (app) {
+                WindowManager.createWindow(app);
+                return `${app.name} initialized...`;
             }
 
-            function shutdownSystem() {
-                addOutput('Are you sure? (y/n)');
-                isShutdownConfirmation = true;
-            }
-
-            function confirmShutdown() {
-                addOutput('Shutting down...');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1000);
-            }
-
-            function cancelShutdown() {
-                addOutput('Shutdown canceled.');
-                isShutdownConfirmation = false;
-            }
-
-            function loadApps() {
-                fetch('./NeoM4trixApps/apps.json')
-                    .then(r => r.json())
-                    .then(d => {
-                        apps = d;
-                        addOutput('System apps loaded: ' + d.map(a => a.name).join(', '));
-                    })
-                    .catch(e => addOutput('Failed to load apps: ' + e.message));
-            }
-
-            function executeCommand(c) {
-                const [cmd, ...args] = c.trim().split(' ');
-                const app = apps.find(a => a.command === cmd.toLowerCase());
-                
-                if (app) {
-                    WindowManager.createWindow(app);
-                    return `${app.name} initialized...`;
-                }
-
-                switch (cmd.toLowerCase()) {
-                    case 'help':
-                        return `Available commands:
+            switch (cmd.toLowerCase()) {
+                case 'help':
+                    return `Available commands:
 - help: Show this help
 - clear: Clear terminal
 - shutdown: Shut down system
@@ -517,94 +517,103 @@
 - echo <text>: Repeat text
 - maximize: maximize the terminal
 - minimize: minimize the terminal
-- date: Show current date/time`;
-                    case 'clear':
-                        output.innerHTML = '';
-                        return '';
-                    case 'date':
-                        return new Date().toString();
-                    case 'echo':
-                        return args.join(' ');
-                    case 'shutdown':
-                        shutdownSystem();
-                        return '';
-                    case 'minimize':
-                        minimizeTerminal();
-                        return 'Terminal minimized.';
-                    case 'maximize':
-                        maximizeTerminal();
-                        return 'Terminal maximized.';
-                    case 'apps':
-                        return apps.map(a => `${a.command.padEnd(8)} - ${a.description}`).join('\n');
-                    default:
-                        return `Command not found: ${c}`;
-                }
-            }
-
-            function addCommand(c) {
-                const d = document.createElement('div');
-                d.className = 'command';
-                d.innerHTML = `<span class="prompt">></span> ${c}`;
-                output.appendChild(d);
-            }
-
-            function addOutput(t) {
-                if (!t) return;
-                const d = document.createElement('div');
-                d.className = 'output-text';
-                d.textContent = t;
-                output.appendChild(d);
-            }
-
-            function processCommand(c) {
-                if (!c.trim()) return;
-
-                if (isShutdownConfirmation) {
-                    if (c.toLowerCase() === 'y') {
-                        confirmShutdown();
-                    } else if (c.toLowerCase() === 'n') {
-                        cancelShutdown();
-                    } else {
-                        addOutput('Invalid input. Please type "y" or "n".');
+- date: Show current date/time
+- switch app bundle to <filename>: Load different app bundle`;
+                case 'switch':
+                    if (args[0] === 'app' && args[1] === 'bundle' && args[2] === 'to') {
+                        const filename = args.slice(3).join(' ');
+                        if (!filename) return 'Specify bundle filename';
+                        loadApps(`./NeoM4trixApps/${filename}`);
+                        return `Switched to ${filename} bundle`;
                     }
-                    return;
-                }
+                    return 'Invalid switch command';
+                case 'clear':
+                    output.innerHTML = '';
+                    return '';
+                case 'date':
+                    return new Date().toString();
+                case 'echo':
+                    return args.join(' ');
+                case 'shutdown':
+                    shutdownSystem();
+                    return '';
+                case 'minimize':
+                    minimizeTerminal();
+                    return 'Terminal minimized.';
+                case 'maximize':
+                    maximizeTerminal();
+                    return 'Terminal maximized.';
+                case 'apps':
+                    return apps.map(a => `${a.command.padEnd(8)} - ${a.description}`).join('\n');
+                default:
+                    return `Command not found: ${c}`;
+            }
+        }
 
-                commandHistory.push(c);
-                historyPosition = 0;
-                addCommand(c);
-                const r = executeCommand(c);
-                addOutput(r);
-                input.value = '';
-                output.scrollTop = output.scrollHeight;
+        function addCommand(c) {
+            const d = document.createElement('div');
+            d.className = 'command';
+            d.innerHTML = `<span class="prompt">></span> ${c}`;
+            output.appendChild(d);
+        }
+
+        function addOutput(t) {
+            if (!t) return;
+            const d = document.createElement('div');
+            d.className = 'output-text';
+            d.textContent = t;
+            output.appendChild(d);
+        }
+
+        function processCommand(c) {
+            if (!c.trim()) return;
+
+            if (isShutdownConfirmation) {
+                if (c.toLowerCase() === 'y') {
+                    confirmShutdown();
+                } else if (c.toLowerCase() === 'n') {
+                    cancelShutdown();
+                } else {
+                    addOutput('Invalid input. Please type "y" or "n".');
+                }
+                return;
             }
 
-            function handleKeyDown(e) {
-                switch (e.key) {
-                    case 'Enter':
-                        processCommand(input.value);
-                        break;
-                    case 'ArrowUp':
-                        if (commandHistory.length === 0) return;
-                        historyPosition = Math.min(commandHistory.length, historyPosition + 1);
-                        input.value = commandHistory[commandHistory.length - historyPosition] || '';
-                        e.preventDefault();
-                        break;
-                    case 'ArrowDown':
-                        historyPosition = Math.max(0, historyPosition - 1);
-                        input.value = historyPosition === 0 
-                            ? ''
-                            : commandHistory[commandHistory.length - historyPosition];
-                        e.preventDefault();
-                        break;
-                }
-            }
+            commandHistory.push(c);
+            historyPosition = 0;
+            addCommand(c);
+            const r = executeCommand(c);
+            addOutput(r);
+            input.value = '';
+            output.scrollTop = output.scrollHeight;
+        }
 
-            initializeTerminalDrag();
-            loadApps();
-            addOutput('4ndyOS NeoM4trix v2.0 - Type \'help\' for commands');
-            input.addEventListener('keydown', handleKeyDown);
-        })();
-    </script>
+        function handleKeyDown(e) {
+            switch (e.key) {
+                case 'Enter':
+                    processCommand(input.value);
+                    break;
+                case 'ArrowUp':
+                    if (commandHistory.length === 0) return;
+                    historyPosition = Math.min(commandHistory.length, historyPosition + 1);
+                    input.value = commandHistory[commandHistory.length - historyPosition] || '';
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    historyPosition = Math.max(0, historyPosition - 1);
+                    input.value = historyPosition === 0 
+                        ? ''
+                        : commandHistory[commandHistory.length - historyPosition];
+                    e.preventDefault();
+                    break;
+            }
+        }
+
+        initializeTerminalDrag();
+        loadApps();
+        addOutput('4ndyOS NeoM4trix v2.0 - Type \'help\' for commands');
+        input.addEventListener('keydown', handleKeyDown);
+    })();
+</script>
 </body>
 </html>
