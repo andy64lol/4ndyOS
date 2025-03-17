@@ -2,7 +2,13 @@
     {
         "command": "readme",
         "name": "Readme",
-        "path": "NeoM4trixApps/readme.html",
-        "description": "Readme file"
+        "path": "NeoM4trixApps/readme(games).html",
+        "description": "Readme file."
+    },
+    {
+        "command": "24game",
+        "name": "24 points game",
+        "path": "NeoM4trixApps/24game.html",
+        "description": "24 points math game."
     }
 ]
