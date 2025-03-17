@@ -489,7 +489,7 @@
             }
 
             function loadApps() {
-                fetch('/NeoM4trixApps/apps.json')
+                fetch('./NeoM4trixApps/apps.json')
                     .then(r => r.json())
                     .then(d => {
                         apps = d;
