@@ -12,15 +12,15 @@
         "description": "24 points math game."
     },
     {
-        "command": "chess"
-        "name": "chess online"
-        "path": "https://playpager.com/embed/chess/index.html"
+        "command": "chess",
+        "name": "chess online",
+        "path": "https://playpager.com/embed/chess/index.html",
         "description": "Online chess game."
     },
     {
-        "command": "reversi"
-        "name": "reversi online"
-        "path": "https://playpager.com/embed/reversi/index.html"
+        "command": "reversi",
+        "name": "reversi online",
+        "path": "https://playpager.com/embed/reversi/index.html",
         "description": "Online reversi game."
     }
 ]
