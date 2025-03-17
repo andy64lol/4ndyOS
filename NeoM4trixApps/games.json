@@ -10,5 +10,11 @@
         "name": "24 points game",
         "path": "NeoM4trixApps/24game.html",
         "description": "24 points math game."
+    },
+    {
+        "command": "chess"
+        "name": "chess online"
+        "path": "https://playpager.com/embed/chess/index.html"
+        "description": "Online chess game."
     }
 ]
