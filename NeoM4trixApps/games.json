@@ -13,7 +13,7 @@
     },
     {
         "command": "chess",
-        "name": "chess online" ,
+        "name": "chess online",
         "path": "https://playpager.com/embed/chess/index.html",
         "description": "Online chess game."
     },
@@ -24,9 +24,9 @@
         "description": "Online reversi game."
     },
     {
-        "command": "Paper Minecraft" ,
-        "name": "Paper Minecraft" ,
-        "path": "NeoM4trixApps/Paper Minecraft .html" ,
+        "command": "Paper Minecraft",
+        "name": "Paper Minecraft",
+        "path": "NeoM4trixApps/Paper Minecraft .html",
         "description": "Paper Minecraft made in scratcth (not mine! original by griffpatch and mod by highpandapanda1, packaged using Turbowarp)."
-    },
+    }
 ]
