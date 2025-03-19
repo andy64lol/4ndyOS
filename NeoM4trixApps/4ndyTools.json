@@ -10,5 +10,23 @@
     "name": "4ndyPixelArt.html",
     "path": "NeoM4trixApps/4ndyPixelArt.html",
     "description": "Simple Pixel Art maker"
+  },
+  {
+    "command": "draw",
+    "name": "4ndyDraw",
+    "path": "NeoM4trixApps/4ndyDraw.html",
+    "description": "Drawing application"
+  },
+  {
+     "command": "4py",
+     "name": "4ndyPython",
+     "path": "NeoM4trixApps/4ndyPython.html",
+     "description": "simple Python editor"
+  },
+  {
+     "command": "4js",
+     "name": "4ndyJavascript",
+     "path": "NeoM4trixApps/4ndyJavascript.html",
+     "description": "simple javascript editor"
   }
 ]
