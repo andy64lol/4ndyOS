@@ -12,7 +12,7 @@
     "description": "Simple Pixel Art maker"
   },
   {
-    "command": "draw",
+    "command": "4draw",
     "name": "4ndyDraw",
     "path": "NeoM4trixApps/4ndyDraw.html",
     "description": "Drawing application"
