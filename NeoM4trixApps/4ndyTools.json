@@ -1,0 +1,14 @@
+[
+  {
+    "command": "4md",
+    "name": "4ndyMarkDown",
+    "path": "NeoM4trixApps/4ndyMarkDown.html",
+    "description": "Simple .md editor"
+  },
+  {
+    "command": "4px",
+    "name": "4ndyPixelArt.html",
+    "path": "NeoM4trixApps/4ndyPixelArt.html",
+    "description": "Simple Pixel Art maker"
+  }
+]
