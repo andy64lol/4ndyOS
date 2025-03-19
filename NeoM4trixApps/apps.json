@@ -9,7 +9,7 @@
         "command": "draw",
         "name": "4ndyDraw",
         "path": "NeoM4trixApps/4ndyDraw.html",
-        "name": "Drawing application"
+        "description": "Drawing application"
     },
     {
         "command": "calc",
