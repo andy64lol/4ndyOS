@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>4ndyPixelArt</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #ecf0f1;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tools-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 200px;
+        }
+
+        .grid-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .grid-controls input {
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(0,0,0,0.2);
+        }
+
+        .current-color {
+            width: 100%;
+            height: 50px;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover, button.active {
+            background: var(--secondary-color);
+        }
+
+        .grid-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .pixel-grid {
+            display: grid;
+            gap: 0;
+            border: 1px solid #ddd;
+            grid-auto-rows: 20px;
+        }
+
+        .pixel-cell {
+            background: white;
+            border: 1px solid #eee;
+            cursor: crosshair;
+            transition: background 0.1s;
+        }
+
+        .pixel-cell:hover {
+            filter: brightness(0.95);
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tools-panel">
+            <div class="current-color" id="current-color"></div>
+            
+            <div class="color-palette" id="color-palette">
+                <div class="color-swatch" data-color="#000000" style="background: #000000"></div>
+                <div class="color-swatch" data-color="#FFFFFF" style="background: #FFFFFF"></div>
+                <div class="color-swatch" data-color="#FF0000" style="background: #FF0000"></div>
+                <div class="color-swatch" data-color="#00FF00" style="background: #00FF00"></div>
+                <div class="color-swatch" data-color="#0000FF" style="background: #0000FF"></div>
+                <div class="color-swatch" data-color="#FFFF00" style="background: #FFFF00"></div>
+                <div class="color-swatch" data-color="#FF00FF" style="background: #FF00FF"></div>
+                <div class="color-swatch" data-color="#00FFFF" style="background: #00FFFF"></div>
+            </div>
+
+            <input type="color" id="custom-color" value="#000000">
+            
+            <div class="grid-controls">
+                <input type="number" id="grid-width" min="8" max="100" value="20">
+                <input type="number" id="grid-height" min="8" max="100" value="20">
+                <button onclick="createGrid()">Update Grid</button>
+                <button onclick="clearGrid()">Clear Grid</button>
+            </div>
+
+            <button onclick="saveAsPNG()">Export PNG</button>
+            <button onclick="saveAsSVG()">Export SVG</button>
+            <button id="toggle-grid-btn" onclick="toggleGrid()">Toggle Grid</button>
+            <button id="eraser-btn" onclick="activateEraser(event)">Eraser</button>
+            <button id="picker-btn" onclick="activatePicker(event)">Color Picker</button>
+            <button id="brush-btn" class="active" onclick="activateBrush(event)">Brush</button>
+
+            <a id="download-link" hidden></a>
+        </div>
+
+        <div class="grid-container">
+            <div id="grid" class="pixel-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        let gridSize = { width: 20, height: 20 };
+        let selectedColor = '#000000';
+        let isMouseDown = false;
+        let showGrid = true;
+        let currentTool = 'brush';
+
+        createGrid();
+        updateColorDisplay();
+
+        function createGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            
+            gridSize.width = parseInt(document.getElementById('grid-width').value) || 20;
+            gridSize.height = parseInt(document.getElementById('grid-height').value) || 20;
+
+            grid.style.gridTemplateColumns = `repeat(${gridSize.width}, 20px)`;
+            
+            for(let y = 0; y < gridSize.height; y++) {
+                for(let x = 0; x < gridSize.width; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'pixel-cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    cell.dataset.color = '#FFFFFF';
+                    cell.style.backgroundColor = '#FFFFFF';
+                    grid.appendChild(cell);
+                }
+            }
+
+            updateGridCells();
+        }
+
+        function clearGrid() {
+            document.querySelectorAll('.pixel-cell').forEach(cell => {
+                cell.style.backgroundColor = '#FFFFFF';
+                cell.dataset.color = '#FFFFFF';
+            });
+        }
+
+        function updateGridCells() {
+            document.querySelectorAll('.pixel-cell').forEach(cell => {
+                cell.addEventListener('mousedown', startDrawing);
+                cell.addEventListener('mouseover', continueDrawing);
+                cell.addEventListener('mouseup', stopDrawing);
+            });
+        }
+
+        function startDrawing(e) {
+            isMouseDown = true;
+            handleDrawing(e.target);
+        }
+
+        function continueDrawing(e) {
+            if(isMouseDown) handleDrawing(e.target);
+        }
+
+        function stopDrawing() {
+            isMouseDown = false;
+        }
+
+        function handleDrawing(cell) {
+            if(currentTool === 'brush') {
+                cell.style.backgroundColor = selectedColor;
+                cell.dataset.color = selectedColor;
+            } else if(currentTool === 'eraser') {
+                cell.style.backgroundColor = '#FFFFFF';
+                cell.dataset.color = '#FFFFFF';
+            } else if(currentTool === 'picker') {
+                selectedColor = cell.dataset.color;
+                updateColorDisplay();
+                activateBrush();
+            }
+        }
+
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                selectedColor = swatch.dataset.color;
+                activateBrush();
+                updateColorDisplay();
+            });
+        });
+
+        document.getElementById('custom-color').addEventListener('input', (e) => {
+            selectedColor = e.target.value;
+            activateBrush();
+            updateColorDisplay();
+        });
+
+        function updateColorDisplay() {
+            document.getElementById('current-color').style.backgroundColor = selectedColor;
+            document.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.classList.toggle('selected', swatch.dataset.color === selectedColor);
+            });
+        }
+
+        function activateTool(event, tool) {
+            currentTool = tool;
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            if(event) event.target.classList.add('active');
+        }
+
+        function activateEraser(event) {
+            activateTool(event, 'eraser');
+        }
+
+        function activatePicker(event) {
+            activateTool(event, 'picker');
+        }
+
+        function activateBrush(event) {
+            if(event) activateTool(event, 'brush');
+            else {
+                currentTool = 'brush';
+                document.getElementById('brush-btn').classList.add('active');
+            }
+        }
+
+        function toggleGrid() {
+            showGrid = !showGrid;
+            document.querySelectorAll('.pixel-cell').forEach(cell => {
+                cell.style.border = showGrid ? '1px solid #eee' : 'none';
+            });
+            document.getElementById('toggle-grid-btn').classList.toggle('active', showGrid);
+        }
+
+        function saveAsPNG() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const scale = 2;
+            
+            canvas.width = gridSize.width * 20 * scale;
+            canvas.height = gridSize.height * 20 * scale;
+            ctx.scale(scale, scale);
+
+            document.querySelectorAll('.pixel-cell').forEach(cell => {
+                const x = cell.dataset.x * 20;
+                const y = cell.dataset.y * 20;
+                ctx.fillStyle = cell.dataset.color;
+                ctx.fillRect(x, y, 20, 20);
+            });
+
+            const link = document.getElementById('download-link');
+            link.href = canvas.toDataURL();
+            link.download = `pixel-art-${Date.now()}.png`;
+            link.click();
+        }
+
+        function saveAsSVG() {
+            const xmlns = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(xmlns, 'svg');
+            
+            svg.setAttribute('width', gridSize.width * 20);
+            svg.setAttribute('height', gridSize.height * 20);
+            svg.setAttribute('viewBox', `0 0 ${gridSize.width * 20} ${gridSize.height * 20}`);
+            svg.setAttribute('xmlns', xmlns);
+
+            document.querySelectorAll('.pixel-cell').forEach(cell => {
+                if(cell.dataset.color !== '#FFFFFF') {
+                    const rect = document.createElementNS(xmlns, 'rect');
+                    rect.setAttribute('x', cell.dataset.x * 20);
+                    rect.setAttribute('y', cell.dataset.y * 20);
+                    rect.setAttribute('width', '20');
+                    rect.setAttribute('height', '20');
+                    rect.setAttribute('fill', cell.dataset.color);
+                    svg.appendChild(rect);
+                }
+            });
+
+            const serializer = new XMLSerializer();
+            const svgBlob = new Blob([serializer.serializeToString(svg)], 
+                {type: 'image/svg+xml;charset=utf-8'});
+            
+            const link = document.getElementById('download-link');
+            link.href = URL.createObjectURL(svgBlob);
+            link.download = `pixel-art-${Date.now()}.svg`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
