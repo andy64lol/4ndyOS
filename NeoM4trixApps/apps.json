@@ -6,6 +6,12 @@
         "description": "Readme file"
     },
     {
+        "command": "draw",
+        "name": "4ndyDraw",
+        "path": "NeoM4trixApps/4ndyDraw.html",
+        "Drawing application"
+    },
+    {
         "command": "calc",
         "name": "Calculator",
         "path": "NeoM4trixApps/calculator.html",
