@@ -518,13 +518,13 @@
 - maximize: maximize the terminal
 - minimize: minimize the terminal
 - date: Show current date/time
-- switch app bundle to <filename>: Switch app bundle`;
-                case 'switch':
-                    if (args[0] === 'app' && args[1] === 'bundle' && args[2] === 'to') {
-                        const filename = args.slice(3).join(' ');
-                        if (!filename) return 'Specify bundle filename';
-                        loadApps(`./NeoM4trixApps/${filename}`);
-                        return `Switched to ${filename} bundle`;
+- switch <filename.json>: Switch app bundle,see all available app bundles in readme file`;
+               case 'switch':
+                 if (!args.length) return 'Specify bundle filename';
+                      const filename = args.join(' ');
+                      if (!filename.endsWith('.json')) return 'Bundle must be a JSON file';
+                      loadApps(`./NeoM4trixApps/${filename}`);
+                      return `Switched to ${filename} bundle`;
                     }
                     return 'Invalid switch command';
                 case 'clear':
