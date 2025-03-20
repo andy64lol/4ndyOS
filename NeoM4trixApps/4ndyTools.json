@@ -28,5 +28,11 @@
      "name": "4ndyJavascript",
      "path": "NeoM4trixApps/4ndyJavascript.html",
      "description": "simple javascript editor"
+  },
+  {
+     "command": "4html",
+     "name": "4ndyHTML editor",
+     "path": "NeoM4trixApps/4ndyHTML.html",
+     "description": "simple yet functional html editor"
   }
 ]
