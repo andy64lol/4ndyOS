@@ -1,5 +1,11 @@
 [
   {
+    "command": "readme",
+    "name": "readme",
+    "path": "NeoM4trixApps/readme(4ndyTools).html",
+    "description": "Readme file"
+  },
+  {
     "command": "4md",
     "name": "4ndyMarkDown",
     "path": "NeoM4trixApps/4ndyMarkDown.html",
