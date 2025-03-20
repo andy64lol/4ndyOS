@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4ndyHTML Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.css">
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --toolbar-bg: #2d2d2d;
+            --button-bg: #363636;
+            --button-hover: #404040;
+            --accent-color: #4CAF50;
+            --gutter-color: #333;
+            --text-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .editor-pane {
+            width: 50%;
+            height: 100%;
+            position: relative;
+        }
+
+        .preview-pane {
+            width: 50%;
+            height: 100%;
+            background: #fff;
+        }
+
+        .toolbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: var(--toolbar-bg);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 12px;
+        }
+
+        .btn {
+            background: var(--button-bg);
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--button-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn img {
+            width: 24px;
+            height: 24px;
+        }
+
+        #editor {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        #preview {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mode-btn {
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.active {
+            background: var(--button-bg);
+            border-color: var(--accent-color);
+        }
+
+        .mode-btn img {
+            width: 28px;
+            height: 28px;
+        }
+
+        .gutter {
+            background: var(--gutter-color);
+            cursor: col-resize;
+        }
+
+        #auto-update {
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="editor-pane">
+            <div class="toolbar">
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="html">
+                        <img src="https://www.w3.org/html/logo/badge/html5-badge-h-solo.png" alt="HTML5">
+                    </button>
+                    <button class="mode-btn" data-mode="css">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/CSS3_logo_and_wordmark.svg" alt="CSS3">
+                    </button>
+                    <button class="mode-btn" data-mode="js">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Unofficial_JavaScript_logo_2.svg" alt="JavaScript">
+                    </button>
+                </div>
+                <button class="btn" id="run-button">
+                    <img src="https://fonts.gstatic.com/s/i/materialicons/play_arrow/v6/24px.svg" alt="Run">
+                </button>
+                <label class="btn">
+                    <input type="checkbox" id="auto-update" hidden>
+                    <img src="https://fonts.gstatic.com/s/i/materialicons/autorenew/v6/24px.svg" alt="Auto Update">
+                </label>
+            </div>
+            <div id="editor"></div>
+        </div>
+        <div class="preview-pane">
+            <iframe id="preview"></iframe>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.15.2/ace.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+
+    <script>
+        class EditorManager {
+            constructor() {
+                this.modes = {
+                    html: { aceMode: 'html', content: '' },
+                    css: { aceMode: 'css', content: '' },
+                    js: { aceMode: 'javascript', content: '' }
+                };
+                this.currentMode = 'html';
+                this.initEditor();
+                this.bindEvents();
+                this.initSplitter();
+                this.loadDefaults();
+            }
+
+            initEditor() {
+                this.editor = ace.edit("editor");
+                this.editor.setTheme("ace/theme/monokai");
+                this.editor.session.setMode(`ace/mode/${this.modes[this.currentMode].aceMode}`);
+                this.editor.session.setUseWrapMode(true);
+                this.editor.setOptions({
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true,
+                    fontSize: "14px",
+                    showPrintMargin: false
+                });
+            }
+
+            bindEvents() {
+                this.editor.session.on('change', () => {
+                    this.modes[this.currentMode].content = this.editor.getValue();
+                    document.getElementById('auto-update').checked && this.debouncedUpdate();
+                });
+
+                document.getElementById('run-button').addEventListener('click', () => this.runCode());
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.currentMode = btn.dataset.mode;
+                        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.editor.session.setMode(`ace/mode/${this.modes[this.currentMode].aceMode}`);
+                        this.editor.setValue(this.modes[this.currentMode].content);
+                    });
+                });
+            }
+
+            initSplitter() {
+                Split(['.editor-pane', '.preview-pane'], {
+                    gutterSize: 8,
+                    cursor: 'col-resize',
+                    gutter: (i, d) => {
+                        const g = document.createElement('div');
+                        g.className = `gutter gutter-${d}`;
+                        return g;
+                    }
+                });
+            }
+
+            debouncedUpdate = _.debounce(() => this.runCode(), 500);
+
+            runCode() {
+                const html = `<html><head><style>${this.modes.css.content}</style></head><body>${this.modes.html.content}<script>${this.modes.js.content}<\/script></body></html>`;
+                const preview = document.getElementById('preview').contentWindow.document;
+                preview.open();
+                preview.write(html);
+                preview.close();
+            }
+
+            loadDefaults() {
+                this.modes.html.content = `<!DOCTYPE html>
+<html>
+<head>
+    <title>4ndyHTML</title>
+</head>
+<body>
+    <h1>Hello 4ndyHTML!</h1>
+    <p id="demo">Start coding...</p>
+    <button onclick="document.getElementById('demo').innerHTML = 'You clicked me!'">Click me!</button>
+</body>
+</html>`;
+
+                this.modes.css.content = `body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f0f0f0;
+}
+
+button {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}`;
+
+                this.modes.js.content = `// JavaScript code here`;
+                this.editor.setValue(this.modes.html.content);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new EditorManager());
+    </script>
+</body>
+</html>
