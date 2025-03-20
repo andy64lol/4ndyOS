@@ -498,57 +498,55 @@
                 .catch(e => addOutput('Failed to load apps: ' + e.message));
         }
 
-        function executeCommand(c) {
-            const [cmd, ...args] = c.trim().split(' ');
-            const app = apps.find(a => a.command === cmd.toLowerCase());
-            
-            if (app) {
-                WindowManager.createWindow(app);
-                return `${app.name} initialized...`;
-            }
+function executeCommand(c) {
+    const [cmd, ...args] = c.trim().split(' ');
+    const app = apps.find(a => a.command === cmd.toLowerCase());
+    
+    if (app) {
+        WindowManager.createWindow(app);
+        return `${app.name} initialized...`;
+    }
 
-            switch (cmd.toLowerCase()) {
-                case 'help':
-                    return `Available commands:
+    switch (cmd.toLowerCase()) {
+        case 'help':
+            return `Available commands:
 - help: Show this help
 - clear: Clear terminal
 - shutdown: Shut down system
-- apps: List available applications installed
+- apps: List available applications
 - echo <text>: Repeat text
-- maximize: maximize the terminal
-- minimize: minimize the terminal
+- maximize: Maximize terminal
+- minimize: Minimize terminal
 - date: Show current date/time
-- switch <filename.json>: Switch app bundle,see all available app bundles in readme file`;
-               case 'switch':
-                 if (!args.length) return 'Specify bundle filename';
-                      const filename = args.join(' ');
-                      if (!filename.endsWith('.json')) return 'Bundle must be a JSON file';
-                      loadApps(`./NeoM4trixApps/${filename}`);
-                      return `Switched to ${filename} bundle`;
-                    }
-                    return 'Invalid switch command';
-                case 'clear':
-                    output.innerHTML = '';
-                    return '';
-                case 'date':
-                    return new Date().toString();
-                case 'echo':
-                    return args.join(' ');
-                case 'shutdown':
-                    shutdownSystem();
-                    return '';
-                case 'minimize':
-                    minimizeTerminal();
-                    return 'Terminal minimized.';
-                case 'maximize':
-                    maximizeTerminal();
-                    return 'Terminal maximized.';
-                case 'apps':
-                    return apps.map(a => `${a.command.padEnd(8)} - ${a.description}`).join('\n');
-                default:
-                    return `Command not found: ${c}`;
-            }
-        }
+- switch <filename.json>: Switch app bundle`;
+        case 'switch':
+            if (!args.length) return 'Specify bundle filename';
+            const filename = args.join(' ');
+            if (!filename.endsWith('.json')) return 'Bundle must be a JSON file';
+            loadApps(`./NeoM4trixApps/${filename}`);
+            return `Switched to ${filename} bundle`;
+        case 'clear':
+            output.innerHTML = '';
+            return '';
+        case 'date':
+            return new Date().toString();
+        case 'echo':
+            return args.join(' ');
+        case 'shutdown':
+            shutdownSystem();
+            return '';
+        case 'minimize':
+            minimizeTerminal();
+            return 'Terminal minimized.';
+        case 'maximize':
+            maximizeTerminal();
+            return 'Terminal maximized.';
+        case 'apps':
+            return apps.map(a => `${a.command.padEnd(8)} - ${a.description}`).join('\n');
+        default:
+            return `Command not found: ${c}`;
+    }
+}
 
         function addCommand(c) {
             const d = document.createElement('div');
