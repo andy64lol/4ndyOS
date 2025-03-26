@@ -46,5 +46,11 @@
         "name": "browser",
         "path": "https://www.bing.com/search?q=hello+world&filters=ufn%3a%22Hello+World+2019%22+sid%3a%2222b38014-3c20-8c80-4723-15df1fcafd25%22&asbe=OS&qs=MB&pq=hello+wopr&sc=12-10&cvid=D6913DFC8AF341BBBB61AAD14A1855E1&FORM=QBLH&sp=1&ghc=1&lq=0",
         "description": "Web Browser (experimental)"
+    },
+    {
+        "command": "byte",
+        "name": "Byte AI",
+        "path": "https://andy64lol.github.io/Byte.github.io/",
+        "description": "Byte AI,artificial intelligence,yet to be tested..."
     }
 ]
