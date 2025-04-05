@@ -6,55 +6,109 @@
     <title>Shield.io Badge Creator</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
             padding: 20px;
+            color: #333;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         h1 {
             text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
         }
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         .form-group label {
             display: block;
-            font-weight: bold;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
         }
         .form-group input, .form-group select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             font-size: 16px;
-            margin-top: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #3498db;
+            outline: none;
         }
         .form-group button {
-            padding: 10px 20px;
-            background-color: #007BFF;
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
         .form-group button:hover {
-            background-color: #0056b3;
+            background-color: #2980b9;
         }
         .result {
-            margin-top: 20px;
+            margin-top: 30px;
             text-align: center;
+            display: none;
         }
         .result img {
             max-width: 100%;
             height: auto;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+        .url {
+            margin-top: 15px;
+            font-family: monospace;
+            word-wrap: break-word;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .url a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .url a:hover {
+            text-decoration: underline;
+        }
+        .download-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .download-btn:hover {
+            background-color: #27ae60;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
         }
     </style>
 </head>
@@ -71,7 +125,7 @@
         </div>
         <div class="form-group">
             <label for="color">Color</label>
-            <input type="text" id="color" placeholder="Enter badge color" />
+            <input type="text" id="color" placeholder="Enter badge color (e.g., #4CAF50)" />
         </div>
         <div class="form-group">
             <label for="style">Style</label>
@@ -85,27 +139,64 @@
         <div class="form-group">
             <button onclick="generateBadge()">Generate Badge</button>
         </div>
+        <div class="loading" id="loading">
+            <p>Generating badge...</p>
+        </div>
+        <div class="error" id="error">
+            <p>Please fill out all fields to generate the badge.</p>
+        </div>
         <div class="result" id="result">
-           
+            <img id="badge-image" src="" alt="Generated Badge">
+            <div class="url">
+                <a id="badge-url" href="" target="_blank"></a>
+            </div>
+            <button class="download-btn" id="download-btn">Download Badge</button>
         </div>
     </div>
 
     <script>
         function generateBadge() {
-            const label = document.getElementById('label').value;
-            const message = document.getElementById('message').value;
-            const color = document.getElementById('color').value;
+            const label = document.getElementById('label').value.trim();
+            const message = document.getElementById('message').value.trim();
+            const color = document.getElementById('color').value.trim();
             const style = document.getElementById('style').value;
 
-            const url = `https://img.shields.io/badge/${encodeURIComponent(label)}-${encodeURIComponent(message)}-${encodeURIComponent(color)}?style=${style}`;
-            const resultDiv = document.getElementById('result');
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
 
-            if (label && message && color) {
-                resultDiv.innerHTML = `<img src="${url}" alt="Generated Badge">`;
-            } else {
-                resultDiv.innerHTML = '<p>Please fill out all fields to generate the badge.</p>';
+            if (!label || !message || !color) {
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error').style.display = 'block';
+                }, 500);
+                return;
             }
+
+            const encodedLabel = encodeURIComponent(label);
+            const encodedMessage = encodeURIComponent(message);
+            const encodedColor = encodeURIComponent(color);
+            const encodedStyle = encodeURIComponent(style);
+
+            const url = `https://img.shields.io/badge/${encodedLabel}-${encodedMessage}-${encodedColor}?style=${encodedStyle}`;
+
+
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('badge-image').src = url;
+                document.getElementById('badge-url').href = url;
+                document.getElementById('badge-url').textContent = url;
+            }, 500);
         }
+
+        document.getElementById('download-btn').addEventListener('click', function() {
+            const badgeUrl = document.getElementById('badge-image').src;
+            const link = document.createElement('a');
+            link.href = badgeUrl;
+            link.download = 'badge.png';
+            link.click();
+        });
     </script>
 </body>
 </html>
