@@ -48,9 +48,9 @@
         "description": "Web Browser (experimental)"
     },
     {
-        "command": "byte",
-        "name": "Byte AI",
-        "path": "https://andy64lol.github.io/Byte.github.io/",
-        "description": "Byte AI,artificial intelligence,yet to be tested..."
+        "command": "n3ko",
+        "name": "N3ko Chatbot",
+        "path": "https://andy64lol.github.io/N3koChat/index.html",
+        "description": "N3koChat, basic chatbot, yet to be tested..."
     }
 ]
