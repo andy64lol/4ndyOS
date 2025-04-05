@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shield.io Badge Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .result img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shield.io Badge Creator</h1>
+        <div class="form-group">
+            <label for="label">Label</label>
+            <input type="text" id="label" placeholder="Enter badge label" />
+        </div>
+        <div class="form-group">
+            <label for="message">Message</label>
+            <input type="text" id="message" placeholder="Enter badge message" />
+        </div>
+        <div class="form-group">
+            <label for="color">Color</label>
+            <input type="text" id="color" placeholder="Enter badge color" />
+        </div>
+        <div class="form-group">
+            <label for="style">Style</label>
+            <select id="style">
+                <option value="flat">Flat</option>
+                <option value="flat-square">Flat Square</option>
+                <option value="plastic">Plastic</option>
+                <option value="for-the-badge">For the Badge</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button onclick="generateBadge()">Generate Badge</button>
+        </div>
+        <div class="result" id="result">
+           
+        </div>
+    </div>
+
+    <script>
+        function generateBadge() {
+            const label = document.getElementById('label').value;
+            const message = document.getElementById('message').value;
+            const color = document.getElementById('color').value;
+            const style = document.getElementById('style').value;
+
+            const url = `https://img.shields.io/badge/${encodeURIComponent(label)}-${encodeURIComponent(message)}-${encodeURIComponent(color)}?style=${style}`;
+            const resultDiv = document.getElementById('result');
+
+            if (label && message && color) {
+                resultDiv.innerHTML = `<img src="${url}" alt="Generated Badge">`;
+            } else {
+                resultDiv.innerHTML = '<p>Please fill out all fields to generate the badge.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
