@@ -46,5 +46,11 @@
         "name": "N3ko Chatbot",
         "path": "https://andy64lol.github.io/N3koChat/index.html",
         "description": "N3koChat, basic chatbot, yet to be tested..."
+    },
+    {
+        "command": "shield",
+        "name": "shield.io badge creator",
+        "path": "NeoM4trixApps/shield_badge_creator_.html",
+        "description": "Basic shield.io badge creator for you"
     }
 ]
