@@ -342,18 +342,6 @@
             <img src="icons/Python.svg" alt="Python Console" />
             <p>Python Console</p>
         </div>
-        <div class="icon" onclick="openWindow('game24')">
-            <img src="icons/gameicons/24.svg" alt="24 Game" />
-            <p>24 Game</p>
-        </div>
-        <div class="icon" onclick="openWindow('mediaPlayer')">
-            <img src="icons/media.png" alt="Media Player" />
-            <p>Media Player</p>
-        </div>
-        <div class="icon" onclick="openWindow('weatherWidget')">
-            <img src="icons/weather.png" alt="Weather Widget" />
-            <p>Weather</p>
-        </div>
     </div>
 
     <div class="taskbar">
@@ -374,9 +362,6 @@
         <div class="app-item" onclick="openWindow('andyDraw')">4ndyDraw</div>
         <div class="app-item" onclick="openWindow('settings')">Settings</div>
         <div class="app-item" onclick="openWindow('pythonConsole')">Python Console</div>
-        <div class="app-item" onclick="openWindow('game24')">24 Game</div>
-        <div class="app-item" onclick="openWindow('mediaPlayer')">Media Player</div>
-        <div class="app-item" onclick="openWindow('weatherWidget')">Weather</div>
         <div class="shutdown-button" onclick="showShutdownMenu()">Turn Off</div>
     </div>
 
@@ -550,43 +535,6 @@
             <pre id="pythonOutput" style="flex: 1; background: #f0f0f0; margin-top: 5px; padding: 10px; overflow: auto; border: 1px solid #ccc; border-radius: 5px;"></pre>
         </div>
     </div>
-    <div id="game24" class="window">
-        <div class="window-header">
-            <span>24 Game</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('game24')">_</span>
-                <span class="close" onclick="closeWindow('game24')">X</span>
-            </span>
-        </div>
-        <div class="window-body" style="padding: 10px;">
-            <p>24 Game coming soon...</p>
-        </div>
-    </div>
-    <div id="mediaPlayer" class="window">
-        <div class="window-header">
-            <span>Media Player</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('mediaPlayer')">_</span>
-                <span class="close" onclick="closeWindow('mediaPlayer')">X</span>
-            </span>
-        </div>
-        <div class="window-body" style="padding: 10px;">
-            <p>Media Player coming soon...</p>
-        </div>
-    </div>
-    <div id="weatherWidget" class="window">
-        <div class="window-header">
-            <span>Weather Widget</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('weatherWidget')">_</span>
-                <span class="close" onclick="closeWindow('weatherWidget')">X</span>
-            </span>
-        </div>
-        <div class="window-body" style="padding: 10px;">
-            <p>Weather Widget coming soon...</p>
-        </div>
-    </div>
-
     <div id="shutdownModal" class="modal">
         <div class="modal-content">
             <h2>Turn Off Options</h2>
