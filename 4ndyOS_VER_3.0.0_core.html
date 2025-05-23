@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>4ndyOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Iceland&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0078d7;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #desktop {
+            flex: 1;
+            background: #f0f0f0;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            padding: 20px;
+            gap: 20px;
+            position: relative;
+            transition: background 0.3s;
+            overflow: auto;
+        }
+
+        .icon {
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .icon p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            color: #333;
+            word-break: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .taskbar {
+            height: 50px;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-size: 14px;
+            border-top: 2px solid #0078d7;
+            position: relative;
+        }
+
+        .start-menu-icon {
+            width: 40px;
+            height: 40px;
+            background: #0078d7;
+            color: white;
+            font-family: 'Iceland', sans-serif;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: transform 0.2s, text-shadow 0.3s;
+            text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff;
+        }
+
+        .start-menu-icon:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff;
+        }
+
+        .taskbar .open-apps {
+            display: flex;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .taskbar .open-app {
+            width: 40px;
+            height: 40px;
+            background: #444;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .taskbar .open-app:hover {
+            background: #666;
+        }
+
+        .taskbar .open-app img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .window {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            width: 600px;
+            height: 400px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            resize: both;
+            overflow: auto;
+            z-index: 10;
+            animation: fadeIn 0.3s;
+        }
+
+        .window-header {
+            background-color: #0078d7;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            cursor: move;
+            user-select: none;
+        }
+
+        .window-header .close {
+            cursor: pointer;
+            color: red;
+        }
+
+        .window-header .minimize {
+            cursor: pointer;
+            color: yellow;
+            margin-right: 10px;
+        }
+
+        .window-body {
+            flex: 1;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        .settings {
+            font-size: 16px;
+        }
+
+        .settings h2 {
+            margin: 0 0 10px 0;
+        }
+
+        .settings label {
+            margin-right: 10px;
+        }
+
+        .settings button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .settings button:hover {
+            background-color: #0056a1;
+        }
+
+        .version-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .start-menu {
+            position: absolute;
+            bottom: 60px;
+            left: 10px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            z-index: 100;
+            animation: fadeIn 0.3s;
+            min-width: 200px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .start-menu .app-item {
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .start-menu .app-item:hover {
+            background: #f0f0f0;
+        }
+
+        .shutdown-button {
+            background: red;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            margin: 5px;
+            padding: 5px;
+            transition: background 0.3s;
+        }
+
+        .shutdown-button:hover {
+            background: darkred;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+        }
+
+        .modal-button {
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .modal-button:hover {
+            background-color: #0056a1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+</head>
+<body>
+    <div id="desktop">
+        <div class="icon" onclick="openWindow('app2')">
+            <img src="icons/search.png" alt="360 Search" />
+            <p>360 Search</p>
+        </div>
+        <div class="icon" onclick="openWindow('app3')">
+            <img src="icons/bilibili.png" alt="Bilibili" />
+            <p>Bilibili</p>
+        </div>
+        <div class="icon" onclick="openWindow('app8')">
+            <img src="https://play-lh.googleusercontent.com/i_lfkfxkGt_v47PUT195nWFcMQEhH0KEGki-oIs4B50n78ILEuYt5mHySwZTEyOe1A" alt="QQ Mail" />
+            <p>QQ Mail</p>
+        </div>
+        <div class="icon" onclick="openWindow('terminal')">
+            <img src="icons/terminal.png" alt="Terminal" />
+            <p>Terminal</p>
+        </div>
+        <div class="icon" onclick="openWindow('calculator')">
+            <img src="icons/calculator.png" alt="Calculator" />
+            <p>Calculator</p>
+        </div>
+        <div class="icon" onclick="openWindow('clicker')">
+            <img src="icons/clicker.png" alt="Clicker" />
+            <p>Clicker</p>
+        </div>
+        <div class="icon" onclick="openWindow('files')">
+            <img src="icons/files.png" alt="Files" />
+            <p>Files</p>
+        </div>
+        <div class="icon" onclick="openWindow('notes')">
+            <img src="icons/notes.png" alt="Notes" />
+            <p>Notes</p>
+        </div>
+        <div class="icon" onclick="openWindow('settings')">
+            <img src="icons/settings.png" alt="Settings" />
+            <p>Settings</p>
+        </div>
+        <div class="icon" onclick="openWindow('andyDraw')">
+            <img src="icons/draw.png" alt="4ndyDraw" />
+            <p>4ndyDraw</p>
+        </div>
+        <div class="icon" onclick="openWindow('pythonConsole')">
+            <img src="icons/Python.svg" alt="Python Console" />
+            <p>Python Console</p>
+        </div>
+        <div class="icon" onclick="openWindow('game24')">
+            <img src="icons/gameicons/24.svg" alt="24 Game" />
+            <p>24 Game</p>
+        </div>
+        <div class="icon" onclick="openWindow('mediaPlayer')">
+            <img src="icons/media.png" alt="Media Player" />
+            <p>Media Player</p>
+        </div>
+        <div class="icon" onclick="openWindow('weatherWidget')">
+            <img src="icons/weather.png" alt="Weather Widget" />
+            <p>Weather</p>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <div class="start-menu-icon" onclick="toggleStartMenu()">4</div>
+        <div class="open-apps" id="openApps"></div>
+        <div id="clock"></div>
+    </div>
+
+    <div class="start-menu" id="startMenu">
+        <div class="app-item" onclick="openWindow('app2')">360 Search</div>
+        <div class="app-item" onclick="openWindow('app3')">Bilibili</div>
+        <div class="app-item" onclick="openWindow('app8')">QQ Mail</div>
+        <div class="app-item" onclick="openWindow('terminal')">Terminal</div>
+        <div class="app-item" onclick="openWindow('calculator')">Calculator</div>
+        <div class="app-item" onclick="openWindow('clicker')">Clicker</div>
+        <div class="app-item" onclick="openWindow('files')">Files</div>
+        <div class="app-item" onclick="openWindow('notes')">Notes</div>
+        <div class="app-item" onclick="openWindow('andyDraw')">4ndyDraw</div>
+        <div class="app-item" onclick="openWindow('settings')">Settings</div>
+        <div class="app-item" onclick="openWindow('pythonConsole')">Python Console</div>
+        <div class="app-item" onclick="openWindow('game24')">24 Game</div>
+        <div class="app-item" onclick="openWindow('mediaPlayer')">Media Player</div>
+        <div class="app-item" onclick="openWindow('weatherWidget')">Weather</div>
+        <div class="shutdown-button" onclick="showShutdownMenu()">Turn Off</div>
+    </div>
+
+    <div id="app2" class="window">
+        <div class="window-header">
+            <span>360 Search</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app2')">_</span>
+                <span class="close" onclick="closeWindow('app2')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://m.so.com/" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="app3" class="window">
+        <div class="window-header">
+            <span>Bilibili</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app3')">_</span>
+                <span class="close" onclick="closeWindow('app3')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://www.bilibili.com" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="app8" class="window">
+        <div class="window-header">
+            <span>QQ Mail</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app8')">_</span>
+                <span class="close" onclick="closeWindow('app8')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://mail.qq.com" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="terminal" class="window">
+        <div class="window-header">
+            <span>Terminal</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('terminal')">_</span>
+                <span class="close" onclick="closeWindow('terminal')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/4ndyTerminal.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="calculator" class="window">
+        <div class="window-header">
+            <span>Calculator</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('calculator')">_</span>
+                <span class="close" onclick="closeWindow('calculator')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/calculator.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="clicker" class="window">
+        <div class="window-header">
+            <span>Clicker</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('clicker')">_</span>
+                <span class="close" onclick="closeWindow('clicker')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/clicker.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="files" class="window">
+        <div class="window-header">
+            <span>Files</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('files')">_</span>
+                <span class="close" onclick="closeWindow('files')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/files.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="notes" class="window">
+        <div class="window-header">
+            <span>Notes</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('notes')">_</span>
+                <span class="close" onclick="closeWindow('notes')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/notes.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="andyDraw" class="window">
+        <div class="window-header">
+            <span>4ndyDraw</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('andyDraw')">_</span>
+                <span class="close" onclick="closeWindow('andyDraw')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/draw.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="settings" class="window">
+        <div class="window-header">
+            <span>Settings</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('settings')">_</span>
+                <span class="close" onclick="closeWindow('settings')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="settings">
+                <h2>Settings</h2>
+                <div>
+                    <h3>Background</h3>
+                    <label for="bgColor">Change Background Color:</label>
+                    <input type="color" id="bgColor" onchange="changeBackground(this.value)" />
+                    <label for="bgUpload">Upload Background Image:</label>
+                    <input type="file" id="bgUpload" accept="image/*" onchange="uploadBackground(event)" />
+                </div>
+                <div>
+                    <h3>Window Settings</h3>
+                    <label for="outlineColor">Outline Color:</label>
+                    <input type="color" id="outlineColor" onchange="changeOutlineColor(this.value)" />
+                </div>
+                <div>
+                    <h3>Screen Settings</h3>
+                    <label for="screenResolution">Screen Resolution:</label>
+                    <input
+                        type="text"
+                        id="screenResolution"
+                        placeholder="e.g., 1920x1080"
+                        onchange="changeScreenResolution(this.value)"
+                    />
+                </div>
+                <button onclick="saveSettings()">Save Changes</button>
+                <div class="version-info">Version: 4ndyOS_VER_3.0.0_core</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pythonConsole" class="window">
+        <div class="window-header">
+            <span>Python Console</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('pythonConsole')">_</span>
+                <span class="close" onclick="closeWindow('pythonConsole')">X</span>
+            </span>
+        </div>
+        <div class="window-body" style="display: flex; flex-direction: column; height: 100%;">
+            <textarea id="pythonInput" style="flex: 1; width: 100%; resize: none; font-family: monospace; font-size: 14px;" placeholder="Type Python code here..."></textarea>
+            <button onclick="runPythonCode()" style="margin-top: 5px; padding: 5px 10px; background-color: #0078d7; color: white; border: none; border-radius: 5px; cursor: pointer;">Run</button>
+            <pre id="pythonOutput" style="flex: 1; background: #f0f0f0; margin-top: 5px; padding: 10px; overflow: auto; border: 1px solid #ccc; border-radius: 5px;"></pre>
+        </div>
+    </div>
+    <div id="game24" class="window">
+        <div class="window-header">
+            <span>24 Game</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('game24')">_</span>
+                <span class="close" onclick="closeWindow('game24')">X</span>
+            </span>
+        </div>
+        <div class="window-body" style="padding: 10px;">
+            <p>24 Game coming soon...</p>
+        </div>
+    </div>
+    <div id="mediaPlayer" class="window">
+        <div class="window-header">
+            <span>Media Player</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('mediaPlayer')">_</span>
+                <span class="close" onclick="closeWindow('mediaPlayer')">X</span>
+            </span>
+        </div>
+        <div class="window-body" style="padding: 10px;">
+            <p>Media Player coming soon...</p>
+        </div>
+    </div>
+    <div id="weatherWidget" class="window">
+        <div class="window-header">
+            <span>Weather Widget</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('weatherWidget')">_</span>
+                <span class="close" onclick="closeWindow('weatherWidget')">X</span>
+            </span>
+        </div>
+        <div class="window-body" style="padding: 10px;">
+            <p>Weather Widget coming soon...</p>
+        </div>
+    </div>
+
+    <div id="shutdownModal" class="modal">
+        <div class="modal-content">
+            <h2>Turn Off Options</h2>
+            <button class="modal-button" onclick="restart()">Restart</button>
+            <button class="modal-button" onclick="turnOff()">Turn Off</button>
+            <button class="modal-button" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let highestZIndex = 1000;
+        let activeWindow = null;
+        let isDragging = false;
+        let initialX;
+        let initialY;
+
+        window.addEventListener('load', async () => {
+            loadSettings();
+            window.pyodide = await loadPyodide();
+        });
+
+        async function runPythonCode() {
+            const input = document.getElementById('pythonInput').value;
+            const output = document.getElementById('pythonOutput');
+            try {
+                let result = await window.pyodide.runPythonAsync(input);
+                output.textContent = result === undefined ? '' : result.toString();
+            } catch (err) {
+                output.textContent = err;
+            }
+        }
+
+        function openWindow(appId) {
+            const window = document.getElementById(appId);
+            window.style.display = 'flex';
+            updateWindowStack(appId);
+            addToTaskbar(appId);
+        }
+
+        function closeWindow(appId) {
+            document.getElementById(appId).style.display = 'none';
+            removeFromTaskbar(appId);
+        }
+
+        function minimizeWindow(appId) {
+            document.getElementById(appId).style.display = 'none';
+        }
+
+        function addToTaskbar(appId) {
+            const openApps = document.getElementById('openApps');
+            const existingApp = Array.from(openApps.children).find(
+                (child) => child.getAttribute('data-app-id') === appId
+            );
+
+            if (!existingApp) {
+                const app = document.createElement('div');
+                app.className = 'open-app';
+                app.setAttribute('data-app-id', appId);
+
+                const windowHeader = document.querySelector(`#${appId} .window-header span:first-child`);
+                const altText = windowHeader ? windowHeader.textContent.trim() : appId;
+                const iconElement = document.querySelector(`.icon[onclick*="${appId}"] img`);
+
+                app.innerHTML = `<img src="${iconElement?.src || 'default-icon.png'}" alt="${altText}" />`;
+                app.onclick = () => toggleWindow(appId);
+                openApps.appendChild(app);
+            }
+        }
+
+        function removeFromTaskbar(appId) {
+            const openApps = document.getElementById('openApps');
+            const app = Array.from(openApps.children).find((child) => child.getAttribute('data-app-id') === appId);
+            if (app) openApps.removeChild(app);
+        }
+
+        function toggleWindow(appId) {
+            const window = document.getElementById(appId);
+            if (window.style.display === 'none') {
+                window.style.display = 'flex';
+                updateWindowStack(appId);
+            } else {
+                window.style.display = 'none';
+            }
+        }
+
+        function toggleStartMenu() {
+            const startMenu = document.getElementById('startMenu');
+            startMenu.style.display = startMenu.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function showShutdownMenu() {
+            document.getElementById('shutdownModal').style.display = 'block';
+            document.getElementById('startMenu').style.display = 'none';
+        }
+
+        function closeModal() {
+            document.getElementById('shutdownModal').style.display = 'none';
+        }
+
+        function restart() {
+            alert('System restarting...');
+            location.reload();
+        }
+
+        function turnOff() {
+            alert('Shutting down...');
+            document.body.innerHTML =
+                '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">System Powered Off</div>';
+            setTimeout(function () {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function updateWindowStack(windowId) {
+            const window = document.getElementById(windowId);
+            highestZIndex += 1;
+            window.style.zIndex = highestZIndex;
+        }
+
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.window-header')) {
+                const window = e.target.closest('.window');
+                const rect = window.getBoundingClientRect();
+                initialX = e.pageX - rect.left;
+                initialY = e.pageY - rect.top;
+                activeWindow = window;
+                isDragging = true;
+                updateWindowStack(window.id);
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && activeWindow) {
+                e.preventDefault();
+                let newX = e.pageX - initialX;
+                let newY = e.pageY - initialY;
+
+                newX = Math.max(0, Math.min(newX, window.innerWidth - activeWindow.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - activeWindow.offsetHeight));
+
+                activeWindow.style.left = `${newX}px`;
+                activeWindow.style.top = `${newY}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            activeWindow = null;
+        });
+
+        function loadSettings() {
+            const bgColor = localStorage.getItem('bgColor');
+            if (bgColor) {
+                document.getElementById('desktop').style.background = bgColor;
+                document.getElementById('bgColor').value = bgColor;
+            }
+
+            const bgImage = localStorage.getItem('bgImage');
+            if (bgImage) {
+                document.getElementById('desktop').style.backgroundImage = `url(${bgImage})`;
+            }
+
+            const outlineColor = localStorage.getItem('outlineColor');
+            if (outlineColor) {
+                document.querySelectorAll('.window').forEach((window) => {
+                    window.style.borderColor = outlineColor;
+                });
+                document.getElementById('outlineColor').value = outlineColor;
+            }
+        }
+
+        function changeBackground(color) {
+            document.getElementById('desktop').style.background = color;
+        }
+
+        function uploadBackground(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imageUrl = e.target.result;
+                document.getElementById('desktop').style.backgroundImage = `url(${imageUrl})`;
+                localStorage.setItem('bgImage', imageUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function changeOutlineColor(color) {
+            document.querySelectorAll('.window').forEach((window) => {
+                window.style.borderColor = color;
+            });
+        }
+
+        function changeScreenResolution(resolution) {
+            const [width, height] = resolution.split('x');
+            if (width && height) {
+                alert('Screen resolution changes will take effect after restart');
+                localStorage.setItem('screenResolution', resolution);
+            }
+        }
+
+        function saveSettings() {
+            const bgColor = document.getElementById('bgColor').value;
+            localStorage.setItem('bgColor', bgColor);
+
+            const outlineColor = document.getElementById('outlineColor').value;
+            localStorage.setItem('outlineColor', outlineColor);
+
+            const bgImage = document.getElementById('desktop').style.backgroundImage;
+            if (bgImage && bgImage !== 'none') {
+                localStorage.setItem('bgImage', bgImage);
+            }
+
+            alert('Settings saved!');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#startMenu') && !e.target.closest('.start-menu-icon')) {
+                document.getElementById('startMenu').style.display = 'none';
+            }
+        });
+
+        document.querySelectorAll('.window').forEach((window) => {
+            window.addEventListener('mousedown', () => {
+                updateWindowStack(window.id);
+            });
+        });
+    </script>
+</body>
+</html>
