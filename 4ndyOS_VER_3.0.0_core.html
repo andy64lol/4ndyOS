@@ -522,27 +522,19 @@
     </div>
 
     <div id="pythonConsole" class="window">
-        <div class="window-header">
-            <span>Python Console</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('pythonConsole')">_</span>
-                <span class="close" onclick="closeWindow('pythonConsole')">X</span>
-            </span>
-        </div>
-        <div class="window-body" style="display: flex; flex-direction: column; height: 100%;">
-            <textarea id="pythonInput" style="flex: 1; width: 100%; resize: none; font-family: monospace; font-size: 14px;" placeholder="Type Python code here..."></textarea>
-            <button onclick="runPythonCode()" style="margin-top: 5px; padding: 5px 10px; background-color: #0078d7; color: white; border: none; border-radius: 5px; cursor: pointer;">Run</button>
-            <pre id="pythonOutput" style="flex: 1; background: #f0f0f0; margin-top: 5px; padding: 10px; overflow: auto; border: 1px solid #ccc; border-radius: 5px;"></pre>
-        </div>
+    <div class="window-header">
+        <span>Python Console</span>
+        <span>
+            <span class="minimize" onclick="minimizeWindow('pythonConsole')">_</span>
+            <span class="close" onclick="closeWindow('pythonConsole')">X</span>
+        </span>
     </div>
-    <div id="shutdownModal" class="modal">
-        <div class="modal-content">
-            <h2>Turn Off Options</h2>
-            <button class="modal-button" onclick="restart()">Restart</button>
-            <button class="modal-button" onclick="turnOff()">Turn Off</button>
-            <button class="modal-button" onclick="closeModal()">Cancel</button>
-        </div>
+    <div class="window-body" style="display: flex; flex-direction: column; height: 100%;">
+        <textarea id="pythonInput" style="flex: 1; width: 100%; resize: none; font-family: monospace; font-size: 14px;" placeholder="Type Python code here..."></textarea>
+        <button onclick="runPythonCode()" style="margin-top: 5px; padding: 5px 10px; background-color: #0078d7; color: white; border: none; border-radius: 5px; cursor: pointer;">Run</button>
+        <pre id="pythonOutput" style="flex: 1; background: #f0f0f0; margin-top: 5px; padding: 10px; overflow: auto; border: 1px solid #ccc; border-radius: 5px;"></pre>
     </div>
+</div>
 
     <script>
         let highestZIndex = 1000;
@@ -551,19 +543,33 @@
         let initialX;
         let initialY;
 
-        window.addEventListener('load', async () => {
-            loadSettings();
-            window.pyodide = await loadPyodide();
-        });
+       window.addEventListener('load', async () => {
+           loadSettings();
+           window.pyodide = await loadPyodide({
+               indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
+           });
+    
+        const pythonOutput = document.getElementById('pythonOutput');
+           window.pyodide.setStdout({batched: (text) => {
+               pythonOutput.textContent += text + '\n';
+           }});
+           window.pyodide.setStderr({batched: (text) => {
+               pythonOutput.textContent += 'Error: ' + text + '\n';
+           }});
+       });
 
         async function runPythonCode() {
             const input = document.getElementById('pythonInput').value;
             const output = document.getElementById('pythonOutput');
             try {
+                output.textContent = '';
+                await window.pyodide.loadPackagesFromImports(input);
                 let result = await window.pyodide.runPythonAsync(input);
-                output.textContent = result === undefined ? '' : result.toString();
+                if (result !== undefined) {
+                    output.textContent += '\n' + result.toString();
+                }
             } catch (err) {
-                output.textContent = err;
+                output.textContent += '\n' + err.toString();
             }
         }
 
