@@ -361,7 +361,7 @@
         <div class="app-item" onclick="openWindow('notes')">Notes</div>
         <div class="app-item" onclick="openWindow('andyDraw')">4ndyDraw</div>
         <div class="app-item" onclick="openWindow('settings')">Settings</div>
-        <div class="app-item" onclick="openWindow('pythonconsole')">Python Console</div>
+        <div class="app-item" onclick="openWindow('pythonConsole')">Python Console</div>
         <div class="shutdown-button" onclick="showShutdownMenu()">Turn Off</div>
     </div>
 
@@ -521,7 +521,7 @@
         </div>
     </div>
 
-    <div id="pythonconsole" class="window">
+    <div id="pythonConsole" class="window">
         <div class="window-header">
             <span>4ndyPython</span>
             <span>
@@ -600,6 +600,11 @@
 
         function openWindow(appId) {
             const window = document.getElementById(appId);
+            if (!window) {
+                console.error(`Window with ID ${appId} not found`);
+                return;
+            }
+            
             window.style.display = 'flex';
             updateWindowStack(appId);
             addToTaskbar(appId);
