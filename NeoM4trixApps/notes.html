@@ -5,11 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes - DeepBlueOS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .note-item:hover { background-color: rgba(59, 130, 246, 0.1); }
         .note-content { resize: none; }
+        .markdown-preview {
+            line-height: 1.6;
+        }
+        .markdown-preview h1 { font-size: 2em; font-weight: bold; margin: 0.5em 0; }
+        .markdown-preview h2 { font-size: 1.5em; font-weight: bold; margin: 0.5em 0; }
+        .markdown-preview h3 { font-size: 1.25em; font-weight: bold; margin: 0.5em 0; }
+        .markdown-preview p { margin: 0.5em 0; }
+        .markdown-preview ul { margin: 0.5em 0; padding-left: 1.5em; }
+        .markdown-preview ol { margin: 0.5em 0; padding-left: 1.5em; }
+        .markdown-preview li { margin: 0.25em 0; }
+        .markdown-preview code { background: #f3f4f6; padding: 0.125em 0.25em; border-radius: 0.25em; font-family: monospace; }
+        .markdown-preview pre { background: #f3f4f6; padding: 1em; border-radius: 0.5em; overflow-x: auto; }
+        .markdown-preview blockquote { border-left: 4px solid #d1d5db; margin: 0.5em 0; padding-left: 1em; color: #6b7280; }
+        .markdown-preview strong { font-weight: bold; }
+        .markdown-preview em { font-style: italic; }
+        .markdown-preview a { color: #3b82f6; text-decoration: underline; }
     </style>
 </head>
 <body class="bg-gray-50 h-screen overflow-hidden">
@@ -50,14 +67,28 @@
             </div>
             
             <!-- Note Editor -->
-            <div class="flex-1 relative">
-                <textarea id="note-content" placeholder="Start writing your note..." 
-                          class="note-content w-full h-full p-4 border-none outline-none text-gray-700 leading-relaxed"></textarea>
+            <div class="flex-1 relative flex">
+                <!-- Editor -->
+                <div id="editor-container" class="flex-1 flex flex-col">
+                    <textarea id="note-content" placeholder="Start writing your note... (supports Markdown)" 
+                              class="note-content flex-1 p-4 border-none outline-none text-gray-700 leading-relaxed resize-none"></textarea>
+                </div>
+                
+                <!-- Preview -->
+                <div id="preview-container" class="hidden flex-1 border-l border-gray-200">
+                    <div id="markdown-preview" class="markdown-preview flex-1 p-4 overflow-y-auto bg-white"></div>
+                </div>
             </div>
             
             <!-- Footer -->
             <div class="p-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
+                    <button id="preview-toggle" class="p-2 hover:bg-gray-200 rounded transition-colors" title="Toggle Preview">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
                     <button id="bold-btn" class="p-2 hover:bg-gray-200 rounded transition-colors" title="Bold">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h5a3 3 0 110 6H6v2h3a3 3 0 110 6H4a1 1 0 01-1-1V4zm3 2v2h3a1 1 0 100-2H6zm0 6v2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
@@ -68,9 +99,14 @@
                             <path d="M7 2a1 1 0 000 2h.5l-1 8H6a1 1 0 000 2h6a1 1 0 100-2h-.5l1-8H13a1 1 0 100-2H7z"></path>
                         </svg>
                     </button>
+                    <button id="code-btn" class="p-2 hover:bg-gray-200 rounded transition-colors" title="Code">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
                 </div>
                 <div class="text-sm text-gray-500">
-                    Auto-saved
+                    Auto-saved • Markdown enabled
                 </div>
             </div>
         </div>
@@ -110,6 +146,11 @@
                 this.emptyState = document.getElementById('empty-state');
                 this.boldBtn = document.getElementById('bold-btn');
                 this.italicBtn = document.getElementById('italic-btn');
+                this.codeBtn = document.getElementById('code-btn');
+                this.previewToggle = document.getElementById('preview-toggle');
+                this.previewContainer = document.getElementById('preview-container');
+                this.markdownPreview = document.getElementById('markdown-preview');
+                this.isPreviewVisible = false;
             }
             
             bindEvents() {
@@ -119,9 +160,14 @@
                 this.noteContent.addEventListener('input', () => {
                     this.updateStats();
                     this.saveCurrentNote();
+                    if (this.isPreviewVisible) {
+                        this.updatePreview();
+                    }
                 });
                 this.boldBtn.addEventListener('click', () => this.formatText('bold'));
                 this.italicBtn.addEventListener('click', () => this.formatText('italic'));
+                this.codeBtn.addEventListener('click', () => this.formatText('code'));
+                this.previewToggle.addEventListener('click', () => this.togglePreview());
                 
                 // Auto-save every 2 seconds
                 setInterval(() => this.saveCurrentNote(), 2000);
@@ -304,13 +350,36 @@
                         formattedText = `**${selectedText}**`;
                     } else if (command === 'italic') {
                         formattedText = `*${selectedText}*`;
+                    } else if (command === 'code') {
+                        formattedText = `\`${selectedText}\``;
                     }
                     
                     textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
                     textarea.focus();
-                    textarea.setSelectionRange(start + (command === 'bold' ? 2 : 1), start + (command === 'bold' ? 2 : 1) + selectedText.length);
+                    const offset = command === 'bold' ? 2 : 1;
+                    textarea.setSelectionRange(start + offset, start + offset + selectedText.length);
                     this.saveCurrentNote();
+                    if (this.isPreviewVisible) {
+                        this.updatePreview();
+                    }
                 }
+            }
+            
+            togglePreview() {
+                this.isPreviewVisible = !this.isPreviewVisible;
+                
+                if (this.isPreviewVisible) {
+                    this.previewContainer.classList.remove('hidden');
+                    this.updatePreview();
+                } else {
+                    this.previewContainer.classList.add('hidden');
+                }
+            }
+            
+            updatePreview() {
+                const content = this.noteContent.value;
+                const html = marked.parse(content);
+                this.markdownPreview.innerHTML = html;
             }
             
             escapeHtml(text) {
