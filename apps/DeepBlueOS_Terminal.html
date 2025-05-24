@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terminal - DeepBlueOS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/shared-filesystem.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -14,6 +15,7 @@
         .terminal-output {
             white-space: pre-wrap;
             word-wrap: break-word;
+            line-height: 1.4;
         }
         .cursor {
             animation: blink 1s infinite;
@@ -35,6 +37,12 @@
         .scrollbar-thin::-webkit-scrollbar-thumb:hover {
             background: #606060;
         }
+        .autocomplete-menu {
+            background: rgba(40, 40, 40, 0.95);
+            border: 1px solid #555;
+            border-radius: 4px;
+            backdrop-filter: blur(8px);
+        }
     </style>
 </head>
 <body class="bg-black text-green-400 h-screen overflow-hidden">
@@ -47,25 +55,32 @@
                     <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
                     <div class="w-3 h-3 bg-green-500 rounded-full"></div>
                 </div>
-                <span class="text-white text-sm font-medium ml-4">4ndyTerminal</span>
+                <span class="text-white text-sm font-medium ml-4">Enhanced Terminal</span>
+                <span id="connection-status" class="text-xs px-2 py-1 rounded bg-green-600 text-white">Connected</span>
             </div>
             <div class="flex items-center space-x-2">
+                <button id="files-btn" class="text-gray-400 hover:text-white px-2 py-1 text-xs bg-blue-600 rounded">Files</button>
                 <button id="clear-btn" class="text-gray-400 hover:text-white px-2 py-1 text-xs">Clear</button>
                 <button id="settings-btn" class="text-gray-400 hover:text-white px-2 py-1 text-xs">Settings</button>
             </div>
         </div>
         
         <!-- Terminal Content -->
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col relative">
             <!-- Output Area -->
             <div id="terminal-output" class="flex-1 p-4 overflow-y-auto scrollbar-thin bg-black">
                 <div class="terminal-output text-sm leading-relaxed"></div>
             </div>
             
+            <!-- Autocomplete Menu -->
+            <div id="autocomplete-menu" class="hidden absolute autocomplete-menu z-10 max-h-32 overflow-y-auto">
+                <!-- Suggestions will be inserted here -->
+            </div>
+            
             <!-- Input Area -->
             <div class="bg-black border-t border-gray-800 p-4">
                 <div class="flex items-center">
-                    <span id="prompt" class="text-blue-400 mr-2">user@deepblueos:~$</span>
+                    <span id="prompt" class="text-blue-400 mr-2">user@deepblueos:/home/user$</span>
                     <div class="flex-1 relative">
                         <input 
                             type="text" 
@@ -73,6 +88,7 @@
                             class="bg-transparent text-green-400 w-full outline-none border-none font-mono text-sm"
                             autocomplete="off"
                             spellcheck="false"
+                            placeholder="Type 'help' for commands..."
                         >
                         <span id="cursor" class="cursor absolute text-green-400">|</span>
                     </div>
@@ -83,7 +99,7 @@
     
     <!-- Settings Modal -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-        <div class="bg-gray-900 rounded-lg p-6 w-96 text-white">
+        <div class="bg-gray-900 rounded-lg p-6 w-96 text-white max-w-full mx-4">
             <h3 class="text-lg font-semibold mb-4">Terminal Settings</h3>
             <div class="space-y-4">
                 <div>
@@ -93,6 +109,7 @@
                         <option value="hacker">Hacker (Blue)</option>
                         <option value="retro">Retro (Amber)</option>
                         <option value="modern">Modern (White)</option>
+                        <option value="cyberpunk">Cyberpunk (Pink)</option>
                     </select>
                 </div>
                 <div>
@@ -105,6 +122,11 @@
                         <option value="20">20px</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Sound Effects:</label>
+                    <input type="checkbox" id="sound-toggle" class="mr-2">
+                    <span class="text-sm">Enable typing sounds</span>
+                </div>
             </div>
             <div class="flex justify-end space-x-2 mt-6">
                 <button id="settings-cancel" class="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
@@ -114,83 +136,85 @@
     </div>
 
     <script>
-        class Terminal {
+        class EnhancedTerminal {
             constructor() {
                 this.output = document.querySelector('.terminal-output');
                 this.input = document.getElementById('command-input');
                 this.prompt = document.getElementById('prompt');
                 this.cursor = document.getElementById('cursor');
                 this.settingsModal = document.getElementById('settings-modal');
+                this.autocompleteMenu = document.getElementById('autocomplete-menu');
                 
                 this.currentDirectory = '/home/user';
                 this.commandHistory = [];
                 this.historyIndex = -1;
-                this.fileSystem = this.initializeFileSystem();
                 this.processes = [];
                 this.theme = localStorage.getItem('terminal-theme') || 'matrix';
                 this.fontSize = localStorage.getItem('terminal-font-size') || '14';
+                this.soundEnabled = localStorage.getItem('terminal-sound') === 'true';
                 
+                // Wait for shared filesystem to be ready
+                this.waitForFileSystem();
+            }
+            
+            waitForFileSystem() {
+                if (window.sharedFS) {
+                    this.fileSystem = window.sharedFS;
+                    this.fileSystem.addObserver(this);
+                    this.initialize();
+                } else {
+                    setTimeout(() => this.waitForFileSystem(), 100);
+                }
+            }
+            
+            initialize() {
                 this.bindEvents();
                 this.applyTheme();
                 this.applyFontSize();
                 this.showWelcome();
                 this.updatePrompt();
+                this.input.focus();
             }
             
-            initializeFileSystem() {
-                return {
-                    '/': {
-                        type: 'directory',
-                        contents: {
-                            'home': {
-                                type: 'directory',
-                                contents: {
-                                    'user': {
-                                        type: 'directory',
-                                        contents: {
-                                            'documents': { type: 'directory', contents: {} },
-                                            'downloads': { type: 'directory', contents: {} },
-                                            'projects': { 
-                                                type: 'directory', 
-                                                contents: {
-                                                    'hello.py': { 
-                                                        type: 'file', 
-                                                        content: 'print("Hello, DeepBlueOS!")' 
-                                                    },
-                                                    'readme.txt': { 
-                                                        type: 'file', 
-                                                        content: 'Welcome to the DeepBlueOS Terminal!\n\nThis is a sample file.' 
-                                                    }
-                                                }
-                                            },
-                                            '.bashrc': { 
-                                                type: 'file', 
-                                                content: '# DeepBlueOS Terminal Configuration' 
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            'bin': { type: 'directory', contents: {} },
-                            'etc': { type: 'directory', contents: {} },
-                            'var': { type: 'directory', contents: {} }
-                        }
-                    }
-                };
+            onFileSystemChange(event, path, data) {
+                // React to file system changes from other apps
+                if (event === 'create') {
+                    this.addOutput(`[File System] Created: ${path}`, 'text-blue-300');
+                } else if (event === 'delete') {
+                    this.addOutput(`[File System] Deleted: ${path}`, 'text-red-300');
+                } else if (event === 'modify') {
+                    this.addOutput(`[File System] Modified: ${path}`, 'text-yellow-300');
+                }
             }
             
             bindEvents() {
                 this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
-                this.input.addEventListener('input', () => this.updateCursor());
+                this.input.addEventListener('input', () => {
+                    this.updateCursor();
+                    this.showAutocomplete();
+                    if (this.soundEnabled) this.playTypingSound();
+                });
                 
                 document.getElementById('clear-btn').addEventListener('click', () => this.clearTerminal());
                 document.getElementById('settings-btn').addEventListener('click', () => this.showSettings());
+                document.getElementById('files-btn').addEventListener('click', () => this.openFileManager());
                 document.getElementById('settings-cancel').addEventListener('click', () => this.hideSettings());
                 document.getElementById('settings-save').addEventListener('click', () => this.saveSettings());
                 
                 // Focus input when clicking anywhere in terminal
-                document.addEventListener('click', () => this.input.focus());
-                this.input.focus();
+                document.addEventListener('click', (e) => {
+                    if (!this.settingsModal.contains(e.target)) {
+                        this.input.focus();
+                    }
+                });
+            }
+            
+            openFileManager() {
+                if (window.parent && window.parent.openApp) {
+                    window.parent.openApp('files');
+                } else {
+                    window.open('files.html', '_blank');
+                }
             }
             
             handleKeydown(e) {
@@ -198,6 +222,7 @@
                     case 'Enter':
                         e.preventDefault();
                         this.executeCommand();
+                        this.hideAutocomplete();
                         break;
                     case 'ArrowUp':
                         e.preventDefault();
@@ -209,7 +234,10 @@
                         break;
                     case 'Tab':
                         e.preventDefault();
-                        this.autoComplete();
+                        this.handleTabCompletion();
+                        break;
+                    case 'Escape':
+                        this.hideAutocomplete();
                         break;
                     case 'c':
                         if (e.ctrlKey) {
@@ -257,6 +285,7 @@
                         this.showHelp();
                         break;
                     case 'ls':
+                    case 'dir':
                         this.listDirectory(args);
                         break;
                     case 'cd':
@@ -266,16 +295,26 @@
                         this.printWorkingDirectory();
                         break;
                     case 'cat':
+                    case 'type':
                         this.displayFile(args[0]);
                         break;
                     case 'mkdir':
                         this.makeDirectory(args[0]);
                         break;
                     case 'touch':
-                        this.createFile(args[0]);
+                        this.createFile(args[0], args.slice(1).join(' '));
                         break;
                     case 'rm':
-                        this.removeFile(args[0]);
+                    case 'del':
+                        this.removeItem(args[0]);
+                        break;
+                    case 'mv':
+                    case 'rename':
+                        this.moveItem(args[0], args[1]);
+                        break;
+                    case 'cp':
+                    case 'copy':
+                        this.copyItem(args[0], args[1]);
                         break;
                     case 'echo':
                         this.echo(args.join(' '));
@@ -293,27 +332,31 @@
                         this.showProcesses();
                         break;
                     case 'clear':
+                    case 'cls':
                         this.clearTerminal();
                         break;
                     case 'history':
                         this.showHistory();
                         break;
-                    case 'python':
-                    case 'python3':
-                        this.runPython(args);
+                    case 'tree':
+                        this.showTree(args[0]);
                         break;
+                    case 'find':
+                        this.findFiles(args[0]);
+                        break;
+                    case 'grep':
+                        this.grepFiles(args[0], args[1]);
+                        break;
+                    case 'edit':
                     case 'nano':
                     case 'vim':
-                        this.openEditor(args[0]);
+                        this.editFile(args[0]);
                         break;
-                    case 'tree':
-                        this.showTree();
+                    case 'files':
+                        this.openFileManager();
                         break;
-                    case 'curl':
-                        this.curl(args);
-                        break;
-                    case 'ping':
-                        this.ping(args[0]);
+                    case 'status':
+                        this.showSystemStatus();
                         break;
                     default:
                         this.commandNotFound(cmd);
@@ -322,95 +365,101 @@
             }
             
             showHelp() {
-                const helpText = `Available commands:
-  help          - Show this help message
-  ls [path]     - List directory contents
-  cd [path]     - Change directory
-  pwd           - Print working directory
-  cat [file]    - Display file contents
-  mkdir [name]  - Create directory
-  touch [file]  - Create empty file
-  rm [file]     - Remove file
-  echo [text]   - Display text
-  date          - Show current date and time
-  whoami        - Show current user
-  uname         - Show system information
-  ps            - Show running processes
-  clear         - Clear terminal screen
-  history       - Show command history
-  python [file] - Run Python script
-  nano [file]   - Open text editor
-  tree          - Show directory structure
-  curl [url]    - Fetch URL content
-  ping [host]   - Ping a host
-
-Keyboard shortcuts:
-  Ctrl+C        - Interrupt current command
-  Ctrl+L        - Clear screen
-  Tab           - Auto-complete
-  ↑/↓ arrows    - Navigate command history`;
+                const helpText = `Enhanced Terminal Commands:
                 
-                this.addOutput(helpText, 'text-blue-300');
+File Operations:
+  ls, dir [path]     - List directory contents
+  cd [path]          - Change directory (.. for parent, ~ for home)
+  pwd                - Print working directory
+  cat, type [file]   - Display file contents
+  mkdir [name]       - Create directory
+  touch [file]       - Create empty file
+  rm, del [item]     - Remove file or directory
+  mv, rename [old] [new] - Move/rename item
+  cp, copy [src] [dst]   - Copy file or directory
+  tree [path]        - Show directory structure
+  find [pattern]     - Find files matching pattern
+  grep [pattern] [file] - Search for text in file
+  edit, nano [file]  - Edit file (opens file manager)
+
+System Commands:
+  echo [text]        - Display text
+  date               - Show current date and time
+  whoami             - Show current user
+  uname              - Show system information
+  ps                 - Show running processes
+  status             - Show system status
+  clear, cls         - Clear terminal screen
+  history            - Show command history
+  files              - Open file manager
+
+Navigation:
+  Tab                - Auto-complete
+  ↑/↓ arrows         - Navigate command history
+  Ctrl+C             - Interrupt current command
+  Ctrl+L             - Clear screen
+
+The terminal is connected to the shared file system.
+Changes made here will be reflected in the File Manager.`;
+                
+                this.addOutput(helpText, 'text-cyan-400');
             }
             
             listDirectory(args) {
-                const path = args[0] || this.currentDirectory;
-                const resolvedPath = this.resolvePath(path);
-                const dir = this.getDirectoryAtPath(resolvedPath);
+                const path = args[0] ? this.fileSystem.resolvePath(this.currentDirectory, args[0]) : this.currentDirectory;
+                const result = this.fileSystem.listDirectory(path);
                 
-                if (!dir) {
-                    this.addOutput(`ls: cannot access '${path}': No such file or directory`, 'text-red-400');
+                if (!result.success) {
+                    this.addOutput(`ls: ${result.error}`, 'text-red-400');
                     return;
                 }
                 
-                if (dir.type !== 'directory') {
-                    this.addOutput(`ls: ${path}: Not a directory`, 'text-red-400');
-                    return;
-                }
-                
-                const contents = Object.keys(dir.contents);
-                if (contents.length === 0) {
+                if (result.items.length === 0) {
                     return; // Empty directory
                 }
                 
-                const output = contents.map(name => {
-                    const item = dir.contents[name];
-                    if (item.type === 'directory') {
-                        return `<span class="text-blue-400 font-bold">${name}/</span>`;
-                    } else {
-                        return `<span class="text-green-400">${name}</span>`;
+                // Sort items: directories first, then files
+                const sorted = result.items.sort((a, b) => {
+                    if (a.type !== b.type) {
+                        return a.type === 'directory' ? -1 : 1;
                     }
-                }).join('  ');
+                    return a.name.localeCompare(b.name);
+                });
                 
-                this.addOutput(output, '', true);
+                const output = sorted.map(item => {
+                    const size = item.type === 'file' ? `${item.size || 0}B` : '';
+                    const date = item.modified ? new Date(item.modified).toLocaleDateString() : '';
+                    const color = item.type === 'directory' ? 'text-blue-400' : 'text-white';
+                    const icon = item.type === 'directory' ? '📁' : '📄';
+                    return `${icon} ${item.name.padEnd(20)} ${size.padEnd(8)} ${date}`;
+                }).join('\n');
+                
+                this.addOutput(output);
             }
             
             changeDirectory(path) {
                 if (!path) {
                     this.currentDirectory = '/home/user';
-                    this.updatePrompt();
-                    return;
+                } else if (path === '~') {
+                    this.currentDirectory = '/home/user';
+                } else {
+                    const newPath = this.fileSystem.resolvePath(this.currentDirectory, path);
+                    const dir = this.fileSystem.getItemAtPath(newPath);
+                    
+                    if (!dir) {
+                        this.addOutput(`cd: ${path}: No such file or directory`, 'text-red-400');
+                        return;
+                    }
+                    
+                    if (dir.type !== 'directory') {
+                        this.addOutput(`cd: ${path}: Not a directory`, 'text-red-400');
+                        return;
+                    }
+                    
+                    this.currentDirectory = newPath;
                 }
                 
-                const resolvedPath = this.resolvePath(path);
-                const dir = this.getDirectoryAtPath(resolvedPath);
-                
-                if (!dir) {
-                    this.addOutput(`cd: ${path}: No such file or directory`, 'text-red-400');
-                    return;
-                }
-                
-                if (dir.type !== 'directory') {
-                    this.addOutput(`cd: ${path}: Not a directory`, 'text-red-400');
-                    return;
-                }
-                
-                this.currentDirectory = resolvedPath;
                 this.updatePrompt();
-            }
-            
-            printWorkingDirectory() {
-                this.addOutput(this.currentDirectory);
             }
             
             displayFile(filename) {
@@ -419,20 +468,15 @@ Keyboard shortcuts:
                     return;
                 }
                 
-                const path = this.resolvePath(filename);
-                const file = this.getFileAtPath(path);
+                const filePath = this.fileSystem.resolvePath(this.currentDirectory, filename);
+                const result = this.fileSystem.readFile(filePath);
                 
-                if (!file) {
-                    this.addOutput(`cat: ${filename}: No such file or directory`, 'text-red-400');
+                if (!result.success) {
+                    this.addOutput(`cat: ${result.error}`, 'text-red-400');
                     return;
                 }
                 
-                if (file.type !== 'file') {
-                    this.addOutput(`cat: ${filename}: Is a directory`, 'text-red-400');
-                    return;
-                }
-                
-                this.addOutput(file.content || '', 'text-yellow-300');
+                this.addOutput(result.content, 'text-gray-300');
             }
             
             makeDirectory(dirname) {
@@ -441,201 +485,225 @@ Keyboard shortcuts:
                     return;
                 }
                 
-                const path = this.resolvePath(dirname);
-                const parentPath = this.getParentPath(path);
-                const parentDir = this.getDirectoryAtPath(parentPath);
-                const name = this.getBasename(path);
+                const result = this.fileSystem.createDirectory(this.currentDirectory, dirname);
                 
-                if (!parentDir) {
-                    this.addOutput(`mkdir: cannot create directory '${dirname}': No such file or directory`, 'text-red-400');
-                    return;
+                if (!result.success) {
+                    this.addOutput(`mkdir: ${result.error}`, 'text-red-400');
+                } else {
+                    this.addOutput(`Directory created: ${dirname}`, 'text-green-400');
                 }
-                
-                if (parentDir.contents[name]) {
-                    this.addOutput(`mkdir: cannot create directory '${dirname}': File exists`, 'text-red-400');
-                    return;
-                }
-                
-                parentDir.contents[name] = { type: 'directory', contents: {} };
-                this.addOutput(`Directory '${dirname}' created`, 'text-green-400');
             }
             
-            createFile(filename) {
+            createFile(filename, content = '') {
                 if (!filename) {
                     this.addOutput('touch: missing file operand', 'text-red-400');
                     return;
                 }
                 
-                const path = this.resolvePath(filename);
-                const parentPath = this.getParentPath(path);
-                const parentDir = this.getDirectoryAtPath(parentPath);
-                const name = this.getBasename(path);
+                const result = this.fileSystem.createFile(this.currentDirectory, filename, content);
                 
-                if (!parentDir) {
-                    this.addOutput(`touch: cannot touch '${filename}': No such file or directory`, 'text-red-400');
-                    return;
-                }
-                
-                if (!parentDir.contents[name]) {
-                    parentDir.contents[name] = { type: 'file', content: '' };
-                    this.addOutput(`File '${filename}' created`, 'text-green-400');
+                if (!result.success) {
+                    this.addOutput(`touch: ${result.error}`, 'text-red-400');
+                } else {
+                    this.addOutput(`File created: ${filename}`, 'text-green-400');
                 }
             }
             
-            removeFile(filename) {
-                if (!filename) {
+            removeItem(itemName) {
+                if (!itemName) {
                     this.addOutput('rm: missing operand', 'text-red-400');
                     return;
                 }
                 
-                const path = this.resolvePath(filename);
-                const parentPath = this.getParentPath(path);
-                const parentDir = this.getDirectoryAtPath(parentPath);
-                const name = this.getBasename(path);
+                const itemPath = this.fileSystem.resolvePath(this.currentDirectory, itemName);
+                const result = this.fileSystem.deleteItem(itemPath);
                 
-                if (!parentDir || !parentDir.contents[name]) {
-                    this.addOutput(`rm: cannot remove '${filename}': No such file or directory`, 'text-red-400');
-                    return;
-                }
-                
-                delete parentDir.contents[name];
-                this.addOutput(`File '${filename}' removed`, 'text-green-400');
-            }
-            
-            echo(text) {
-                this.addOutput(text, 'text-yellow-300');
-            }
-            
-            showDate() {
-                const now = new Date();
-                this.addOutput(now.toString(), 'text-cyan-400');
-            }
-            
-            showUser() {
-                this.addOutput('user', 'text-green-400');
-            }
-            
-            showSystem() {
-                this.addOutput('DeepBlueOS 1.0.0 Web Terminal', 'text-cyan-400');
-            }
-            
-            showProcesses() {
-                const processes = [
-                    'PID  COMMAND',
-                    '1    init',
-                    '42   terminal',
-                    '156  deepblueos'
-                ];
-                this.addOutput(processes.join('\n'), 'text-cyan-400');
-            }
-            
-            showHistory() {
-                this.commandHistory.forEach((cmd, index) => {
-                    this.addOutput(`${index + 1}  ${cmd}`, 'text-gray-400');
-                });
-            }
-            
-            runPython(args) {
-                if (args.length === 0) {
-                    this.addOutput('Python 3.9.0 Interactive Shell (Web Terminal)', 'text-yellow-300');
-                    this.addOutput('Type "exit()" to quit', 'text-gray-400');
-                    return;
-                }
-                
-                const filename = args[0];
-                const path = this.resolvePath(filename);
-                const file = this.getFileAtPath(path);
-                
-                if (!file) {
-                    this.addOutput(`python: can't open file '${filename}': No such file or directory`, 'text-red-400');
-                    return;
-                }
-                
-                if (file.type !== 'file') {
-                    this.addOutput(`python: '${filename}' is a directory`, 'text-red-400');
-                    return;
-                }
-                
-                // Simple Python execution simulation
-                const content = file.content || '';
-                if (content.includes('print(')) {
-                    const match = content.match(/print\("([^"]*)"\)/);
-                    if (match) {
-                        this.addOutput(match[1], 'text-yellow-300');
-                    }
+                if (!result.success) {
+                    this.addOutput(`rm: ${result.error}`, 'text-red-400');
                 } else {
-                    this.addOutput('Python script executed successfully', 'text-green-400');
+                    this.addOutput(`Removed: ${itemName}`, 'text-yellow-400');
                 }
             }
             
-            openEditor(filename) {
-                if (!filename) {
-                    this.addOutput('Editor: missing filename', 'text-red-400');
+            showTree(startPath) {
+                const path = startPath ? this.fileSystem.resolvePath(this.currentDirectory, startPath) : this.currentDirectory;
+                const result = this.fileSystem.listDirectory(path);
+                
+                if (!result.success) {
+                    this.addOutput(`tree: ${result.error}`, 'text-red-400');
                     return;
                 }
                 
-                this.addOutput(`Opening ${filename} in editor...`, 'text-cyan-400');
-                this.addOutput('(This is a simulated editor - use cat to view files)', 'text-gray-400');
+                this.addOutput(`📁 ${path}`, 'text-blue-400');
+                this.displayTree(path, '', new Set());
             }
             
-            showTree() {
-                this.addOutput('Directory structure:', 'text-cyan-400');
-                this.renderTree(this.currentDirectory, '', true);
-            }
-            
-            renderTree(path, prefix, isLast) {
-                const dir = this.getDirectoryAtPath(path);
-                if (!dir || dir.type !== 'directory') return;
+            displayTree(path, prefix, visited) {
+                if (visited.has(path)) return; // Prevent infinite recursion
+                visited.add(path);
                 
-                const entries = Object.entries(dir.contents);
-                entries.forEach(([name, item], index) => {
-                    const isLastItem = index === entries.length - 1;
-                    const connector = isLastItem ? '└── ' : '├── ';
+                const result = this.fileSystem.listDirectory(path);
+                if (!result.success) return;
+                
+                const items = result.items.sort((a, b) => {
+                    if (a.type !== b.type) {
+                        return a.type === 'directory' ? -1 : 1;
+                    }
+                    return a.name.localeCompare(b.name);
+                });
+                
+                items.forEach((item, index) => {
+                    const isLast = index === items.length - 1;
+                    const connector = isLast ? '└── ' : '├── ';
                     const icon = item.type === 'directory' ? '📁' : '📄';
+                    const color = item.type === 'directory' ? 'text-blue-400' : 'text-gray-300';
                     
-                    this.addOutput(`${prefix}${connector}${icon} ${name}`, 'text-blue-300', true);
+                    this.addOutput(`${prefix}${connector}${icon} ${item.name}`, color);
                     
                     if (item.type === 'directory') {
-                        const newPrefix = prefix + (isLastItem ? '    ' : '│   ');
-                        this.renderTree(path + (path === '/' ? '' : '/') + name, newPrefix, false);
+                        const newPrefix = prefix + (isLast ? '    ' : '│   ');
+                        const childPath = path === '/' ? `/${item.name}` : `${path}/${item.name}`;
+                        this.displayTree(childPath, newPrefix, visited);
                     }
                 });
             }
             
-            curl(args) {
-                if (args.length === 0) {
-                    this.addOutput('curl: missing URL', 'text-red-400');
+            showSystemStatus() {
+                const storage = this.fileSystem.calculateStorageUsage();
+                const uptime = Math.floor((Date.now() - performance.timing.navigationStart) / 1000);
+                
+                const statusText = `System Status:
+                
+Memory Usage:    ${storage.usedMB} MB / 1024 MB (${storage.percentage.toFixed(1)}%)
+Uptime:          ${Math.floor(uptime / 60)}m ${uptime % 60}s
+File System:     Connected (Shared)
+Terminal:        Enhanced Terminal v2.0
+User:            user@deepblueos
+Shell:           /bin/bash
+Current Dir:     ${this.currentDirectory}
+Commands Run:    ${this.commandHistory.length}`;
+                
+                this.addOutput(statusText, 'text-cyan-400');
+            }
+            
+            editFile(filename) {
+                if (!filename) {
+                    this.addOutput('edit: missing file operand', 'text-red-400');
                     return;
                 }
                 
-                const url = args[0];
-                this.addOutput(`Fetching ${url}...`, 'text-cyan-400');
-                this.addOutput('(This is a simulated request)', 'text-gray-400');
-                this.addOutput('HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html><body>Sample response</body></html>', 'text-yellow-300');
+                this.addOutput(`Opening ${filename} in file manager...`, 'text-blue-400');
+                this.openFileManager();
             }
             
-            ping(host) {
-                if (!host) {
-                    this.addOutput('ping: missing hostname', 'text-red-400');
+            showAutocomplete() {
+                const input = this.input.value;
+                if (input.length < 2) {
+                    this.hideAutocomplete();
                     return;
                 }
                 
-                this.addOutput(`PING ${host} (127.0.0.1): 56 data bytes`, 'text-cyan-400');
-                for (let i = 1; i <= 3; i++) {
-                    const time = Math.floor(Math.random() * 50) + 10;
-                    this.addOutput(`64 bytes from ${host}: icmp_seq=${i} time=${time}ms`, 'text-green-400');
+                const parts = input.split(' ');
+                const currentPart = parts[parts.length - 1];
+                
+                // Command completion
+                if (parts.length === 1) {
+                    const commands = ['help', 'ls', 'cd', 'pwd', 'cat', 'mkdir', 'touch', 'rm', 'mv', 'cp', 'echo', 'date', 'whoami', 'uname', 'ps', 'clear', 'history', 'tree', 'find', 'grep', 'edit', 'files', 'status'];
+                    const matches = commands.filter(cmd => cmd.startsWith(currentPart));
+                    this.showSuggestions(matches);
+                } else {
+                    // File/directory completion
+                    const result = this.fileSystem.listDirectory(this.currentDirectory);
+                    if (result.success) {
+                        const matches = result.items
+                            .filter(item => item.name.startsWith(currentPart))
+                            .map(item => item.name);
+                        this.showSuggestions(matches);
+                    }
                 }
             }
             
-            commandNotFound(cmd) {
-                this.addOutput(`bash: ${cmd}: command not found`, 'text-red-400');
-                this.addOutput('Type "help" for available commands', 'text-gray-400');
+            showSuggestions(suggestions) {
+                if (suggestions.length === 0) {
+                    this.hideAutocomplete();
+                    return;
+                }
+                
+                this.autocompleteMenu.innerHTML = suggestions.map(suggestion => 
+                    `<div class="px-3 py-1 hover:bg-gray-600 cursor-pointer text-sm">${suggestion}</div>`
+                ).join('');
+                
+                this.autocompleteMenu.classList.remove('hidden');
+                this.positionAutocomplete();
+                
+                // Add click handlers
+                this.autocompleteMenu.querySelectorAll('div').forEach((item, index) => {
+                    item.addEventListener('click', () => {
+                        this.selectSuggestion(suggestions[index]);
+                    });
+                });
+            }
+            
+            hideAutocomplete() {
+                this.autocompleteMenu.classList.add('hidden');
+            }
+            
+            selectSuggestion(suggestion) {
+                const parts = this.input.value.split(' ');
+                parts[parts.length - 1] = suggestion;
+                this.input.value = parts.join(' ') + ' ';
+                this.hideAutocomplete();
+                this.updateCursor();
+                this.input.focus();
+            }
+            
+            positionAutocomplete() {
+                const inputRect = this.input.getBoundingClientRect();
+                const terminalRect = document.getElementById('terminal-output').getBoundingClientRect();
+                
+                this.autocompleteMenu.style.left = `${inputRect.left}px`;
+                this.autocompleteMenu.style.bottom = `${window.innerHeight - inputRect.top + 5}px`;
+                this.autocompleteMenu.style.minWidth = `${Math.min(300, inputRect.width)}px`;
+            }
+            
+            handleTabCompletion() {
+                const suggestions = this.autocompleteMenu.querySelectorAll('div');
+                if (suggestions.length === 1) {
+                    suggestions[0].click();
+                } else if (suggestions.length > 1) {
+                    this.showAutocomplete();
+                }
+            }
+            
+            playTypingSound() {
+                // Simple beep sound simulation
+                if (this.audioContext) {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    gainNode.gain.value = 0.01;
+                    
+                    oscillator.start();
+                    oscillator.stop(this.audioContext.currentTime + 0.05);
+                }
+            }
+            
+            initAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Audio context not supported');
+                }
             }
             
             navigateHistory(direction) {
                 if (this.commandHistory.length === 0) return;
                 
-                if (direction === -1) {
+                if (direction < 0) {
                     if (this.historyIndex === -1) {
                         this.historyIndex = this.commandHistory.length - 1;
                     } else if (this.historyIndex > 0) {
@@ -652,41 +720,8 @@ Keyboard shortcuts:
                     }
                 }
                 
-                this.input.value = this.commandHistory[this.historyIndex] || '';
+                this.input.value = this.commandHistory[this.historyIndex];
                 this.updateCursor();
-            }
-            
-            autoComplete() {
-                const command = this.input.value;
-                const parts = command.split(' ');
-                const lastPart = parts[parts.length - 1];
-                
-                if (parts.length === 1) {
-                    // Command completion
-                    const commands = ['help', 'ls', 'cd', 'pwd', 'cat', 'mkdir', 'touch', 'rm', 'echo', 'date', 'whoami', 'uname', 'ps', 'clear', 'history', 'python', 'nano', 'tree', 'curl', 'ping'];
-                    const matches = commands.filter(cmd => cmd.startsWith(lastPart));
-                    
-                    if (matches.length === 1) {
-                        this.input.value = matches[0] + ' ';
-                        this.updateCursor();
-                    } else if (matches.length > 1) {
-                        this.addOutput(matches.join('  '), 'text-blue-300');
-                    }
-                } else {
-                    // File/directory completion
-                    const dir = this.getDirectoryAtPath(this.currentDirectory);
-                    if (dir && dir.contents) {
-                        const matches = Object.keys(dir.contents).filter(name => name.startsWith(lastPart));
-                        
-                        if (matches.length === 1) {
-                            parts[parts.length - 1] = matches[0];
-                            this.input.value = parts.join(' ') + ' ';
-                            this.updateCursor();
-                        } else if (matches.length > 1) {
-                            this.addOutput(matches.join('  '), 'text-blue-300');
-                        }
-                    }
-                }
             }
             
             interrupt() {
@@ -701,9 +736,9 @@ Keyboard shortcuts:
             }
             
             showWelcome() {
-                const welcomeText = `Welcome to DeepBlueOS Terminal v1.0.0
-Type "help" for available commands.
-`;
+                const welcomeText = `Welcome to Enhanced DeepBlueOS Terminal v2.0
+Connected to shared file system. Type "help" for commands.
+Changes made here will sync with the File Manager.`;
                 this.addOutput(welcomeText, 'text-cyan-400');
             }
             
@@ -721,20 +756,14 @@ Type "help" for available commands.
             getTextWidth(text) {
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                context.font = `${this.fontSize}px 'Fira Code', monospace`;
+                context.font = getComputedStyle(this.input).font;
                 return context.measureText(text).width;
             }
             
-            addOutput(text, className = 'text-green-400', html = false) {
+            addOutput(text, className = 'text-green-400') {
                 const line = document.createElement('div');
                 line.className = className;
-                
-                if (html) {
-                    line.innerHTML = text;
-                } else {
-                    line.textContent = text;
-                }
-                
+                line.textContent = text;
                 this.output.appendChild(line);
                 this.scrollToBottom();
             }
@@ -744,65 +773,54 @@ Type "help" for available commands.
                 outputContainer.scrollTop = outputContainer.scrollHeight;
             }
             
-            // Path utility functions
-            resolvePath(path) {
-                if (path.startsWith('/')) {
-                    return this.normalizePath(path);
-                } else {
-                    return this.normalizePath(`${this.currentDirectory}/${path}`);
-                }
+            echo(text) {
+                this.addOutput(text, 'text-white');
             }
             
-            normalizePath(path) {
-                const parts = path.split('/').filter(p => p && p !== '.');
-                const normalized = [];
-                
-                for (const part of parts) {
-                    if (part === '..') {
-                        normalized.pop();
-                    } else {
-                        normalized.push(part);
-                    }
-                }
-                
-                return '/' + normalized.join('/');
+            showDate() {
+                this.addOutput(new Date().toString(), 'text-yellow-400');
             }
             
-            getParentPath(path) {
-                const parts = path.split('/').filter(Boolean);
-                parts.pop();
-                return '/' + parts.join('/');
+            showUser() {
+                this.addOutput('user', 'text-blue-400');
             }
             
-            getBasename(path) {
-                const parts = path.split('/').filter(Boolean);
-                return parts[parts.length - 1] || '';
+            showSystem() {
+                this.addOutput('DeepBlueOS 2.0 WebTerminal x86_64', 'text-purple-400');
             }
             
-            getDirectoryAtPath(path) {
-                return this.getFileAtPath(path);
+            showProcesses() {
+                const processes = [
+                    'PID  USER     COMMAND',
+                    '1    root     /sbin/init',
+                    '42   user     enhanced-terminal',
+                    '43   user     file-manager',
+                    '44   user     system-monitor'
+                ];
+                processes.forEach(proc => this.addOutput(proc, 'text-gray-300'));
             }
             
-            getFileAtPath(path) {
-                const parts = path.split('/').filter(Boolean);
-                let current = this.fileSystem['/'];
-                
-                for (const part of parts) {
-                    if (current.type === 'directory' && current.contents && current.contents[part]) {
-                        current = current.contents[part];
-                    } else {
-                        return null;
-                    }
-                }
-                
-                return current;
+            showHistory() {
+                this.commandHistory.forEach((cmd, index) => {
+                    this.addOutput(`${index + 1}  ${cmd}`, 'text-gray-300');
+                });
             }
             
-            // Settings
+            commandNotFound(cmd) {
+                this.addOutput(`bash: ${cmd}: command not found`, 'text-red-400');
+                this.addOutput(`Type 'help' for available commands`, 'text-blue-300');
+            }
+            
+            printWorkingDirectory() {
+                this.addOutput(this.currentDirectory, 'text-blue-400');
+            }
+            
+            // Settings functions
             showSettings() {
                 this.settingsModal.classList.remove('hidden');
                 document.getElementById('theme-select').value = this.theme;
                 document.getElementById('font-size-select').value = this.fontSize;
+                document.getElementById('sound-toggle').checked = this.soundEnabled;
             }
             
             hideSettings() {
@@ -812,12 +830,19 @@ Type "help" for available commands.
             saveSettings() {
                 this.theme = document.getElementById('theme-select').value;
                 this.fontSize = document.getElementById('font-size-select').value;
+                this.soundEnabled = document.getElementById('sound-toggle').checked;
                 
                 localStorage.setItem('terminal-theme', this.theme);
                 localStorage.setItem('terminal-font-size', this.fontSize);
+                localStorage.setItem('terminal-sound', this.soundEnabled);
                 
                 this.applyTheme();
                 this.applyFontSize();
+                
+                if (this.soundEnabled && !this.audioContext) {
+                    this.initAudioContext();
+                }
+                
                 this.hideSettings();
             }
             
@@ -838,6 +863,9 @@ Type "help" for available commands.
                     case 'modern':
                         body.classList.add('bg-gray-800', 'text-white');
                         break;
+                    case 'cyberpunk':
+                        body.classList.add('bg-purple-900', 'text-pink-400');
+                        break;
                 }
             }
             
@@ -850,8 +878,10 @@ Type "help" for available commands.
             }
         }
         
-        // Initialize terminal
-        const terminal = new Terminal();
+        // Initialize terminal when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new EnhancedTerminal();
+        });
     </script>
 </body>
 </html>
