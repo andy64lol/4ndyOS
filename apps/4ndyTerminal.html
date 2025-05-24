@@ -1,297 +1,857 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4ndyTerminal VER 1.0.0</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-    body {
-      background-color: #121212;
-      color: #00ffff;
-      font-family: 'VT323', monospace;
-      font-size: 18px;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      justify-content: flex-end;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    #terminal {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 20px;
-      border-top: 2px solid #00ffff;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-      border-radius: 10px;
-      background-color: #1e1e1e;
-      transition: box-shadow 0.3s ease, background-color 0.3s ease;
-    }
-    #input-line {
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      background-color: #2e2e2e;
-      border-top: 2px solid #00ffff;
-      border-radius: 0 0 10px 10px;
-      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    #input-line span {
-      margin-right: 5px;
-      color: #00ffff; 
-      transition: color 0.3s ease;
-    }
-    #input {
-      background: none;
-      border: none;
-      color: #00ffff;
-      font-family: 'VT323', monospace;
-      font-size: 18px;
-      width: 100%;
-      outline: none;
-      padding: 5px;
-      border-radius: 5px;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    #input:focus {
-      background-color: rgba(0, 255, 255, 0.1);
-    }
-    #output {
-      white-space: pre-wrap;
-      line-height: 1.5;
-      margin-bottom: 10px;
-    }
-    #time-date {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: #00ffff;
-      font-size: 14px;
-      transition: color 0.3s ease;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal - DeepBlueOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Fira Code', monospace; 
+            background: #0a0a0a;
+        }
+        .terminal-output {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .cursor {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #606060;
+        }
+    </style>
 </head>
-<body>
-  <div id="terminal">
-    <div id="output"></div>
-  </div>
-  <div id="input-line">
-    <span id="user-label">USER:</span>
-    <input type="text" id="input" autofocus>
-  </div>
-  <div id="time-date"></div>
+<body class="bg-black text-green-400 h-screen overflow-hidden">
+    <div class="flex flex-col h-full">
+        <!-- Terminal Header -->
+        <div class="bg-gray-900 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="flex space-x-1">
+                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                <span class="text-white text-sm font-medium ml-4">4ndyTerminal</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="clear-btn" class="text-gray-400 hover:text-white px-2 py-1 text-xs">Clear</button>
+                <button id="settings-btn" class="text-gray-400 hover:text-white px-2 py-1 text-xs">Settings</button>
+            </div>
+        </div>
+        
+        <!-- Terminal Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Output Area -->
+            <div id="terminal-output" class="flex-1 p-4 overflow-y-auto scrollbar-thin bg-black">
+                <div class="terminal-output text-sm leading-relaxed"></div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="bg-black border-t border-gray-800 p-4">
+                <div class="flex items-center">
+                    <span id="prompt" class="text-blue-400 mr-2">user@deepblueos:~$</span>
+                    <div class="flex-1 relative">
+                        <input 
+                            type="text" 
+                            id="command-input" 
+                            class="bg-transparent text-green-400 w-full outline-none border-none font-mono text-sm"
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                        <span id="cursor" class="cursor absolute text-green-400">|</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-gray-900 rounded-lg p-6 w-96 text-white">
+            <h3 class="text-lg font-semibold mb-4">Terminal Settings</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Theme:</label>
+                    <select id="theme-select" class="w-full bg-gray-800 text-white border border-gray-600 rounded px-3 py-2">
+                        <option value="matrix">Matrix (Green)</option>
+                        <option value="hacker">Hacker (Blue)</option>
+                        <option value="retro">Retro (Amber)</option>
+                        <option value="modern">Modern (White)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Font Size:</label>
+                    <select id="font-size-select" class="w-full bg-gray-800 text-white border border-gray-600 rounded px-3 py-2">
+                        <option value="12">12px</option>
+                        <option value="14" selected>14px</option>
+                        <option value="16">16px</option>
+                        <option value="18">18px</option>
+                        <option value="20">20px</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 mt-6">
+                <button id="settings-cancel" class="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
+                <button id="settings-save" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+            </div>
+        </div>
+    </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
-  <script>
-    const output = document.getElementById('output');
-    const input = document.getElementById('input');
-    const timeDateElement = document.getElementById('time-date');
-    const userLabel = document.getElementById('user-label'); 
-    let username = "user";
-    let currentMode = "dark";
+    <script>
+        class Terminal {
+            constructor() {
+                this.output = document.querySelector('.terminal-output');
+                this.input = document.getElementById('command-input');
+                this.prompt = document.getElementById('prompt');
+                this.cursor = document.getElementById('cursor');
+                this.settingsModal = document.getElementById('settings-modal');
+                
+                this.currentDirectory = '/home/user';
+                this.commandHistory = [];
+                this.historyIndex = -1;
+                this.fileSystem = this.initializeFileSystem();
+                this.processes = [];
+                this.theme = localStorage.getItem('terminal-theme') || 'matrix';
+                this.fontSize = localStorage.getItem('terminal-font-size') || '14';
+                
+                this.bindEvents();
+                this.applyTheme();
+                this.applyFontSize();
+                this.showWelcome();
+                this.updatePrompt();
+            }
+            
+            initializeFileSystem() {
+                return {
+                    '/': {
+                        type: 'directory',
+                        contents: {
+                            'home': {
+                                type: 'directory',
+                                contents: {
+                                    'user': {
+                                        type: 'directory',
+                                        contents: {
+                                            'documents': { type: 'directory', contents: {} },
+                                            'downloads': { type: 'directory', contents: {} },
+                                            'projects': { 
+                                                type: 'directory', 
+                                                contents: {
+                                                    'hello.py': { 
+                                                        type: 'file', 
+                                                        content: 'print("Hello, DeepBlueOS!")' 
+                                                    },
+                                                    'readme.txt': { 
+                                                        type: 'file', 
+                                                        content: 'Welcome to the DeepBlueOS Terminal!\n\nThis is a sample file.' 
+                                                    }
+                                                }
+                                            },
+                                            '.bashrc': { 
+                                                type: 'file', 
+                                                content: '# DeepBlueOS Terminal Configuration' 
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            'bin': { type: 'directory', contents: {} },
+                            'etc': { type: 'directory', contents: {} },
+                            'var': { type: 'directory', contents: {} }
+                        }
+                    }
+                };
+            }
+            
+            bindEvents() {
+                this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
+                this.input.addEventListener('input', () => this.updateCursor());
+                
+                document.getElementById('clear-btn').addEventListener('click', () => this.clearTerminal());
+                document.getElementById('settings-btn').addEventListener('click', () => this.showSettings());
+                document.getElementById('settings-cancel').addEventListener('click', () => this.hideSettings());
+                document.getElementById('settings-save').addEventListener('click', () => this.saveSettings());
+                
+                // Focus input when clicking anywhere in terminal
+                document.addEventListener('click', () => this.input.focus());
+                this.input.focus();
+            }
+            
+            handleKeydown(e) {
+                switch(e.key) {
+                    case 'Enter':
+                        e.preventDefault();
+                        this.executeCommand();
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        this.navigateHistory(-1);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        this.navigateHistory(1);
+                        break;
+                    case 'Tab':
+                        e.preventDefault();
+                        this.autoComplete();
+                        break;
+                    case 'c':
+                        if (e.ctrlKey) {
+                            e.preventDefault();
+                            this.interrupt();
+                        }
+                        break;
+                    case 'l':
+                        if (e.ctrlKey) {
+                            e.preventDefault();
+                            this.clearTerminal();
+                        }
+                        break;
+                }
+            }
+            
+            executeCommand() {
+                const command = this.input.value.trim();
+                if (command) {
+                    this.commandHistory.push(command);
+                    if (this.commandHistory.length > 100) {
+                        this.commandHistory.shift();
+                    }
+                }
+                
+                this.historyIndex = -1;
+                this.addOutput(`${this.prompt.textContent} ${command}`);
+                
+                if (command) {
+                    this.processCommand(command);
+                }
+                
+                this.input.value = '';
+                this.updateCursor();
+                this.scrollToBottom();
+            }
+            
+            processCommand(command) {
+                const parts = command.trim().split(/\s+/);
+                const cmd = parts[0];
+                const args = parts.slice(1);
+                
+                switch(cmd) {
+                    case 'help':
+                        this.showHelp();
+                        break;
+                    case 'ls':
+                        this.listDirectory(args);
+                        break;
+                    case 'cd':
+                        this.changeDirectory(args[0]);
+                        break;
+                    case 'pwd':
+                        this.printWorkingDirectory();
+                        break;
+                    case 'cat':
+                        this.displayFile(args[0]);
+                        break;
+                    case 'mkdir':
+                        this.makeDirectory(args[0]);
+                        break;
+                    case 'touch':
+                        this.createFile(args[0]);
+                        break;
+                    case 'rm':
+                        this.removeFile(args[0]);
+                        break;
+                    case 'echo':
+                        this.echo(args.join(' '));
+                        break;
+                    case 'date':
+                        this.showDate();
+                        break;
+                    case 'whoami':
+                        this.showUser();
+                        break;
+                    case 'uname':
+                        this.showSystem();
+                        break;
+                    case 'ps':
+                        this.showProcesses();
+                        break;
+                    case 'clear':
+                        this.clearTerminal();
+                        break;
+                    case 'history':
+                        this.showHistory();
+                        break;
+                    case 'python':
+                    case 'python3':
+                        this.runPython(args);
+                        break;
+                    case 'nano':
+                    case 'vim':
+                        this.openEditor(args[0]);
+                        break;
+                    case 'tree':
+                        this.showTree();
+                        break;
+                    case 'curl':
+                        this.curl(args);
+                        break;
+                    case 'ping':
+                        this.ping(args[0]);
+                        break;
+                    default:
+                        this.commandNotFound(cmd);
+                        break;
+                }
+            }
+            
+            showHelp() {
+                const helpText = `Available commands:
+  help          - Show this help message
+  ls [path]     - List directory contents
+  cd [path]     - Change directory
+  pwd           - Print working directory
+  cat [file]    - Display file contents
+  mkdir [name]  - Create directory
+  touch [file]  - Create empty file
+  rm [file]     - Remove file
+  echo [text]   - Display text
+  date          - Show current date and time
+  whoami        - Show current user
+  uname         - Show system information
+  ps            - Show running processes
+  clear         - Clear terminal screen
+  history       - Show command history
+  python [file] - Run Python script
+  nano [file]   - Open text editor
+  tree          - Show directory structure
+  curl [url]    - Fetch URL content
+  ping [host]   - Ping a host
 
-    function updateTimeDate() {
-      const now = new Date();
-      const time = now.toLocaleTimeString();
-      const date = now.toLocaleDateString();
-      timeDateElement.textContent = `Fecha: ${date} | Hora: ${time}`;
-    }
-
-    setInterval(updateTimeDate, 1000);
-    updateTimeDate();
-
-    const commands = {
-      h: () =>
-        `4ndyTerminal: Available commands:
-        //h - help
-        //c - clear the screen
-        //e [text] - write text
-        //length [text] - count characters in the input
-        //cw [text] - count how many words are in the input
-        //lowercase [text] - convert to undercase
-        //searchword [text],[word] - get how many times a certain word is repeated
-        //a - system info
-        //v - version
-        //s [math equation] - solve math equation
-        //w [URL] - open url
-        //r [min] [max] - random number
-        //u [texto] - convert to uppercase
-        //mode [light/dark/black-white] - change theme
-        `,
-      c: () => {
-        output.innerHTML = "";
-        return "";
-      },
-      e: (args) => `4ndyTerminal: ${args.join(" ")}`,
-      length: (args) => `4ndyTerminal: ${args.join(" ").length}`,
-      cw: (args) => {
-        const text = args.join(" ");
-        const wordCount = text.split(/\s+/).filter(Boolean).length;
-        return `4ndyTerminal: ${wordCount}`;
-      },
-      lowercase: (args) => `4ndyTerminal: ${args.join(" ").toLowerCase()}`,
-      searchword: (args) => {
-        const parts = args.join(" ").split(",");
-        if (parts.length === 2) {
-          const text = parts[0].trim();
-          const word = parts[1].trim();
-          const count = (text.match(new RegExp(word, 'g')) || []).length;
-          return `4ndyTerminal: word '${word}' is repeated ${count} times.`;
+Keyboard shortcuts:
+  Ctrl+C        - Interrupt current command
+  Ctrl+L        - Clear screen
+  Tab           - Auto-complete
+  ↑/↓ arrows    - Navigate command history`;
+                
+                this.addOutput(helpText, 'text-blue-300');
+            }
+            
+            listDirectory(args) {
+                const path = args[0] || this.currentDirectory;
+                const resolvedPath = this.resolvePath(path);
+                const dir = this.getDirectoryAtPath(resolvedPath);
+                
+                if (!dir) {
+                    this.addOutput(`ls: cannot access '${path}': No such file or directory`, 'text-red-400');
+                    return;
+                }
+                
+                if (dir.type !== 'directory') {
+                    this.addOutput(`ls: ${path}: Not a directory`, 'text-red-400');
+                    return;
+                }
+                
+                const contents = Object.keys(dir.contents);
+                if (contents.length === 0) {
+                    return; // Empty directory
+                }
+                
+                const output = contents.map(name => {
+                    const item = dir.contents[name];
+                    if (item.type === 'directory') {
+                        return `<span class="text-blue-400 font-bold">${name}/</span>`;
+                    } else {
+                        return `<span class="text-green-400">${name}</span>`;
+                    }
+                }).join('  ');
+                
+                this.addOutput(output, '', true);
+            }
+            
+            changeDirectory(path) {
+                if (!path) {
+                    this.currentDirectory = '/home/user';
+                    this.updatePrompt();
+                    return;
+                }
+                
+                const resolvedPath = this.resolvePath(path);
+                const dir = this.getDirectoryAtPath(resolvedPath);
+                
+                if (!dir) {
+                    this.addOutput(`cd: ${path}: No such file or directory`, 'text-red-400');
+                    return;
+                }
+                
+                if (dir.type !== 'directory') {
+                    this.addOutput(`cd: ${path}: Not a directory`, 'text-red-400');
+                    return;
+                }
+                
+                this.currentDirectory = resolvedPath;
+                this.updatePrompt();
+            }
+            
+            printWorkingDirectory() {
+                this.addOutput(this.currentDirectory);
+            }
+            
+            displayFile(filename) {
+                if (!filename) {
+                    this.addOutput('cat: missing file operand', 'text-red-400');
+                    return;
+                }
+                
+                const path = this.resolvePath(filename);
+                const file = this.getFileAtPath(path);
+                
+                if (!file) {
+                    this.addOutput(`cat: ${filename}: No such file or directory`, 'text-red-400');
+                    return;
+                }
+                
+                if (file.type !== 'file') {
+                    this.addOutput(`cat: ${filename}: Is a directory`, 'text-red-400');
+                    return;
+                }
+                
+                this.addOutput(file.content || '', 'text-yellow-300');
+            }
+            
+            makeDirectory(dirname) {
+                if (!dirname) {
+                    this.addOutput('mkdir: missing operand', 'text-red-400');
+                    return;
+                }
+                
+                const path = this.resolvePath(dirname);
+                const parentPath = this.getParentPath(path);
+                const parentDir = this.getDirectoryAtPath(parentPath);
+                const name = this.getBasename(path);
+                
+                if (!parentDir) {
+                    this.addOutput(`mkdir: cannot create directory '${dirname}': No such file or directory`, 'text-red-400');
+                    return;
+                }
+                
+                if (parentDir.contents[name]) {
+                    this.addOutput(`mkdir: cannot create directory '${dirname}': File exists`, 'text-red-400');
+                    return;
+                }
+                
+                parentDir.contents[name] = { type: 'directory', contents: {} };
+                this.addOutput(`Directory '${dirname}' created`, 'text-green-400');
+            }
+            
+            createFile(filename) {
+                if (!filename) {
+                    this.addOutput('touch: missing file operand', 'text-red-400');
+                    return;
+                }
+                
+                const path = this.resolvePath(filename);
+                const parentPath = this.getParentPath(path);
+                const parentDir = this.getDirectoryAtPath(parentPath);
+                const name = this.getBasename(path);
+                
+                if (!parentDir) {
+                    this.addOutput(`touch: cannot touch '${filename}': No such file or directory`, 'text-red-400');
+                    return;
+                }
+                
+                if (!parentDir.contents[name]) {
+                    parentDir.contents[name] = { type: 'file', content: '' };
+                    this.addOutput(`File '${filename}' created`, 'text-green-400');
+                }
+            }
+            
+            removeFile(filename) {
+                if (!filename) {
+                    this.addOutput('rm: missing operand', 'text-red-400');
+                    return;
+                }
+                
+                const path = this.resolvePath(filename);
+                const parentPath = this.getParentPath(path);
+                const parentDir = this.getDirectoryAtPath(parentPath);
+                const name = this.getBasename(path);
+                
+                if (!parentDir || !parentDir.contents[name]) {
+                    this.addOutput(`rm: cannot remove '${filename}': No such file or directory`, 'text-red-400');
+                    return;
+                }
+                
+                delete parentDir.contents[name];
+                this.addOutput(`File '${filename}' removed`, 'text-green-400');
+            }
+            
+            echo(text) {
+                this.addOutput(text, 'text-yellow-300');
+            }
+            
+            showDate() {
+                const now = new Date();
+                this.addOutput(now.toString(), 'text-cyan-400');
+            }
+            
+            showUser() {
+                this.addOutput('user', 'text-green-400');
+            }
+            
+            showSystem() {
+                this.addOutput('DeepBlueOS 1.0.0 Web Terminal', 'text-cyan-400');
+            }
+            
+            showProcesses() {
+                const processes = [
+                    'PID  COMMAND',
+                    '1    init',
+                    '42   terminal',
+                    '156  deepblueos'
+                ];
+                this.addOutput(processes.join('\n'), 'text-cyan-400');
+            }
+            
+            showHistory() {
+                this.commandHistory.forEach((cmd, index) => {
+                    this.addOutput(`${index + 1}  ${cmd}`, 'text-gray-400');
+                });
+            }
+            
+            runPython(args) {
+                if (args.length === 0) {
+                    this.addOutput('Python 3.9.0 Interactive Shell (Web Terminal)', 'text-yellow-300');
+                    this.addOutput('Type "exit()" to quit', 'text-gray-400');
+                    return;
+                }
+                
+                const filename = args[0];
+                const path = this.resolvePath(filename);
+                const file = this.getFileAtPath(path);
+                
+                if (!file) {
+                    this.addOutput(`python: can't open file '${filename}': No such file or directory`, 'text-red-400');
+                    return;
+                }
+                
+                if (file.type !== 'file') {
+                    this.addOutput(`python: '${filename}' is a directory`, 'text-red-400');
+                    return;
+                }
+                
+                // Simple Python execution simulation
+                const content = file.content || '';
+                if (content.includes('print(')) {
+                    const match = content.match(/print\("([^"]*)"\)/);
+                    if (match) {
+                        this.addOutput(match[1], 'text-yellow-300');
+                    }
+                } else {
+                    this.addOutput('Python script executed successfully', 'text-green-400');
+                }
+            }
+            
+            openEditor(filename) {
+                if (!filename) {
+                    this.addOutput('Editor: missing filename', 'text-red-400');
+                    return;
+                }
+                
+                this.addOutput(`Opening ${filename} in editor...`, 'text-cyan-400');
+                this.addOutput('(This is a simulated editor - use cat to view files)', 'text-gray-400');
+            }
+            
+            showTree() {
+                this.addOutput('Directory structure:', 'text-cyan-400');
+                this.renderTree(this.currentDirectory, '', true);
+            }
+            
+            renderTree(path, prefix, isLast) {
+                const dir = this.getDirectoryAtPath(path);
+                if (!dir || dir.type !== 'directory') return;
+                
+                const entries = Object.entries(dir.contents);
+                entries.forEach(([name, item], index) => {
+                    const isLastItem = index === entries.length - 1;
+                    const connector = isLastItem ? '└── ' : '├── ';
+                    const icon = item.type === 'directory' ? '📁' : '📄';
+                    
+                    this.addOutput(`${prefix}${connector}${icon} ${name}`, 'text-blue-300', true);
+                    
+                    if (item.type === 'directory') {
+                        const newPrefix = prefix + (isLastItem ? '    ' : '│   ');
+                        this.renderTree(path + (path === '/' ? '' : '/') + name, newPrefix, false);
+                    }
+                });
+            }
+            
+            curl(args) {
+                if (args.length === 0) {
+                    this.addOutput('curl: missing URL', 'text-red-400');
+                    return;
+                }
+                
+                const url = args[0];
+                this.addOutput(`Fetching ${url}...`, 'text-cyan-400');
+                this.addOutput('(This is a simulated request)', 'text-gray-400');
+                this.addOutput('HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html><body>Sample response</body></html>', 'text-yellow-300');
+            }
+            
+            ping(host) {
+                if (!host) {
+                    this.addOutput('ping: missing hostname', 'text-red-400');
+                    return;
+                }
+                
+                this.addOutput(`PING ${host} (127.0.0.1): 56 data bytes`, 'text-cyan-400');
+                for (let i = 1; i <= 3; i++) {
+                    const time = Math.floor(Math.random() * 50) + 10;
+                    this.addOutput(`64 bytes from ${host}: icmp_seq=${i} time=${time}ms`, 'text-green-400');
+                }
+            }
+            
+            commandNotFound(cmd) {
+                this.addOutput(`bash: ${cmd}: command not found`, 'text-red-400');
+                this.addOutput('Type "help" for available commands', 'text-gray-400');
+            }
+            
+            navigateHistory(direction) {
+                if (this.commandHistory.length === 0) return;
+                
+                if (direction === -1) {
+                    if (this.historyIndex === -1) {
+                        this.historyIndex = this.commandHistory.length - 1;
+                    } else if (this.historyIndex > 0) {
+                        this.historyIndex--;
+                    }
+                } else {
+                    if (this.historyIndex < this.commandHistory.length - 1) {
+                        this.historyIndex++;
+                    } else {
+                        this.historyIndex = -1;
+                        this.input.value = '';
+                        this.updateCursor();
+                        return;
+                    }
+                }
+                
+                this.input.value = this.commandHistory[this.historyIndex] || '';
+                this.updateCursor();
+            }
+            
+            autoComplete() {
+                const command = this.input.value;
+                const parts = command.split(' ');
+                const lastPart = parts[parts.length - 1];
+                
+                if (parts.length === 1) {
+                    // Command completion
+                    const commands = ['help', 'ls', 'cd', 'pwd', 'cat', 'mkdir', 'touch', 'rm', 'echo', 'date', 'whoami', 'uname', 'ps', 'clear', 'history', 'python', 'nano', 'tree', 'curl', 'ping'];
+                    const matches = commands.filter(cmd => cmd.startsWith(lastPart));
+                    
+                    if (matches.length === 1) {
+                        this.input.value = matches[0] + ' ';
+                        this.updateCursor();
+                    } else if (matches.length > 1) {
+                        this.addOutput(matches.join('  '), 'text-blue-300');
+                    }
+                } else {
+                    // File/directory completion
+                    const dir = this.getDirectoryAtPath(this.currentDirectory);
+                    if (dir && dir.contents) {
+                        const matches = Object.keys(dir.contents).filter(name => name.startsWith(lastPart));
+                        
+                        if (matches.length === 1) {
+                            parts[parts.length - 1] = matches[0];
+                            this.input.value = parts.join(' ') + ' ';
+                            this.updateCursor();
+                        } else if (matches.length > 1) {
+                            this.addOutput(matches.join('  '), 'text-blue-300');
+                        }
+                    }
+                }
+            }
+            
+            interrupt() {
+                this.addOutput('^C', 'text-red-400');
+                this.input.value = '';
+                this.updateCursor();
+            }
+            
+            clearTerminal() {
+                this.output.innerHTML = '';
+                this.showWelcome();
+            }
+            
+            showWelcome() {
+                const welcomeText = `Welcome to DeepBlueOS Terminal v1.0.0
+Type "help" for available commands.
+`;
+                this.addOutput(welcomeText, 'text-cyan-400');
+            }
+            
+            updatePrompt() {
+                const shortPath = this.currentDirectory.replace('/home/user', '~');
+                this.prompt.textContent = `user@deepblueos:${shortPath}$`;
+            }
+            
+            updateCursor() {
+                const inputRect = this.input.getBoundingClientRect();
+                const textWidth = this.getTextWidth(this.input.value);
+                this.cursor.style.left = `${textWidth}px`;
+            }
+            
+            getTextWidth(text) {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                context.font = `${this.fontSize}px 'Fira Code', monospace`;
+                return context.measureText(text).width;
+            }
+            
+            addOutput(text, className = 'text-green-400', html = false) {
+                const line = document.createElement('div');
+                line.className = className;
+                
+                if (html) {
+                    line.innerHTML = text;
+                } else {
+                    line.textContent = text;
+                }
+                
+                this.output.appendChild(line);
+                this.scrollToBottom();
+            }
+            
+            scrollToBottom() {
+                const outputContainer = document.getElementById('terminal-output');
+                outputContainer.scrollTop = outputContainer.scrollHeight;
+            }
+            
+            // Path utility functions
+            resolvePath(path) {
+                if (path.startsWith('/')) {
+                    return this.normalizePath(path);
+                } else {
+                    return this.normalizePath(`${this.currentDirectory}/${path}`);
+                }
+            }
+            
+            normalizePath(path) {
+                const parts = path.split('/').filter(p => p && p !== '.');
+                const normalized = [];
+                
+                for (const part of parts) {
+                    if (part === '..') {
+                        normalized.pop();
+                    } else {
+                        normalized.push(part);
+                    }
+                }
+                
+                return '/' + normalized.join('/');
+            }
+            
+            getParentPath(path) {
+                const parts = path.split('/').filter(Boolean);
+                parts.pop();
+                return '/' + parts.join('/');
+            }
+            
+            getBasename(path) {
+                const parts = path.split('/').filter(Boolean);
+                return parts[parts.length - 1] || '';
+            }
+            
+            getDirectoryAtPath(path) {
+                return this.getFileAtPath(path);
+            }
+            
+            getFileAtPath(path) {
+                const parts = path.split('/').filter(Boolean);
+                let current = this.fileSystem['/'];
+                
+                for (const part of parts) {
+                    if (current.type === 'directory' && current.contents && current.contents[part]) {
+                        current = current.contents[part];
+                    } else {
+                        return null;
+                    }
+                }
+                
+                return current;
+            }
+            
+            // Settings
+            showSettings() {
+                this.settingsModal.classList.remove('hidden');
+                document.getElementById('theme-select').value = this.theme;
+                document.getElementById('font-size-select').value = this.fontSize;
+            }
+            
+            hideSettings() {
+                this.settingsModal.classList.add('hidden');
+            }
+            
+            saveSettings() {
+                this.theme = document.getElementById('theme-select').value;
+                this.fontSize = document.getElementById('font-size-select').value;
+                
+                localStorage.setItem('terminal-theme', this.theme);
+                localStorage.setItem('terminal-font-size', this.fontSize);
+                
+                this.applyTheme();
+                this.applyFontSize();
+                this.hideSettings();
+            }
+            
+            applyTheme() {
+                const body = document.body;
+                body.className = 'h-screen overflow-hidden';
+                
+                switch(this.theme) {
+                    case 'matrix':
+                        body.classList.add('bg-black', 'text-green-400');
+                        break;
+                    case 'hacker':
+                        body.classList.add('bg-gray-900', 'text-blue-400');
+                        break;
+                    case 'retro':
+                        body.classList.add('bg-black', 'text-yellow-400');
+                        break;
+                    case 'modern':
+                        body.classList.add('bg-gray-800', 'text-white');
+                        break;
+                }
+            }
+            
+            applyFontSize() {
+                const outputContainer = document.getElementById('terminal-output');
+                const input = this.input;
+                
+                outputContainer.style.fontSize = `${this.fontSize}px`;
+                input.style.fontSize = `${this.fontSize}px`;
+            }
         }
-        return "4ndyTerminal: Error in command //searchword. Use //searchword [texto],[palabra].";
-      },
-      a: () => "4ndyTerminal: 4ndyTerminal VER 1.0.0, created by 4ndy64.",
-      v: () => "4ndyTerminal: 4ndyTerminal VER 1.0.0",
-      s: (args) => {
-        try {
-          const expression = args.join(" ");
-          const result = math.evaluate(expression);
-          return `4ndyTerminal: ${result}`;
-        } catch (e) {
-          return "4ndyTerminal: Error:invalid";
-        }
-      },
-      w: (args) => {
-        if (!args[0]) {
-          return "4ndyTerminal: Error: URL required. example: //w example.com";
-        }
-        const url = args[0].startsWith("http") ? args[0] : `https://${args[0]}`;
-        openWebWindow(url);
-        return `4ndyTerminal: opening ${url}`;
-      },
-      r: (args) => {
-        const min = parseInt(args[0], 10) || 0;
-        const max = parseInt(args[1], 10) || 100;
-        return `4ndyTerminal: Random: ${Math.floor(Math.random() * (max - min + 1)) + min}`;
-      },
-      u: (args) => `4ndyTerminal: ${args.join(" ").toUpperCase()}`,
-      mode: (args) => {
-        if (args[0] === "light") {
-          document.body.style.backgroundColor = "#ffffff";
-          document.body.style.color = "#121212";
-          document.getElementById('terminal').style.backgroundColor = "#f0f0f0";
-          document.getElementById('input-line').style.backgroundColor = "#e0e0e0";
-          document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.1)";
-          document.getElementById('terminal').style.borderTopColor = "#0000ff";
-          document.getElementById('input').style.color = "#121212"; 
-          document.getElementById('input').style.backgroundColor = "#ffffff"; 
-          userLabel.style.color = "#121212"; 
-          currentMode = "light";
-          return "4ndyTerminal: Changed to light mode.";
-        } else if (args[0] === "dark") {
-          document.body.style.backgroundColor = "#121212";
-          document.body.style.color = "#00ffff";
-          document.getElementById('terminal').style.backgroundColor = "#1e1e1e";
-          document.getElementById('input-line').style.backgroundColor = "#2e2e2e";
-          document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(0, 255, 255, 0.2)";
-          document.getElementById('terminal').style.borderTopColor = "#00ffff";
-          document.getElementById('input').style.color = "#00ffff"; 
-          document.getElementById('input').style.backgroundColor = "transparent"; 
-          userLabel.style.color = "#00ffff"; 
-          currentMode = "dark";
-          return "4ndyTerminal:Changed to dark mode.";
-        } else if (args[0] === "black-white") {
-          document.body.style.backgroundColor = "#000000";
-          document.body.style.color = "#FFFFFF";
-          document.getElementById('terminal').style.backgroundColor = "#000000";
-          document.getElementById('input-line').style.backgroundColor = "#333333";
-          document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(255, 255, 255, 0.2)";
-          document.getElementById('terminal').style.borderTopColor = "#FFFFFF";
-          document.getElementById('input').style.color = "#FFFFFF"; 
-          document.getElementById('input').style.backgroundColor = "#000000"; 
-          userLabel.style.color = "#FFFFFF"; 
-          currentMode = "black-white";
-          return "4ndyTerminal: Changed to black and white.";
-        } else if (args[0] === "RGB") {
-          document.body.style.backgroundColor = "#FF0000"; 
-          document.body.style.color = "#00FF00"; 
-          document.getElementById('terminal').style.backgroundColor = "#0000FF"; 
-          document.getElementById('input-line').style.backgroundColor = "#FFFF00";
-          document.getElementById('input-line').style.boxShadow = "0 0 20px rgba(0, 0, 0, 0.5)";
-          document.getElementById('terminal').style.borderTopColor = "#FF00FF";
-          document.getElementById('input').style.color = "#FFFFFF"; 
-          document.getElementById('input').style.backgroundColor = "#000000";
-          userLabel.style.color = "#FFFFFF";
-          currentMode = "rgb";
-          return "4ndyTerminal: BRO JUST FOUND AN EASTER EGG LOL 9999999999999999999999999999999999999999999999999+ OF AURA.";
-        }
-        return "4ndyTerminal: Error: Invalid commands,try //mode and add the theme you want to use. Not sure? type //h to see all available themes";
-      }
-    };
-
-    function openWebWindow(url) {
-      const width = 800;
-      const height = 600;
-      const left = (screen.width - width) / 2;
-      const top = (screen.height - height) / 2;
-
-      window.open(
-        url,
-        "_blank",
-        `width=${width},height=${height},left=${left},top=${top},resizable=yes`
-      );
-    }
-
-    function executeCommand(commandLine) {
-      const [command, ...args] = commandLine.split(" ");
-      const cmd = commands[command.slice(2)];
-
-      if (/^hi$/i.test(command)) {
-        return `4ndyTerminal: Hello, ${username} ,How may I assist you?`;
-      }
-
-      if (cmd) {
-        return cmd(args);
-      } else {
-        return `4ndyTerminal: '${command}' is not valid. Try //h.`;
-      }
-    }
-
-    function addOutput(text, delay = 30) {
-      return new Promise((resolve) => {
-        const newLine = document.createElement("div");
-        output.appendChild(newLine);
-        let index = 0;
-
-        function typeChar() {
-          if (index < text.length) {
-            newLine.textContent += text[index];
-            index++;
-            setTimeout(typeChar, Math.max(delay - Math.floor(text.length / 50), 5));
-          } else {
-            resolve();
-          }
-        }
-
-        typeChar();
-        output.scrollTop = output.scrollHeight;
-      });
-    }
-
-    input.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter") {
-        const commandLine = input.value.trim();
-        if (commandLine) {
-          await addOutput(`4ndyTerminal: ${commandLine}`);
-          const result = executeCommand(commandLine);
-          if (result) await addOutput(result);
-        }
-        input.value = "";
-      }
-    });
-
-    async function showWelcomeMessage() {
-      await addOutput("4ndyTerminal: Welcome to 4ndyTerminal VER 1.0.0.");
-      await addOutput("4ndyTerminal: type '//h' to look the available commands.");
-    }
-
-    window.onload = async () => {
-      input.focus();
-      await showWelcomeMessage();
-    };
-  </script>
+        
+        // Initialize terminal
+        const terminal = new Terminal();
+    </script>
 </body>
 </html>
