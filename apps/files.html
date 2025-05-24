@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Manager - DeepBlueOS</title>
+    <title>Enhanced File Manager - DeepBlueOS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/shared-filesystem.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -24,10 +25,14 @@
 <body class="bg-gray-50 h-screen overflow-hidden">
     <div class="flex h-full">
         <!-- Sidebar -->
-        <div class="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div class="w-48 sm:w-64 bg-white border-r border-gray-200 flex flex-col">
             <!-- Header -->
-            <div class="p-4 border-b border-gray-200">
-                <h1 class="text-lg font-semibold text-gray-800">File Manager</h1>
+            <div class="p-3 sm:p-4 border-b border-gray-200">
+                <h1 class="text-base sm:text-lg font-semibold text-gray-800">Enhanced Files</h1>
+                <div class="flex items-center mt-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    <span class="text-xs text-gray-600">Connected to Terminal</span>
+                </div>
             </div>
             
             <!-- Quick Access -->
@@ -112,12 +117,18 @@
                     </div>
                     
                     <!-- Actions -->
-                    <div class="flex items-center space-x-2">
-                        <button id="new-folder-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                    <div class="flex items-center space-x-1 sm:space-x-2">
+                        <button id="terminal-btn" class="bg-green-600 hover:bg-green-700 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-colors">
+                            Terminal
+                        </button>
+                        <button id="new-folder-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-colors">
                             New Folder
                         </button>
-                        <button id="view-toggle" class="p-2 text-gray-600 hover:text-gray-800" title="Toggle view">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <button id="new-file-btn" class="bg-purple-500 hover:bg-purple-600 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-colors">
+                            New File
+                        </button>
+                        <button id="view-toggle" class="p-1 sm:p-2 text-gray-600 hover:text-gray-800" title="Toggle view">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                             </svg>
                         </button>
@@ -157,7 +168,7 @@
     </div>
     
     <div id="new-folder-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-96">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-full mx-4">
             <h3 class="text-lg font-semibold mb-4">New Folder</h3>
             <input type="text" id="folder-name-input" placeholder="Folder name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             <div class="flex justify-end space-x-2 mt-4">
@@ -166,24 +177,56 @@
             </div>
         </div>
     </div>
+    
+    <div id="new-file-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-96 max-w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">New File</h3>
+            <input type="text" id="file-name-input" placeholder="File name (e.g. document.txt)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 mb-3">
+            <textarea id="file-content-input" placeholder="File content (optional)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 h-32 resize-none"></textarea>
+            <div class="flex justify-end space-x-2 mt-4">
+                <button id="file-cancel" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                <button id="file-confirm" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">Create</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        class FileManager {
+        class EnhancedFileManager {
             constructor() {
-                this.currentPath = '/';
-                this.navigationHistory = ['/'];
+                this.currentPath = '/home/user';
+                this.navigationHistory = ['/home/user'];
                 this.historyIndex = 0;
                 this.viewMode = 'grid'; // 'grid' or 'list'
-                this.clipboard = { item: null, operation: null }; // operation: 'copy' or 'cut'
                 this.selectedItem = null;
                 
-                // Virtual file system
-                this.fileSystem = this.loadFileSystem() || this.createDefaultFileSystem();
-                
+                // Wait for shared filesystem to be ready
+                this.waitForFileSystem();
+            }
+            
+            waitForFileSystem() {
+                if (window.sharedFS) {
+                    this.fileSystem = window.sharedFS;
+                    this.fileSystem.addObserver(this);
+                    this.initialize();
+                } else {
+                    setTimeout(() => this.waitForFileSystem(), 100);
+                }
+            }
+            
+            initialize() {
                 this.initializeElements();
                 this.bindEvents();
                 this.renderCurrentDirectory();
                 this.updateStorageInfo();
+            }
+            
+            onFileSystemChange(event, path, data) {
+                // React to file system changes from terminal or other sources
+                this.renderCurrentDirectory();
+                this.updateStorageInfo();
+                
+                // Show notification
+                this.showNotification(`File system updated: ${event} ${path}`, 'info');
             }
             
             initializeElements() {
@@ -194,9 +237,12 @@
                 this.upBtn = document.getElementById('up-btn');
                 this.viewToggle = document.getElementById('view-toggle');
                 this.newFolderBtn = document.getElementById('new-folder-btn');
+                this.newFileBtn = document.getElementById('new-file-btn');
+                this.terminalBtn = document.getElementById('terminal-btn');
                 this.contextMenu = document.getElementById('context-menu');
                 this.renameModal = document.getElementById('rename-modal');
                 this.newFolderModal = document.getElementById('new-folder-modal');
+                this.newFileModal = document.getElementById('new-file-modal');
                 this.storageUsage = document.getElementById('storage-usage');
                 this.storageBar = document.getElementById('storage-bar');
             }
@@ -208,6 +254,8 @@
                 this.upBtn.addEventListener('click', () => this.navigateUp());
                 this.viewToggle.addEventListener('click', () => this.toggleView());
                 this.newFolderBtn.addEventListener('click', () => this.showNewFolderModal());
+                this.newFileBtn.addEventListener('click', () => this.showNewFileModal());
+                this.terminalBtn.addEventListener('click', () => this.openTerminal());
                 
                 // Quick access
                 document.querySelectorAll('.quick-access').forEach(btn => {
@@ -231,6 +279,8 @@
                 document.getElementById('rename-confirm').addEventListener('click', () => this.confirmRename());
                 document.getElementById('folder-cancel').addEventListener('click', () => this.hideNewFolderModal());
                 document.getElementById('folder-confirm').addEventListener('click', () => this.confirmNewFolder());
+                document.getElementById('file-cancel').addEventListener('click', () => this.hideNewFileModal());
+                document.getElementById('file-confirm').addEventListener('click', () => this.confirmNewFile());
                 
                 // Keyboard shortcuts
                 document.addEventListener('keydown', (e) => this.handleKeyboard(e));
