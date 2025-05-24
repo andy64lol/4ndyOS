@@ -3,236 +3,671 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Epic Clicker Game</title>
+    <title>Clicker Game - DeepBlueOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        body { font-family: 'Inter', sans-serif; }
+        .click-button {
+            transition: transform 0.1s ease;
+        }
+        .click-button:active {
+            transform: scale(0.95);
+        }
+        .upgrade-card {
+            transition: all 0.2s ease;
+        }
+        .upgrade-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        .pulse-animation {
+            animation: pulse 0.3s ease-in-out;
+        }
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #00b4db, #0083b0);
-            overflow: hidden;
+        .floating-number {
+            animation: float 1s ease-out forwards;
+            pointer-events: none;
         }
-
-        .game-container {
-            text-align: center;
-            padding: 30px;
-            border-radius: 15px;
-            background: white;
-            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
-            max-width: 450px;
-            width: 90%;
-            position: relative;
+        @keyframes float {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
         }
-
-        h1 {
-            color: #007acc;
-            font-size: 2em;
-            text-shadow: 2px 2px #005f99;
+        .progress-bar {
+            transition: width 0.3s ease;
         }
-
-        #counter {
-            font-size: 3em;
-            font-weight: bold;
-            color: #222;
-            animation: pulse 1s infinite;
+        .achievement-popup {
+            animation: achievementSlide 3s ease-in-out;
         }
-
-        button {
-            padding: 12px 25px;
-            font-size: 1.2em;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            transition: 0.3s;
-            margin: 10px;
-        }
-
-        #click-button {
-            background-color: #007acc;
-            color: white;
-            font-size: 1.5em;
-            animation: pulse 1s infinite;
-        }
-
-        #click-button:active {
-            transform: scale(0.9);
-        }
-
-        .upgrade-button {
-            background-color: #0083b0;
-            color: white;
-            font-size: 1em;
-            padding: 10px 20px;
-        }
-
-        .upgrade-button:hover {
-            background-color: #006c8a;
-        }
-
-        .disabled {
-            background-color: gray !important;
-            cursor: not-allowed;
-        }
-
-        #auto-clicker {
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            font-size: 2em;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .click-effect {
-            position: absolute;
-            font-size: 2em;
-            color: #007acc;
-            font-weight: bold;
-            animation: rise 1s ease-in-out;
-        }
-
-        @keyframes rise {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-50px); opacity: 0; }
+        @keyframes achievementSlide {
+            0%, 100% { transform: translateX(100%); }
+            10%, 90% { transform: translateX(0); }
         }
     </style>
 </head>
-<body>
-    <div class="game-container">
-        <h1>Epic Clicker Game</h1>
-        <div id="counter">0</div>
-        <button id="click-button">💙 Click Me! 💙</button>
-        <button id="upgrade-button" class="upgrade-button">Upgrade Click (+1 per click) - Cost: 10</button>
-        <button id="auto-clicker-button" class="upgrade-button">Upgrade Auto-Clicker (+1/sec) - Cost: 100</button>
-        <button id="auto-speed-button" class="upgrade-button">Upgrade Auto-Speed (Interval: 1000ms) - Cost: 500</button>
-        <p>Auto-click speed: <span id="auto-speed-display">1000</span>ms</p>
-        <div id="auto-clicker">🤖</div>
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 h-screen overflow-hidden">
+    <div class="h-full flex">
+        <!-- Sidebar -->
+        <div class="w-80 bg-white bg-opacity-90 backdrop-blur-sm border-r border-gray-200 flex flex-col">
+            <!-- Header -->
+            <div class="p-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                <h1 class="text-2xl font-bold">⚡ Power Clicker</h1>
+                <p class="text-blue-100 text-sm">Click your way to infinity!</p>
+            </div>
+            
+            <!-- Stats -->
+            <div class="p-4 bg-gray-50 border-b border-gray-200">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-blue-600" id="total-clicks">0</p>
+                        <p class="text-xs text-gray-600">Total Clicks</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-purple-600" id="clicks-per-second">0</p>
+                        <p class="text-xs text-gray-600">Per Second</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upgrades -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <h3 class="font-semibold text-gray-800 mb-3">Upgrades</h3>
+                <div id="upgrades-container" class="space-y-3">
+                    <!-- Upgrades will be dynamically generated -->
+                </div>
+            </div>
+            
+            <!-- Achievements -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-semibold text-gray-800">Achievements</h3>
+                    <span id="achievement-count" class="text-sm text-gray-600">0/10</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="achievement-progress" class="progress-bar bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Game Area -->
+        <div class="flex-1 flex flex-col items-center justify-center relative">
+            <!-- Score Display -->
+            <div class="text-center mb-8">
+                <h2 class="text-6xl font-black text-gray-800 mb-2" id="score-display">0</h2>
+                <p class="text-xl text-gray-600">Energy Points</p>
+                <div class="mt-4">
+                    <p class="text-lg text-gray-700">Level <span id="level-display" class="font-bold text-blue-600">1</span></p>
+                    <div class="w-64 bg-gray-200 rounded-full h-3 mt-2 mx-auto">
+                        <div id="level-progress" class="progress-bar bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-1"><span id="level-current">0</span> / <span id="level-target">100</span></p>
+                </div>
+            </div>
+            
+            <!-- Click Button -->
+            <div class="relative">
+                <button id="click-button" class="click-button w-48 h-48 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-full shadow-2xl flex items-center justify-center text-6xl transition-all duration-200 transform hover:scale-105">
+                    ⚡
+                </button>
+                <div id="floating-numbers" class="absolute inset-0 pointer-events-none"></div>
+            </div>
+            
+            <!-- Power-ups -->
+            <div class="mt-8 flex space-x-4" id="powerups-container">
+                <!-- Power-ups will be dynamically generated -->
+            </div>
+            
+            <!-- Multiplier Display -->
+            <div class="mt-6 text-center">
+                <p class="text-lg text-gray-700">Click Power: <span id="click-power" class="font-bold text-green-600">1</span></p>
+                <p class="text-sm text-gray-500">Auto-clickers: <span id="auto-clickers" class="font-medium">0</span></p>
+            </div>
+        </div>
     </div>
     
-    <audio id="click-sound" src="https://www.myinstants.com/media/sounds/button-click.mp3"></audio>
-    <audio id="upgrade-sound" src="https://www.myinstants.com/media/sounds/level-up.mp3"></audio>
+    <!-- Achievement Popup -->
+    <div id="achievement-popup" class="hidden fixed top-4 right-4 bg-yellow-400 text-black p-4 rounded-lg shadow-lg z-50">
+        <div class="flex items-center">
+            <span class="text-2xl mr-2">🏆</span>
+            <div>
+                <p class="font-bold">Achievement Unlocked!</p>
+                <p id="achievement-text" class="text-sm"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-96">
+            <h3 class="text-lg font-semibold mb-4">Game Settings</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="sound-effects" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                        <span class="ml-2 text-sm text-gray-700">Sound Effects</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="auto-save" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                        <span class="ml-2 text-sm text-gray-700">Auto Save</span>
+                    </label>
+                </div>
+                <div>
+                    <button id="reset-game" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition-colors">
+                        Reset Game
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 mt-6">
+                <button id="settings-close" class="px-4 py-2 text-gray-600 hover:text-gray-800">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Button -->
+    <button id="settings-btn" class="fixed top-4 right-4 bg-white bg-opacity-90 backdrop-blur-sm p-2 rounded-lg shadow-lg hover:bg-opacity-100 transition-all">
+        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+        </svg>
+    </button>
 
     <script>
-        const UPGRADE_MULTIPLIER = 1.5;
-        const MIN_AUTO_SPEED = 100;
-
-        const clickButton = document.getElementById('click-button');
-        const counter = document.getElementById('counter');
-        const autoSpeedDisplay = document.getElementById('auto-speed-display');
-        const clickSound = document.getElementById('click-sound');
-        const upgradeSound = document.getElementById('upgrade-sound');
-        const autoClickerEmoji = document.getElementById('auto-clicker');
-
-        let count = parseInt(localStorage.getItem("count")) || 0;
-        let clickValue = parseInt(localStorage.getItem("clickValue")) || 1;
-        let autoClicker = parseInt(localStorage.getItem("autoClicker")) || 0;
-        let upgradeCost = parseInt(localStorage.getItem("upgradeCost")) || 10;
-        let autoClickerCost = parseInt(localStorage.getItem("autoClickerCost")) || 100;
-        let autoSpeedCost = parseInt(localStorage.getItem("autoSpeedCost")) || 500;
-        let autoSpeed = parseInt(localStorage.getItem("autoSpeed")) || 1000;
-        let autoClickerInterval;
-
-        startAutoClicker();
-        updateCounter();
-
-        document.querySelector('.game-container').addEventListener('click', (e) => {
-            if (e.target.id === 'click-button') handleClick();
-            else if (e.target.id === 'upgrade-button') handleUpgrade();
-            else if (e.target.id === 'auto-clicker-button') handleAutoClickerUpgrade();
-            else if (e.target.id === 'auto-speed-button') handleAutoSpeedUpgrade();
+        class ClickerGame {
+            constructor() {
+                this.gameData = this.loadGameData();
+                this.autoClickInterval = null;
+                this.powerupTimers = {};
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.renderUpgrades();
+                this.renderPowerups();
+                this.updateDisplay();
+                this.startAutoClicker();
+                this.startAutoSave();
+                
+                // Check for achievements
+                this.checkAchievements();
+            }
+            
+            initializeElements() {
+                this.scoreDisplay = document.getElementById('score-display');
+                this.clickButton = document.getElementById('click-button');
+                this.totalClicksDisplay = document.getElementById('total-clicks');
+                this.cpsDisplay = document.getElementById('clicks-per-second');
+                this.clickPowerDisplay = document.getElementById('click-power');
+                this.autoClickersDisplay = document.getElementById('auto-clickers');
+                this.levelDisplay = document.getElementById('level-display');
+                this.levelProgress = document.getElementById('level-progress');
+                this.levelCurrent = document.getElementById('level-current');
+                this.levelTarget = document.getElementById('level-target');
+                this.upgradesContainer = document.getElementById('upgrades-container');
+                this.powerupsContainer = document.getElementById('powerups-container');
+                this.floatingNumbers = document.getElementById('floating-numbers');
+                this.achievementPopup = document.getElementById('achievement-popup');
+                this.achievementText = document.getElementById('achievement-text');
+                this.achievementCount = document.getElementById('achievement-count');
+                this.achievementProgress = document.getElementById('achievement-progress');
+                this.settingsModal = document.getElementById('settings-modal');
+            }
+            
+            bindEvents() {
+                this.clickButton.addEventListener('click', (e) => this.handleClick(e));
+                
+                document.getElementById('settings-btn').addEventListener('click', () => {
+                    this.settingsModal.classList.remove('hidden');
+                });
+                
+                document.getElementById('settings-close').addEventListener('click', () => {
+                    this.settingsModal.classList.add('hidden');
+                });
+                
+                document.getElementById('reset-game').addEventListener('click', () => {
+                    if (confirm('Are you sure you want to reset your game? This cannot be undone!')) {
+                        this.resetGame();
+                    }
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        this.handleClick();
+                    }
+                });
+            }
+            
+            loadGameData() {
+                const saved = localStorage.getItem('deepblue-clicker-game');
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+                
+                return {
+                    score: 0,
+                    totalClicks: 0,
+                    clickPower: 1,
+                    level: 1,
+                    levelProgress: 0,
+                    autoClickers: 0,
+                    upgrades: {
+                        clickPower: 0,
+                        autoClicker: 0,
+                        energyBoost: 0,
+                        quantumClick: 0,
+                        megaBoost: 0
+                    },
+                    achievements: [],
+                    powerupsActive: {},
+                    totalEarned: 0,
+                    startTime: Date.now()
+                };
+            }
+            
+            saveGameData() {
+                if (document.getElementById('auto-save').checked) {
+                    localStorage.setItem('deepblue-clicker-game', JSON.stringify(this.gameData));
+                }
+            }
+            
+            handleClick(event = null) {
+                const power = this.getClickPower();
+                this.gameData.score += power;
+                this.gameData.totalClicks++;
+                this.gameData.totalEarned += power;
+                this.gameData.levelProgress += power;
+                
+                // Visual feedback
+                if (event) {
+                    this.clickButton.classList.add('pulse-animation');
+                    setTimeout(() => this.clickButton.classList.remove('pulse-animation'), 300);
+                    
+                    this.showFloatingNumber(power, event.clientX, event.clientY);
+                }
+                
+                this.checkLevelUp();
+                this.updateDisplay();
+                this.checkAchievements();
+            }
+            
+            getClickPower() {
+                let power = this.gameData.clickPower;
+                
+                // Apply powerup multipliers
+                if (this.gameData.powerupsActive.doubleClick && this.gameData.powerupsActive.doubleClick > Date.now()) {
+                    power *= 2;
+                }
+                if (this.gameData.powerupsActive.megaClick && this.gameData.powerupsActive.megaClick > Date.now()) {
+                    power *= 5;
+                }
+                
+                return power;
+            }
+            
+            showFloatingNumber(value, x, y) {
+                const floatingNum = document.createElement('div');
+                floatingNum.className = 'floating-number absolute text-2xl font-bold text-green-400 pointer-events-none';
+                floatingNum.textContent = `+${this.formatNumber(value)}`;
+                floatingNum.style.left = '50%';
+                floatingNum.style.top = '50%';
+                floatingNum.style.transform = 'translate(-50%, -50%)';
+                
+                this.floatingNumbers.appendChild(floatingNum);
+                
+                setTimeout(() => {
+                    if (floatingNum.parentNode) {
+                        floatingNum.parentNode.removeChild(floatingNum);
+                    }
+                }, 1000);
+            }
+            
+            checkLevelUp() {
+                const requiredXP = this.getLevelRequirement(this.gameData.level);
+                
+                if (this.gameData.levelProgress >= requiredXP) {
+                    this.gameData.level++;
+                    this.gameData.levelProgress = 0;
+                    this.gameData.clickPower += Math.floor(this.gameData.level / 5) + 1;
+                    
+                    this.showAchievement(`Level Up! Reached Level ${this.gameData.level}`);
+                }
+            }
+            
+            getLevelRequirement(level) {
+                return Math.floor(100 * Math.pow(1.5, level - 1));
+            }
+            
+            buyUpgrade(upgradeType) {
+                const cost = this.getUpgradeCost(upgradeType);
+                
+                if (this.gameData.score >= cost) {
+                    this.gameData.score -= cost;
+                    this.gameData.upgrades[upgradeType]++;
+                    
+                    this.applyUpgrade(upgradeType);
+                    this.updateDisplay();
+                    this.renderUpgrades();
+                    this.checkAchievements();
+                }
+            }
+            
+            getUpgradeCost(upgradeType) {
+                const baseCosts = {
+                    clickPower: 50,
+                    autoClicker: 100,
+                    energyBoost: 500,
+                    quantumClick: 2000,
+                    megaBoost: 10000
+                };
+                
+                const level = this.gameData.upgrades[upgradeType];
+                return Math.floor(baseCosts[upgradeType] * Math.pow(1.5, level));
+            }
+            
+            applyUpgrade(upgradeType) {
+                switch (upgradeType) {
+                    case 'clickPower':
+                        this.gameData.clickPower += 1;
+                        break;
+                    case 'autoClicker':
+                        this.gameData.autoClickers++;
+                        break;
+                    case 'energyBoost':
+                        this.gameData.clickPower += 5;
+                        break;
+                    case 'quantumClick':
+                        this.gameData.clickPower += 10;
+                        break;
+                    case 'megaBoost':
+                        this.gameData.clickPower += 25;
+                        break;
+                }
+            }
+            
+            activatePowerup(powerupType) {
+                const costs = {
+                    doubleClick: 1000,
+                    megaClick: 5000,
+                    timeWarp: 10000
+                };
+                
+                if (this.gameData.score >= costs[powerupType]) {
+                    this.gameData.score -= costs[powerupType];
+                    
+                    const duration = 30000; // 30 seconds
+                    this.gameData.powerupsActive[powerupType] = Date.now() + duration;
+                    
+                    if (powerupType === 'timeWarp') {
+                        // Give 10 seconds worth of auto-clicker income
+                        const autoIncome = this.gameData.autoClickers * 10;
+                        this.gameData.score += autoIncome;
+                    }
+                    
+                    this.updateDisplay();
+                    this.renderPowerups();
+                    
+                    // Clear powerup after duration
+                    setTimeout(() => {
+                        delete this.gameData.powerupsActive[powerupType];
+                        this.renderPowerups();
+                    }, duration);
+                }
+            }
+            
+            renderUpgrades() {
+                const upgrades = [
+                    {
+                        id: 'clickPower',
+                        name: 'Enhanced Cursor',
+                        description: '+1 click power',
+                        icon: '👆',
+                        cost: this.getUpgradeCost('clickPower'),
+                        owned: this.gameData.upgrades.clickPower
+                    },
+                    {
+                        id: 'autoClicker',
+                        name: 'Auto Clicker',
+                        description: 'Clicks automatically',
+                        icon: '🤖',
+                        cost: this.getUpgradeCost('autoClicker'),
+                        owned: this.gameData.upgrades.autoClicker
+                    },
+                    {
+                        id: 'energyBoost',
+                        name: 'Energy Boost',
+                        description: '+5 click power',
+                        icon: '⚡',
+                        cost: this.getUpgradeCost('energyBoost'),
+                        owned: this.gameData.upgrades.energyBoost
+                    },
+                    {
+                        id: 'quantumClick',
+                        name: 'Quantum Click',
+                        description: '+10 click power',
+                        icon: '🌟',
+                        cost: this.getUpgradeCost('quantumClick'),
+                        owned: this.gameData.upgrades.quantumClick
+                    },
+                    {
+                        id: 'megaBoost',
+                        name: 'Mega Boost',
+                        description: '+25 click power',
+                        icon: '💥',
+                        cost: this.getUpgradeCost('megaBoost'),
+                        owned: this.gameData.upgrades.megaBoost
+                    }
+                ];
+                
+                this.upgradesContainer.innerHTML = '';
+                
+                upgrades.forEach(upgrade => {
+                    const canAfford = this.gameData.score >= upgrade.cost;
+                    
+                    const upgradeElement = document.createElement('div');
+                    upgradeElement.className = `upgrade-card p-3 bg-white rounded-lg border cursor-pointer transition-all ${
+                        canAfford ? 'border-green-300 hover:border-green-400' : 'border-gray-200 opacity-50'
+                    }`;
+                    
+                    upgradeElement.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-3">${upgrade.icon}</span>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">${upgrade.name}</h4>
+                                    <p class="text-xs text-gray-600">${upgrade.description}</p>
+                                    <p class="text-xs text-blue-600">Owned: ${upgrade.owned}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-green-600">${this.formatNumber(upgrade.cost)}</p>
+                                <p class="text-xs text-gray-500">Energy</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (canAfford) {
+                        upgradeElement.addEventListener('click', () => this.buyUpgrade(upgrade.id));
+                    }
+                    
+                    this.upgradesContainer.appendChild(upgradeElement);
+                });
+            }
+            
+            renderPowerups() {
+                const powerups = [
+                    {
+                        id: 'doubleClick',
+                        name: 'Double Click',
+                        description: '2x click power for 30s',
+                        icon: '⚡',
+                        cost: 1000,
+                        active: this.gameData.powerupsActive.doubleClick > Date.now()
+                    },
+                    {
+                        id: 'megaClick',
+                        name: 'Mega Click',
+                        description: '5x click power for 30s',
+                        icon: '💫',
+                        cost: 5000,
+                        active: this.gameData.powerupsActive.megaClick > Date.now()
+                    },
+                    {
+                        id: 'timeWarp',
+                        name: 'Time Warp',
+                        description: 'Instant 10s income',
+                        icon: '🕐',
+                        cost: 10000,
+                        active: false
+                    }
+                ];
+                
+                this.powerupsContainer.innerHTML = '';
+                
+                powerups.forEach(powerup => {
+                    const canAfford = this.gameData.score >= powerup.cost && !powerup.active;
+                    
+                    const powerupElement = document.createElement('button');
+                    powerupElement.className = `p-3 rounded-lg border-2 transition-all ${
+                        powerup.active ? 'bg-yellow-100 border-yellow-400' :
+                        canAfford ? 'bg-white border-blue-300 hover:border-blue-400 hover:bg-blue-50' :
+                        'bg-gray-100 border-gray-200 opacity-50'
+                    }`;
+                    
+                    powerupElement.innerHTML = `
+                        <div class="text-center">
+                            <div class="text-2xl mb-1">${powerup.icon}</div>
+                            <div class="text-xs font-medium">${powerup.name}</div>
+                            <div class="text-xs text-gray-600">${this.formatNumber(powerup.cost)}</div>
+                        </div>
+                    `;
+                    
+                    if (canAfford) {
+                        powerupElement.addEventListener('click', () => this.activatePowerup(powerup.id));
+                    }
+                    
+                    this.powerupsContainer.appendChild(powerupElement);
+                });
+            }
+            
+            updateDisplay() {
+                this.scoreDisplay.textContent = this.formatNumber(this.gameData.score);
+                this.totalClicksDisplay.textContent = this.formatNumber(this.gameData.totalClicks);
+                this.clickPowerDisplay.textContent = this.formatNumber(this.getClickPower());
+                this.autoClickersDisplay.textContent = this.formatNumber(this.gameData.autoClickers);
+                this.levelDisplay.textContent = this.gameData.level;
+                
+                // Level progress
+                const requiredXP = this.getLevelRequirement(this.gameData.level);
+                const progressPercent = (this.gameData.levelProgress / requiredXP) * 100;
+                this.levelProgress.style.width = `${progressPercent}%`;
+                this.levelCurrent.textContent = this.formatNumber(this.gameData.levelProgress);
+                this.levelTarget.textContent = this.formatNumber(requiredXP);
+                
+                // CPS calculation
+                const cps = this.gameData.autoClickers;
+                this.cpsDisplay.textContent = this.formatNumber(cps);
+            }
+            
+            startAutoClicker() {
+                this.autoClickInterval = setInterval(() => {
+                    if (this.gameData.autoClickers > 0) {
+                        const income = this.gameData.autoClickers;
+                        this.gameData.score += income;
+                        this.gameData.totalEarned += income;
+                        this.gameData.levelProgress += income;
+                        
+                        this.checkLevelUp();
+                        this.updateDisplay();
+                    }
+                }, 1000);
+            }
+            
+            startAutoSave() {
+                setInterval(() => {
+                    this.saveGameData();
+                }, 10000); // Save every 10 seconds
+            }
+            
+            checkAchievements() {
+                const achievements = [
+                    { id: 'first_click', name: 'First Click', description: 'Click for the first time', condition: () => this.gameData.totalClicks >= 1 },
+                    { id: 'hundred_clicks', name: 'Century', description: 'Click 100 times', condition: () => this.gameData.totalClicks >= 100 },
+                    { id: 'thousand_clicks', name: 'Millennium', description: 'Click 1,000 times', condition: () => this.gameData.totalClicks >= 1000 },
+                    { id: 'first_upgrade', name: 'First Upgrade', description: 'Buy your first upgrade', condition: () => Object.values(this.gameData.upgrades).some(count => count > 0) },
+                    { id: 'level_10', name: 'Double Digits', description: 'Reach level 10', condition: () => this.gameData.level >= 10 },
+                    { id: 'million_points', name: 'Millionaire', description: 'Earn 1 million energy points', condition: () => this.gameData.totalEarned >= 1000000 },
+                    { id: 'auto_army', name: 'Auto Army', description: 'Own 10 auto clickers', condition: () => this.gameData.autoClickers >= 10 },
+                    { id: 'power_house', name: 'Power House', description: 'Reach 100 click power', condition: () => this.gameData.clickPower >= 100 },
+                    { id: 'level_25', name: 'Quarter Century', description: 'Reach level 25', condition: () => this.gameData.level >= 25 },
+                    { id: 'dedication', name: 'Dedication', description: 'Play for 1 hour', condition: () => Date.now() - this.gameData.startTime >= 3600000 }
+                ];
+                
+                achievements.forEach(achievement => {
+                    if (!this.gameData.achievements.includes(achievement.id) && achievement.condition()) {
+                        this.gameData.achievements.push(achievement.id);
+                        this.showAchievement(achievement.name);
+                    }
+                });
+                
+                this.updateAchievementProgress();
+            }
+            
+            updateAchievementProgress() {
+                const totalAchievements = 10;
+                const unlockedCount = this.gameData.achievements.length;
+                const progressPercent = (unlockedCount / totalAchievements) * 100;
+                
+                this.achievementCount.textContent = `${unlockedCount}/${totalAchievements}`;
+                this.achievementProgress.style.width = `${progressPercent}%`;
+            }
+            
+            showAchievement(name) {
+                this.achievementText.textContent = name;
+                this.achievementPopup.classList.remove('hidden');
+                this.achievementPopup.classList.add('achievement-popup');
+                
+                setTimeout(() => {
+                    this.achievementPopup.classList.add('hidden');
+                    this.achievementPopup.classList.remove('achievement-popup');
+                }, 3000);
+            }
+            
+            formatNumber(num) {
+                if (num < 1000) return num.toString();
+                if (num < 1000000) return (num / 1000).toFixed(1) + 'K';
+                if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
+                if (num < 1000000000000) return (num / 1000000000).toFixed(1) + 'B';
+                return (num / 1000000000000).toFixed(1) + 'T';
+            }
+            
+            resetGame() {
+                localStorage.removeItem('deepblue-clicker-game');
+                this.gameData = this.loadGameData();
+                this.updateDisplay();
+                this.renderUpgrades();
+                this.renderPowerups();
+                this.settingsModal.classList.add('hidden');
+            }
+        }
+        
+        // Initialize the game
+        const clickerGame = new ClickerGame();
+        
+        // Prevent context menu on click button
+        document.getElementById('click-button').addEventListener('contextmenu', (e) => {
+            e.preventDefault();
         });
-
-        function handleClick() {
-            count += clickValue;
-            clickSound.play();
-            showClickEffect();
-            updateCounter();
-        }
-
-        function handleUpgrade() {
-            if (count >= upgradeCost) {
-                count -= upgradeCost;
-                clickValue++;
-                upgradeCost = Math.floor(upgradeCost * UPGRADE_MULTIPLIER);
-                upgradeSound.play();
-                updateCounter();
-            }
-        }
-
-        function handleAutoClickerUpgrade() {
-            if (count >= autoClickerCost) {
-                count -= autoClickerCost;
-                autoClicker++;
-                autoClickerCost = Math.floor(autoClickerCost * UPGRADE_MULTIPLIER);
-                upgradeSound.play();
-                updateCounter();
-                startAutoClicker();
-            }
-        }
-
-        function handleAutoSpeedUpgrade() {
-            if (count >= autoSpeedCost && autoSpeed > MIN_AUTO_SPEED) {
-                count -= autoSpeedCost;
-                autoSpeed = Math.max(autoSpeed - 100, MIN_AUTO_SPEED);
-                autoSpeedCost = Math.floor(autoSpeedCost * UPGRADE_MULTIPLIER);
-                upgradeSound.play();
-                updateCounter();
-                startAutoClicker();
-            }
-        }
-
-        function updateCounter() {
-            counter.textContent = count;
-            document.getElementById('upgrade-button').textContent = `Upgrade Click (+${clickValue} per click) - Cost: ${upgradeCost}`;
-            document.getElementById('auto-clicker-button').textContent = `Upgrade Auto-Clicker (+${autoClicker} per sec) - Cost: ${autoClickerCost}`;
-            document.getElementById('auto-speed-button').textContent = `Upgrade Auto-Speed (Interval: ${autoSpeed}ms) - Cost: ${autoSpeedCost}`;
-            autoSpeedDisplay.textContent = autoSpeed;
-
-            document.getElementById('upgrade-button').disabled = count < upgradeCost;
-            document.getElementById('auto-clicker-button').disabled = count < autoClickerCost;
-            document.getElementById('auto-speed-button').disabled = count < autoSpeedCost || autoSpeed <= MIN_AUTO_SPEED;
-
-            saveProgress();
-        }
-
-        function saveProgress() {
-            localStorage.setItem("count", count);
-            localStorage.setItem("clickValue", clickValue);
-            localStorage.setItem("autoClicker", autoClicker);
-            localStorage.setItem("upgradeCost", upgradeCost);
-            localStorage.setItem("autoClickerCost", autoClickerCost);
-            localStorage.setItem("autoSpeedCost", autoSpeedCost);
-            localStorage.setItem("autoSpeed", autoSpeed);
-        }
-
-        function startAutoClicker() {
-            clearInterval(autoClickerInterval);
-            if (autoClicker > 0) {
-                autoClickerEmoji.style.opacity = "1";
-                autoClickerInterval = setInterval(() => {
-                    count += autoClicker;
-                    updateCounter();
-                }, autoSpeed);
-            }
-        }
-
-        function showClickEffect() {
-            const effect = document.createElement("div");
-            effect.textContent = `+${clickValue}`;
-            effect.classList.add("click-effect");
-            effect.style.left = `${Math.random() * 50 + 25}%`;
-            document.body.appendChild(effect);
-            setTimeout(() => effect.remove(), 1000);
-        }
     </script>
 </body>
 </html>
