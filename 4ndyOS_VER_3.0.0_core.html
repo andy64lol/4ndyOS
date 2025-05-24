@@ -248,42 +248,41 @@
         }
 
         .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.4);
-            padding-top: 60px;
-        }
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 300px;
-            text-align: center;
-        }
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    border-radius: 5px;
+    text-align: center;
+}
 
-        .modal-button {
-            margin: 5px;
-            padding: 10px 20px;
-            background-color: #0078d7;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+.modal-button {
+    margin: 5px;
+    padding: 10px 20px;
+    background-color: #0078d7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
 
-        .modal-button:hover {
-            background-color: #0056a1;
-        }
+.modal-button:hover {
+    background-color: #0056a1;
+}
 
         @keyframes fadeIn {
             from {
@@ -534,6 +533,15 @@
         </div>
     </div>
 
+    <div id="shutdownModal" class="modal">
+        <div class="modal-content">
+            <h3>Shut Down</h3>
+            <p>What would you like to do?</p>
+            <button class="modal-button" onclick="turnOff()">Shut Down</button>
+            <button class="modal-button" onclick="restart()">Restart</button>
+            <button class="modal-button" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
     <!--upcoming apps-->
     
     <div id="pixelArt" class="window">
@@ -661,28 +669,24 @@
             startMenu.style.display = startMenu.style.display === 'none' ? 'flex' : 'none';
         }
 
-        function showShutdownMenu() {
-            document.getElementById('shutdownModal').style.display = 'block';
-            document.getElementById('startMenu').style.display = 'none';
-        }
+function showShutdownMenu() {
+    document.getElementById('shutdownModal').style.display = 'block';
+    document.getElementById('startMenu').style.display = 'none';
+}
 
-        function closeModal() {
-            document.getElementById('shutdownModal').style.display = 'none';
-        }
+function closeModal() {
+    document.getElementById('shutdownModal').style.display = 'none';
+}
 
-        function restart() {
-            alert('System restarting...');
-            location.reload();
-        }
+function restart() {
+    document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">Restarting System...</div>';
+    setTimeout(() => location.reload(), 2000);
+}
 
-        function turnOff() {
-            alert('Shutting down...');
-            document.body.innerHTML =
-                '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">System Powered Off</div>';
-            setTimeout(function () {
-                window.location.href = 'index.html';
-            }, 2000);
-        }
+function turnOff() {
+    document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">System Powered Off</div>';
+    setTimeout(() => window.location.href = 'index.html', 2000);
+}
 
         function updateClock() {
             const now = new Date();
