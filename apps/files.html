@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced File Manager - DeepBlueOS</title>
+    <title>File Manager - DeepBlueOS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../js/shared-filesystem.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -127,6 +127,10 @@
                         <button id="new-file-btn" class="bg-purple-500 hover:bg-purple-600 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-colors">
                             New File
                         </button>
+                        <button id="upload-btn" class="bg-orange-500 hover:bg-orange-600 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-colors">
+                            Upload
+                        </button>
+                        <input type="file" id="file-upload" accept=".txt,.md,.json,.csv,.log" multiple class="hidden">
                         <button id="view-toggle" class="p-1 sm:p-2 text-gray-600 hover:text-gray-800" title="Toggle view">
                             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
@@ -238,6 +242,8 @@
                 this.viewToggle = document.getElementById('view-toggle');
                 this.newFolderBtn = document.getElementById('new-folder-btn');
                 this.newFileBtn = document.getElementById('new-file-btn');
+                this.uploadBtn = document.getElementById('upload-btn');
+                this.fileUpload = document.getElementById('file-upload');
                 this.terminalBtn = document.getElementById('terminal-btn');
                 this.contextMenu = document.getElementById('context-menu');
                 this.renameModal = document.getElementById('rename-modal');
@@ -255,6 +261,8 @@
                 this.viewToggle.addEventListener('click', () => this.toggleView());
                 this.newFolderBtn.addEventListener('click', () => this.showNewFolderModal());
                 this.newFileBtn.addEventListener('click', () => this.showNewFileModal());
+                this.uploadBtn.addEventListener('click', () => this.fileUpload.click());
+                this.fileUpload.addEventListener('change', (e) => this.handleFileUpload(e));
                 this.terminalBtn.addEventListener('click', () => this.openTerminal());
                 
                 // Quick access
