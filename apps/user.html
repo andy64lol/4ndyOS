@@ -3,64 +3,696 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User</title>
+    <title>User Profile - DeepBlueOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #e0f7fa;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        body { font-family: 'Inter', sans-serif; }
+        .avatar-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-
-        .profile-container {
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            padding: 20px;
-            width: 300px;
+        .stat-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-
-        .profile-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 3px solid #2196F3;
-            margin-bottom: 15px;
-        }
-
-        .username {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2196F3;
-        }
-
-        .bio {
-            font-size: 14px;
-            color: #555;
-            margin-top: 10px;
-        }
-
-        .address, .email, .phone {
-            font-size: 14px;
-            color: #777;
-            margin-top: 5px;
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
-<body>
-    <div class="profile-container">
-        <img src="https://avatars.githubusercontent.com/u/190431544?s=40&v=4" alt="Profile Image" class="profile-image">
-        <div class="username">4ndy64</div>
-        <div class="bio">Welcome to my profile! I'm a passionate developer and tech enthusiast.</div>
-        <div class="address">NW1/W1 Baker Street</div>
-        <div class="email">Email: 4ndy64@sussymail.com</div>
-        <div class="phone">Phone: (+44) 496-8675</div>
-        <div class="location">Location: London, UK</div>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="w-80 bg-white border-r border-gray-200 flex flex-col">
+            <!-- Profile Header -->
+            <div class="p-6 bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 avatar-gradient rounded-full flex items-center justify-center text-2xl font-bold">
+                        U
+                    </div>
+                    <div>
+                        <h2 id="display-name" class="text-xl font-semibold">User Name</h2>
+                        <p class="text-blue-100">@username</p>
+                        <p class="text-blue-100 text-sm">Member since: <span id="member-since">Today</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <button class="nav-item w-full flex items-center px-3 py-2 text-left text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors" data-section="profile">
+                            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                            </svg>
+                            Profile Information
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-item w-full flex items-center px-3 py-2 text-left text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors" data-section="preferences">
+                            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                            </svg>
+                            Preferences
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-item w-full flex items-center px-3 py-2 text-left text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors" data-section="security">
+                            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            Security
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-item w-full flex items-center px-3 py-2 text-left text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors" data-section="activity">
+                            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            Activity Log
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-item w-full flex items-center px-3 py-2 text-left text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors" data-section="stats">
+                            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                            </svg>
+                            Statistics
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-200">
+                <button id="logout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition-colors">
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="bg-white border-b border-gray-200 px-6 py-4">
+                <h1 id="section-title" class="text-2xl font-bold text-gray-900">Profile Information</h1>
+                <p id="section-description" class="text-gray-600 mt-1">Manage your personal information and account details</p>
+            </div>
+            
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- Profile Section -->
+                <div id="profile-section" class="section">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Personal Information -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+                            <form id="profile-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                                    <input type="text" id="name-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="User Name">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                    <input type="text" id="username-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="username">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input type="email" id="email-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="user@deepblueos.com">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                    <textarea id="bio-input" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tell us about yourself...">DeepBlueOS user exploring the web-based operating system experience.</textarea>
+                                </div>
+                                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                    Save Changes
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Avatar & Quick Stats -->
+                        <div class="space-y-6">
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h3>
+                                <div class="text-center">
+                                    <div class="w-24 h-24 avatar-gradient rounded-full flex items-center justify-center text-3xl font-bold text-white mx-auto mb-4">
+                                        U
+                                    </div>
+                                    <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                        Change Avatar
+                                    </button>
+                                    <p class="text-sm text-gray-500 mt-2">Click to upload a new profile picture</p>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Info</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Account Status</span>
+                                        <span class="text-green-600 font-medium">Active</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Account Type</span>
+                                        <span class="text-blue-600 font-medium">Standard</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Last Login</span>
+                                        <span class="text-gray-900" id="last-login">Today</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preferences Section -->
+                <div id="preferences-section" class="section hidden">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">System Preferences</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                                <select id="theme-preference" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="auto">Auto (System)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                                <select id="language-preference" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="text-md font-medium text-gray-900 mb-3">Notification Settings</h4>
+                            <div class="space-y-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="email-notifications" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                                    <span class="ml-2 text-sm text-gray-700">Email notifications</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="desktop-notifications" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                                    <span class="ml-2 text-sm text-gray-700">Desktop notifications</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="sound-notifications" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="ml-2 text-sm text-gray-700">Sound notifications</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button id="save-preferences" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                            Save Preferences
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Security Section -->
+                <div id="security-section" class="section hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Password & Authentication</h3>
+                            <form id="password-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                    <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                    <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                    <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                    Change Password
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Two-Factor Authentication</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">Authenticator App</p>
+                                        <p class="text-sm text-gray-600">Use an app like Google Authenticator</p>
+                                    </div>
+                                    <button class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                                        Enable
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">SMS Authentication</p>
+                                        <p class="text-sm text-gray-600">Receive codes via text message</p>
+                                    </div>
+                                    <button class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                                        Setup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Activity Section -->
+                <div id="activity-section" class="section hidden">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                        <div class="space-y-4" id="activity-list">
+                            <!-- Activity items will be dynamically generated -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistics Section -->
+                <div id="stats-section" class="section hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="stat-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Total Logins</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="total-logins">42</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-green-100 rounded-lg">
+                                    <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Apps Used</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="apps-used">8</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-purple-100 rounded-lg">
+                                    <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Files Created</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="files-created">23</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-yellow-100 rounded-lg">
+                                    <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">Session Time</p>
+                                    <p class="text-2xl font-semibold text-gray-900" id="session-time">2h 34m</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Usage Chart -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Usage Over Time</h3>
+                        <div class="h-64 flex items-end justify-center space-x-2">
+                            <div class="bg-blue-500 w-8 rounded-t" style="height: 40%"></div>
+                            <div class="bg-blue-500 w-8 rounded-t" style="height: 60%"></div>
+                            <div class="bg-blue-500 w-8 rounded-t" style="height: 30%"></div>
+                            <div class="bg-blue-500 w-8 rounded-t" style="height: 80%"></div>
+                            <div class="bg-blue-500 w-8 rounded-t" style="height: 50%"></div>
+                            <div class="bg-blue-500 w-8 rounded-t" style="height: 90%"></div>
+                            <div class="bg-blue-500 w-8 rounded-t" style="height: 70%"></div>
+                        </div>
+                        <div class="mt-4 flex justify-between text-sm text-gray-500">
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                            <span>Sun</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        class UserProfile {
+            constructor() {
+                this.currentSection = 'profile';
+                this.userData = this.loadUserData();
+                this.sessionStart = Date.now();
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.loadUserProfile();
+                this.generateActivityLog();
+                this.updateSessionTime();
+                
+                // Update session time every minute
+                setInterval(() => this.updateSessionTime(), 60000);
+            }
+            
+            initializeElements() {
+                this.navItems = document.querySelectorAll('.nav-item');
+                this.sections = document.querySelectorAll('.section');
+                this.sectionTitle = document.getElementById('section-title');
+                this.sectionDescription = document.getElementById('section-description');
+                this.displayName = document.getElementById('display-name');
+                this.memberSince = document.getElementById('member-since');
+                this.lastLogin = document.getElementById('last-login');
+                this.activityList = document.getElementById('activity-list');
+            }
+            
+            bindEvents() {
+                // Navigation
+                this.navItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const section = item.dataset.section;
+                        this.switchSection(section);
+                    });
+                });
+                
+                // Form submissions
+                document.getElementById('profile-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveProfile();
+                });
+                
+                document.getElementById('password-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.changePassword();
+                });
+                
+                document.getElementById('save-preferences').addEventListener('click', () => {
+                    this.savePreferences();
+                });
+                
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    this.logout();
+                });
+            }
+            
+            switchSection(sectionName) {
+                // Update navigation
+                this.navItems.forEach(item => {
+                    item.classList.remove('bg-blue-50', 'text-blue-700');
+                    item.classList.add('text-gray-700');
+                });
+                
+                const activeItem = document.querySelector(`[data-section="${sectionName}"]`);
+                if (activeItem) {
+                    activeItem.classList.remove('text-gray-700');
+                    activeItem.classList.add('bg-blue-50', 'text-blue-700');
+                }
+                
+                // Hide all sections
+                this.sections.forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Show active section
+                const activeSection = document.getElementById(`${sectionName}-section`);
+                if (activeSection) {
+                    activeSection.classList.remove('hidden');
+                }
+                
+                // Update header
+                this.updateSectionHeader(sectionName);
+                this.currentSection = sectionName;
+            }
+            
+            updateSectionHeader(sectionName) {
+                const headers = {
+                    profile: {
+                        title: 'Profile Information',
+                        description: 'Manage your personal information and account details'
+                    },
+                    preferences: {
+                        title: 'Preferences',
+                        description: 'Customize your DeepBlueOS experience'
+                    },
+                    security: {
+                        title: 'Security',
+                        description: 'Manage your password and security settings'
+                    },
+                    activity: {
+                        title: 'Activity Log',
+                        description: 'View your recent activity and login history'
+                    },
+                    stats: {
+                        title: 'Statistics',
+                        description: 'Your usage statistics and analytics'
+                    }
+                };
+                
+                const header = headers[sectionName];
+                if (header) {
+                    this.sectionTitle.textContent = header.title;
+                    this.sectionDescription.textContent = header.description;
+                }
+            }
+            
+            loadUserData() {
+                const saved = localStorage.getItem('deepblue-user-data');
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+                
+                return {
+                    name: 'User Name',
+                    username: 'username',
+                    email: 'user@deepblueos.com',
+                    bio: 'DeepBlueOS user exploring the web-based operating system experience.',
+                    memberSince: new Date().toLocaleDateString(),
+                    lastLogin: new Date().toLocaleString(),
+                    preferences: {
+                        theme: 'light',
+                        language: 'en',
+                        emailNotifications: true,
+                        desktopNotifications: true,
+                        soundNotifications: false
+                    },
+                    stats: {
+                        totalLogins: Math.floor(Math.random() * 50) + 20,
+                        appsUsed: Math.floor(Math.random() * 10) + 5,
+                        filesCreated: Math.floor(Math.random() * 30) + 10
+                    },
+                    activity: []
+                };
+            }
+            
+            saveUserData() {
+                localStorage.setItem('deepblue-user-data', JSON.stringify(this.userData));
+            }
+            
+            loadUserProfile() {
+                // Load profile information
+                document.getElementById('name-input').value = this.userData.name;
+                document.getElementById('username-input').value = this.userData.username;
+                document.getElementById('email-input').value = this.userData.email;
+                document.getElementById('bio-input').value = this.userData.bio;
+                
+                // Update display elements
+                this.displayName.textContent = this.userData.name;
+                this.memberSince.textContent = this.userData.memberSince;
+                this.lastLogin.textContent = this.userData.lastLogin;
+                
+                // Load preferences
+                document.getElementById('theme-preference').value = this.userData.preferences.theme;
+                document.getElementById('language-preference').value = this.userData.preferences.language;
+                document.getElementById('email-notifications').checked = this.userData.preferences.emailNotifications;
+                document.getElementById('desktop-notifications').checked = this.userData.preferences.desktopNotifications;
+                document.getElementById('sound-notifications').checked = this.userData.preferences.soundNotifications;
+                
+                // Load statistics
+                document.getElementById('total-logins').textContent = this.userData.stats.totalLogins;
+                document.getElementById('apps-used').textContent = this.userData.stats.appsUsed;
+                document.getElementById('files-created').textContent = this.userData.stats.filesCreated;
+            }
+            
+            saveProfile() {
+                this.userData.name = document.getElementById('name-input').value;
+                this.userData.username = document.getElementById('username-input').value;
+                this.userData.email = document.getElementById('email-input').value;
+                this.userData.bio = document.getElementById('bio-input').value;
+                
+                // Update display elements
+                this.displayName.textContent = this.userData.name;
+                
+                this.saveUserData();
+                this.showNotification('Profile updated successfully!', 'success');
+                this.addActivity('Updated profile information');
+            }
+            
+            savePreferences() {
+                this.userData.preferences = {
+                    theme: document.getElementById('theme-preference').value,
+                    language: document.getElementById('language-preference').value,
+                    emailNotifications: document.getElementById('email-notifications').checked,
+                    desktopNotifications: document.getElementById('desktop-notifications').checked,
+                    soundNotifications: document.getElementById('sound-notifications').checked
+                };
+                
+                this.saveUserData();
+                this.showNotification('Preferences saved successfully!', 'success');
+                this.addActivity('Updated preferences');
+            }
+            
+            changePassword() {
+                // In a real application, this would validate the current password
+                // and update it on the server
+                this.showNotification('Password changed successfully!', 'success');
+                this.addActivity('Changed password');
+                
+                // Clear password fields
+                document.querySelectorAll('#password-form input[type="password"]').forEach(input => {
+                    input.value = '';
+                });
+            }
+            
+            generateActivityLog() {
+                const activities = [
+                    'Logged into DeepBlueOS',
+                    'Opened Calculator app',
+                    'Created new note',
+                    'Changed system theme',
+                    'Opened File Manager',
+                    'Updated profile picture',
+                    'Opened Terminal',
+                    'Created new folder',
+                    'Opened Settings',
+                    'Saved document'
+                ];
+                
+                // Generate some random recent activities
+                for (let i = 0; i < 5; i++) {
+                    const activity = activities[Math.floor(Math.random() * activities.length)];
+                    const time = new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000);
+                    this.userData.activity.unshift({
+                        action: activity,
+                        timestamp: time.toISOString()
+                    });
+                }
+                
+                this.renderActivityLog();
+                this.saveUserData();
+            }
+            
+            renderActivityLog() {
+                this.activityList.innerHTML = '';
+                
+                this.userData.activity.slice(0, 10).forEach(activity => {
+                    const time = new Date(activity.timestamp);
+                    const timeString = time.toLocaleString();
+                    
+                    const activityElement = document.createElement('div');
+                    activityElement.className = 'flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0';
+                    activityElement.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                            <span class="text-gray-900">${activity.action}</span>
+                        </div>
+                        <span class="text-gray-500 text-sm">${timeString}</span>
+                    `;
+                    
+                    this.activityList.appendChild(activityElement);
+                });
+            }
+            
+            addActivity(action) {
+                this.userData.activity.unshift({
+                    action: action,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Keep only last 50 activities
+                if (this.userData.activity.length > 50) {
+                    this.userData.activity = this.userData.activity.slice(0, 50);
+                }
+                
+                this.renderActivityLog();
+                this.saveUserData();
+            }
+            
+            updateSessionTime() {
+                const elapsed = Date.now() - this.sessionStart;
+                const hours = Math.floor(elapsed / (1000 * 60 * 60));
+                const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+                
+                const sessionTimeElement = document.getElementById('session-time');
+                if (sessionTimeElement) {
+                    sessionTimeElement.textContent = `${hours}h ${minutes}m`;
+                }
+            }
+            
+            showNotification(message, type = 'info') {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 ${
+                    type === 'success' ? 'bg-green-500 text-white' : 
+                    type === 'error' ? 'bg-red-500 text-white' : 
+                    'bg-blue-500 text-white'
+                }`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // Remove notification after 3 seconds
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+            
+            logout() {
+                if (confirm('Are you sure you want to logout?')) {
+                    this.addActivity('Logged out of DeepBlueOS');
+                    this.showNotification('Logging out...', 'info');
+                    
+                    setTimeout(() => {
+                        // In a real app, this would redirect to login
+                        window.parent.location.reload();
+                    }, 1500);
+                }
+            }
+        }
+        
+        // Initialize the user profile app
+        const userProfile = new UserProfile();
+        
+        // Set active navigation item on load
+        document.querySelector('[data-section="profile"]').classList.add('bg-blue-50', 'text-blue-700');
+    </script>
 </body>
 </html>
