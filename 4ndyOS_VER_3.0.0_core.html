@@ -342,18 +342,6 @@
             <img src="icons/Python.svg" alt="Python Console" />
             <p>Python Console</p>
         </div>
-        <div class="icon" onclick="openWindow('game24')">
-            <img src="icons/gameicons/24.svg" alt="24 Game" />
-            <p>24 Game</p>
-        </div>
-        <div class="icon" onclick="openWindow('mediaPlayer')">
-            <img src="icons/media.png" alt="Media Player" />
-            <p>Media Player</p>
-        </div>
-        <div class="icon" onclick="openWindow('weatherWidget')">
-            <img src="icons/weather.png" alt="Weather Widget" />
-            <p>Weather</p>
-        </div>
     </div>
 
     <div class="taskbar">
@@ -373,7 +361,7 @@
         <div class="app-item" onclick="openWindow('notes')">Notes</div>
         <div class="app-item" onclick="openWindow('andyDraw')">4ndyDraw</div>
         <div class="app-item" onclick="openWindow('settings')">Settings</div>
-        <div class="app-item" onclick="openWindow('pythonConsole')">Python Console</div>
+        <div class="app-item" onclick="openWindow('pythonconsole')">Python Console</div>
         <div class="shutdown-button" onclick="showShutdownMenu()">Turn Off</div>
     </div>
 
@@ -533,29 +521,60 @@
         </div>
     </div>
 
-    <div id="pythonConsole" class="window">
+    <div id="pythonconsole" class="window">
         <div class="window-header">
-            <span>Python Console</span>
+            <span>4ndyPython</span>
             <span>
-                <span class="minimize" onclick="minimizeWindow('pythonConsole')">_</span>
-                <span class="close" onclick="closeWindow('pythonConsole')">X</span>
+                <span class="minimize" onclick="minimizeWindow('files')">_</span>
+                <span class="close" onclick="closeWindow('files')">X</span>
             </span>
         </div>
-        <div class="window-body" style="display: flex; flex-direction: column; height: 100%;">
-            <textarea id="pythonInput" style="flex: 1; width: 100%; resize: none; font-family: monospace; font-size: 14px;" placeholder="Type Python code here..."></textarea>
-            <button onclick="runPythonCode()" style="margin-top: 5px; padding: 5px 10px; background-color: #0078d7; color: white; border: none; border-radius: 5px; cursor: pointer;">Run</button>
-            <pre id="pythonOutput" style="flex: 1; background: #f0f0f0; margin-top: 5px; padding: 10px; overflow: auto; border: 1px solid #ccc; border-radius: 5px;"></pre>
-        </div>
-    </div>
-    <div id="shutdownModal" class="modal">
-        <div class="modal-content">
-            <h2>Turn Off Options</h2>
-            <button class="modal-button" onclick="restart()">Restart</button>
-            <button class="modal-button" onclick="turnOff()">Turn Off</button>
-            <button class="modal-button" onclick="closeModal()">Cancel</button>
+        <div class="window-body">
+            <iframe src="apps/4ndyPython.html" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
     </div>
 
+    <!--upcoming apps-->
+    
+    <div id="pythonconsole" class="window">
+        <div class="window-header">
+            <span>4ndyPixelArt</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('files')">_</span>
+                <span class="close" onclick="closeWindow('files')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="NeoM4trixApps/4ndyPixelArt.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="pythonconsole" class="window">
+        <div class="window-header">
+            <span>Paper Minecraft</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('files')">_</span>
+                <span class="close" onclick="closeWindow('files')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="NeoM4trixApps/Paper Minecraft .html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="24" class="window">
+        <div class="window-header">
+            <span>24 game</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('files')">_</span>
+                <span class="close" onclick="closeWindow('files')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="NeoM4trixApps/24game.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+    
     <script>
         let highestZIndex = 1000;
         let activeWindow = null;
