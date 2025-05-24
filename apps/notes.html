@@ -3,170 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notes</title>
+    <title>Notes - DeepBlueOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f4f8;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            overflow: hidden;
-            user-select: none;
-        }
-
-        #notes-container {
-            width: 90%;
-            max-width: 600px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            text-align: center;
-        }
-
-        select, textarea, button {
-            width: 100%;
-            padding: 10px;
-            font-size: 1rem;
-            border-radius: 8px;
-            border: none;
-        }
-
-        textarea {
-            height: 300px;
-            background-color: #e9ecef;
-            resize: none;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #import-container {
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            padding: 15px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .note-item:hover { background-color: rgba(59, 130, 246, 0.1); }
+        .note-content { resize: none; }
     </style>
 </head>
-<body>
-    <div id="notes-container">
-        <select id="noteSlot">
-            <option value="0">Slot 1</option>
-            <option value="1">Slot 2</option>
-            <option value="2">Slot 3</option>
-            <option value="3">Slot 4</option>
-            <option value="4">Slot 5</option>
-            <option value="5">Slot 6</option>
-            <option value="6">Slot 7</option>
-            <option value="7">Slot 8</option>
-            <option value="8">Slot 9</option>
-            <option value="9">Slot 10</option>
-        </select>
-        <textarea id="note" placeholder="Write your notes here..."></textarea>
-        <button id="save">Save Note</button>
-        <button id="export">Export as .txt</button>
-        <button id="showImport">Import .txt</button>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div class="w-1/3 bg-white border-r border-gray-200 flex flex-col">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center justify-between mb-3">
+                    <h1 class="text-xl font-semibold text-gray-800">Notes</h1>
+                    <button id="new-note-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-sm transition-colors">
+                        + New
+                    </button>
+                </div>
+                <input type="text" id="search-input" placeholder="Search notes..." 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <!-- Notes List -->
+            <div id="notes-list" class="flex-1 overflow-y-auto">
+                <!-- Notes will be dynamically inserted here -->
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Note Editor Header -->
+            <div class="p-4 border-b border-gray-200 bg-white">
+                <input type="text" id="note-title" placeholder="Note title..." 
+                       class="w-full text-xl font-medium border-none outline-none placeholder-gray-400">
+                <div class="flex items-center mt-2 text-sm text-gray-500">
+                    <span id="last-modified">Last modified: Never</span>
+                    <span class="mx-2">•</span>
+                    <span id="word-count">0 words</span>
+                    <span class="mx-2">•</span>
+                    <span id="char-count">0 characters</span>
+                </div>
+            </div>
+            
+            <!-- Note Editor -->
+            <div class="flex-1 relative">
+                <textarea id="note-content" placeholder="Start writing your note..." 
+                          class="note-content w-full h-full p-4 border-none outline-none text-gray-700 leading-relaxed"></textarea>
+            </div>
+            
+            <!-- Footer -->
+            <div class="p-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <button id="bold-btn" class="p-2 hover:bg-gray-200 rounded transition-colors" title="Bold">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h5a3 3 0 110 6H6v2h3a3 3 0 110 6H4a1 1 0 01-1-1V4zm3 2v2h3a1 1 0 100-2H6zm0 6v2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    <button id="italic-btn" class="p-2 hover:bg-gray-200 rounded transition-colors" title="Italic">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M7 2a1 1 0 000 2h.5l-1 8H6a1 1 0 000 2h6a1 1 0 100-2h-.5l1-8H13a1 1 0 100-2H7z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="text-sm text-gray-500">
+                    Auto-saved
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div id="import-container">
-        <h3>Import .txt File</h3>
-        <input type="file" id="importFile" accept=".txt">
-        <select id="importSlot">
-            <option value="0">Slot 1</option>
-            <option value="1">Slot 2</option>
-            <option value="2">Slot 3</option>
-            <option value="3">Slot 4</option>
-            <option value="4">Slot 5</option>
-            <option value="5">Slot 6</option>
-            <option value="6">Slot 7</option>
-            <option value="7">Slot 8</option>
-            <option value="8">Slot 9</option>
-            <option value="9">Slot 10</option>
-        </select>
-        <button id="importConfirm">Import</button>
-        <button id="importCancel">Cancel</button>
+    
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden flex-1 flex items-center justify-center bg-gray-50">
+        <div class="text-center">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No note selected</h3>
+            <p class="text-gray-500">Create a new note or select an existing one to start writing.</p>
+        </div>
     </div>
 
     <script>
-        const note = document.getElementById('note');
-        const saveButton = document.getElementById('save');
-        const exportButton = document.getElementById('export');
-        const noteSlot = document.getElementById('noteSlot');
-        const showImport = document.getElementById('showImport');
-        const importContainer = document.getElementById('import-container');
-        const importFile = document.getElementById('importFile');
-        const importSlot = document.getElementById('importSlot');
-        const importConfirm = document.getElementById('importConfirm');
-        const importCancel = document.getElementById('importCancel');
-
-        function loadNote() {
-            note.value = localStorage.getItem(`noteSlot${noteSlot.value}`) || '';
-        }
-
-        saveButton.addEventListener('click', () => {
-            localStorage.setItem(`noteSlot${noteSlot.value}`, note.value);
-            alert('Note saved!');
-        });
-
-        exportButton.addEventListener('click', () => {
-            const blob = new Blob([note.value], { type: 'text/plain' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `note_slot_${parseInt(noteSlot.value) + 1}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        });
-
-        showImport.addEventListener('click', () => {
-            importContainer.style.display = 'flex';
-        });
-
-        importCancel.addEventListener('click', () => {
-            importContainer.style.display = 'none';
-        });
-
-        importConfirm.addEventListener('click', () => {
-            const file = importFile.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    localStorage.setItem(`noteSlot${importSlot.value}`, e.target.result);
-                    alert('Note imported successfully!');
-                    if (noteSlot.value === importSlot.value) {
-                        loadNote();
-                    }
-                    importContainer.style.display = 'none';
+        class NotesApp {
+            constructor() {
+                this.notes = this.loadNotes();
+                this.currentNoteId = null;
+                this.initializeElements();
+                this.bindEvents();
+                this.renderNotesList();
+                this.showEmptyState();
+            }
+            
+            initializeElements() {
+                this.notesList = document.getElementById('notes-list');
+                this.noteTitle = document.getElementById('note-title');
+                this.noteContent = document.getElementById('note-content');
+                this.searchInput = document.getElementById('search-input');
+                this.newNoteBtn = document.getElementById('new-note-btn');
+                this.lastModified = document.getElementById('last-modified');
+                this.wordCount = document.getElementById('word-count');
+                this.charCount = document.getElementById('char-count');
+                this.emptyState = document.getElementById('empty-state');
+                this.boldBtn = document.getElementById('bold-btn');
+                this.italicBtn = document.getElementById('italic-btn');
+            }
+            
+            bindEvents() {
+                this.newNoteBtn.addEventListener('click', () => this.createNewNote());
+                this.searchInput.addEventListener('input', (e) => this.searchNotes(e.target.value));
+                this.noteTitle.addEventListener('input', () => this.saveCurrentNote());
+                this.noteContent.addEventListener('input', () => {
+                    this.updateStats();
+                    this.saveCurrentNote();
+                });
+                this.boldBtn.addEventListener('click', () => this.formatText('bold'));
+                this.italicBtn.addEventListener('click', () => this.formatText('italic'));
+                
+                // Auto-save every 2 seconds
+                setInterval(() => this.saveCurrentNote(), 2000);
+            }
+            
+            loadNotes() {
+                const saved = localStorage.getItem('deepblue-notes');
+                return saved ? JSON.parse(saved) : [];
+            }
+            
+            saveNotes() {
+                localStorage.setItem('deepblue-notes', JSON.stringify(this.notes));
+            }
+            
+            createNewNote() {
+                const note = {
+                    id: Date.now().toString(),
+                    title: 'Untitled Note',
+                    content: '',
+                    createdAt: new Date().toISOString(),
+                    modifiedAt: new Date().toISOString()
                 };
-                reader.readAsText(file);
+                
+                this.notes.unshift(note);
+                this.saveNotes();
+                this.renderNotesList();
+                this.selectNote(note.id);
+            }
+            
+            selectNote(noteId) {
+                this.currentNoteId = noteId;
+                const note = this.notes.find(n => n.id === noteId);
+                
+                if (note) {
+                    this.noteTitle.value = note.title;
+                    this.noteContent.value = note.content;
+                    this.updateStats();
+                    this.updateLastModified(note.modifiedAt);
+                    this.hideEmptyState();
+                    this.highlightSelectedNote(noteId);
+                }
+            }
+            
+            saveCurrentNote() {
+                if (!this.currentNoteId) return;
+                
+                const note = this.notes.find(n => n.id === this.currentNoteId);
+                if (note) {
+                    note.title = this.noteTitle.value || 'Untitled Note';
+                    note.content = this.noteContent.value;
+                    note.modifiedAt = new Date().toISOString();
+                    this.saveNotes();
+                    this.updateLastModified(note.modifiedAt);
+                    this.renderNotesList();
+                }
+            }
+            
+            deleteNote(noteId) {
+                if (confirm('Are you sure you want to delete this note?')) {
+                    this.notes = this.notes.filter(n => n.id !== noteId);
+                    this.saveNotes();
+                    this.renderNotesList();
+                    
+                    if (this.currentNoteId === noteId) {
+                        this.currentNoteId = null;
+                        this.showEmptyState();
+                    }
+                }
+            }
+            
+            searchNotes(query) {
+                const filtered = this.notes.filter(note => 
+                    note.title.toLowerCase().includes(query.toLowerCase()) ||
+                    note.content.toLowerCase().includes(query.toLowerCase())
+                );
+                this.renderNotesList(filtered);
+            }
+            
+            renderNotesList(notesToRender = this.notes) {
+                this.notesList.innerHTML = '';
+                
+                notesToRender.forEach(note => {
+                    const noteElement = this.createNoteListItem(note);
+                    this.notesList.appendChild(noteElement);
+                });
+                
+                if (notesToRender.length === 0 && this.searchInput.value) {
+                    this.notesList.innerHTML = '<div class="p-4 text-center text-gray-500">No notes found</div>';
+                }
+            }
+            
+            createNoteListItem(note) {
+                const div = document.createElement('div');
+                div.className = `note-item p-4 border-b border-gray-100 cursor-pointer transition-colors ${
+                    this.currentNoteId === note.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                }`;
+                div.onclick = () => this.selectNote(note.id);
+                
+                const preview = note.content.substring(0, 100) || 'No content';
+                const date = new Date(note.modifiedAt).toLocaleDateString();
+                
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <h3 class="font-medium text-gray-900 truncate flex-1">${this.escapeHtml(note.title)}</h3>
+                        <button class="delete-btn text-red-500 hover:text-red-700 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" 
+                                onclick="event.stopPropagation(); notesApp.deleteNote('${note.id}')">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-600 line-clamp-2 mb-2">${this.escapeHtml(preview)}</p>
+                    <p class="text-xs text-gray-400">${date}</p>
+                `;
+                
+                // Show delete button on hover
+                div.addEventListener('mouseenter', () => {
+                    const deleteBtn = div.querySelector('.delete-btn');
+                    deleteBtn.classList.remove('opacity-0');
+                    deleteBtn.classList.add('opacity-100');
+                });
+                
+                div.addEventListener('mouseleave', () => {
+                    const deleteBtn = div.querySelector('.delete-btn');
+                    deleteBtn.classList.add('opacity-0');
+                    deleteBtn.classList.remove('opacity-100');
+                });
+                
+                return div;
+            }
+            
+            highlightSelectedNote(noteId) {
+                document.querySelectorAll('.note-item').forEach(item => {
+                    item.classList.remove('bg-blue-50', 'border-l-4', 'border-l-blue-500');
+                });
+                
+                const selectedItem = document.querySelector(`[onclick*="${noteId}"]`);
+                if (selectedItem) {
+                    selectedItem.classList.add('bg-blue-50', 'border-l-4', 'border-l-blue-500');
+                }
+            }
+            
+            updateStats() {
+                const content = this.noteContent.value;
+                const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+                const chars = content.length;
+                
+                this.wordCount.textContent = `${words} words`;
+                this.charCount.textContent = `${chars} characters`;
+            }
+            
+            updateLastModified(timestamp) {
+                const date = new Date(timestamp);
+                this.lastModified.textContent = `Last modified: ${date.toLocaleString()}`;
+            }
+            
+            showEmptyState() {
+                this.emptyState.classList.remove('hidden');
+                this.emptyState.classList.add('flex');
+                this.noteTitle.value = '';
+                this.noteContent.value = '';
+                this.updateStats();
+                this.lastModified.textContent = 'Last modified: Never';
+            }
+            
+            hideEmptyState() {
+                this.emptyState.classList.add('hidden');
+                this.emptyState.classList.remove('flex');
+            }
+            
+            formatText(command) {
+                const textarea = this.noteContent;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const selectedText = textarea.value.substring(start, end);
+                
+                if (selectedText) {
+                    let formattedText;
+                    if (command === 'bold') {
+                        formattedText = `**${selectedText}**`;
+                    } else if (command === 'italic') {
+                        formattedText = `*${selectedText}*`;
+                    }
+                    
+                    textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+                    textarea.focus();
+                    textarea.setSelectionRange(start + (command === 'bold' ? 2 : 1), start + (command === 'bold' ? 2 : 1) + selectedText.length);
+                    this.saveCurrentNote();
+                }
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+        
+        // Initialize the app
+        const notesApp = new NotesApp();
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        notesApp.createNewNote();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        notesApp.saveCurrentNote();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        notesApp.searchInput.focus();
+                        break;
+                }
             }
         });
-
-        noteSlot.addEventListener('change', loadNote);
-        loadNote();
     </script>
 </body>
 </html>
