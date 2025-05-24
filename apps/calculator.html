@@ -2,132 +2,475 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Minimalistic 4ndy Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator - DeepBlueOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+        body { font-family: 'Inter', sans-serif; }
+        .calc-button {
+            transition: all 0.1s ease;
         }
-
-        html, body {
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f4f8;
-            font-family: Arial, sans-serif;
+        .calc-button:active {
+            transform: scale(0.95);
         }
-
-        #calculator {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            width: 300px;
-        }
-
-        #display {
-            width: 100%;
-            height: 60px;
-            border: none;
-            background-color: #e9ecef;
-            font-size: 2rem;
-            text-align: right;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .button-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .button {
-            width: 100%;
-            height: 60px;
-            font-size: 1.5rem;
-            border: none;
-            border-radius: 8px;
-            background-color: #6c757d;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .button:hover {
-            background-color: #5a6268;
-        }
-
-        .button.operation {
-            background-color: #007bff;
-        }
-
-        .button.operation:hover {
-            background-color: #0056b3;
-        }
-
-        .button.equal {
-            background-color: #28a745;
-            grid-column: span 2;
-        }
-
-        .button.equal:hover {
-            background-color: #218838;
+        .display {
+            font-family: 'Courier New', monospace;
         }
     </style>
 </head>
-<body>
-    <div id="calculator">
-        <input type="text" id="display" disabled>
-        <div class="button-container">
-            <button class="button">7</button>
-            <button class="button">8</button>
-            <button class="button">9</button>
-            <button class="button operation">/</button>
-            <button class="button">4</button>
-            <button class="button">5</button>
-            <button class="button">6</button>
-            <button class="button operation">*</button>
-            <button class="button">1</button>
-            <button class="button">2</button>
-            <button class="button">3</button>
-            <button class="button operation">-</button>
-            <button class="button">0</button>
-            <button class="button">.</button>
-            <button class="button operation">+</button>
-            <button class="button equal">=</button>
+<body class="bg-gray-100 h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Calculator</h1>
+        </div>
+        
+        <!-- Display -->
+        <div class="bg-gray-900 rounded-xl p-4 mb-6">
+            <div class="text-right">
+                <div id="previous-operation" class="text-gray-400 text-sm h-4 overflow-hidden"></div>
+                <div id="current-display" class="display text-white text-3xl font-mono min-h-12 flex items-end justify-end">0</div>
+            </div>
+        </div>
+        
+        <!-- Memory Display -->
+        <div id="memory-display" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-2 mb-4">
+            <div class="text-sm text-blue-700">Memory: <span id="memory-value">0</span></div>
+        </div>
+        
+        <!-- Buttons Grid -->
+        <div class="grid grid-cols-4 gap-3">
+            <!-- Memory Row -->
+            <button class="calc-button bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-lg font-medium transition-colors" onclick="memoryRecall()">MR</button>
+            <button class="calc-button bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-lg font-medium transition-colors" onclick="memoryClear()">MC</button>
+            <button class="calc-button bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-lg font-medium transition-colors" onclick="memoryAdd()">M+</button>
+            <button class="calc-button bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-lg font-medium transition-colors" onclick="memorySubtract()">M-</button>
+            
+            <!-- Function Row -->
+            <button class="calc-button bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-medium transition-colors" onclick="clearAll()">C</button>
+            <button class="calc-button bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-medium transition-colors" onclick="clearEntry()">CE</button>
+            <button class="calc-button bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-medium transition-colors" onclick="backspace()">⌫</button>
+            <button class="calc-button bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-medium transition-colors" onclick="inputOperator('÷')">÷</button>
+            
+            <!-- Number Row 1 -->
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('7')">7</button>
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('8')">8</button>
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('9')">9</button>
+            <button class="calc-button bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-medium transition-colors" onclick="inputOperator('×')">×</button>
+            
+            <!-- Number Row 2 -->
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('4')">4</button>
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('5')">5</button>
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('6')">6</button>
+            <button class="calc-button bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-medium transition-colors" onclick="inputOperator('-')">-</button>
+            
+            <!-- Number Row 3 -->
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('1')">1</button>
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('2')">2</button>
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('3')">3</button>
+            <button class="calc-button bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-medium transition-colors" onclick="inputOperator('+')">+</button>
+            
+            <!-- Bottom Row -->
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="toggleSign()">±</button>
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputNumber('0')">0</button>
+            <button class="calc-button bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors" onclick="inputDecimal()">.</button>
+            <button class="calc-button bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-medium transition-colors" onclick="calculate()">=</button>
+        </div>
+        
+        <!-- Scientific Functions (Initially Hidden) -->
+        <div id="scientific-panel" class="hidden mt-4 p-4 bg-gray-50 rounded-lg">
+            <div class="grid grid-cols-4 gap-2">
+                <button class="calc-button bg-purple-500 hover:bg-purple-600 text-white py-2 rounded text-sm" onclick="scientificFunction('sin')">sin</button>
+                <button class="calc-button bg-purple-500 hover:bg-purple-600 text-white py-2 rounded text-sm" onclick="scientificFunction('cos')">cos</button>
+                <button class="calc-button bg-purple-500 hover:bg-purple-600 text-white py-2 rounded text-sm" onclick="scientificFunction('tan')">tan</button>
+                <button class="calc-button bg-purple-500 hover:bg-purple-600 text-white py-2 rounded text-sm" onclick="scientificFunction('log')">log</button>
+                <button class="calc-button bg-purple-500 hover:bg-purple-600 text-white py-2 rounded text-sm" onclick="scientificFunction('ln')">ln</button>
+                <button class="calc-button bg-purple-500 hover:bg-purple-600 text-white py-2 rounded text-sm" onclick="scientificFunction('sqrt')">√</button>
+                <button class="calc-button bg-purple-500 hover:bg-purple-600 text-white py-2 rounded text-sm" onclick="scientificFunction('square')">x²</button>
+                <button class="calc-button bg-purple-500 hover:bg-purple-600 text-white py-2 rounded text-sm" onclick="scientificFunction('power')">x^y</button>
+            </div>
+        </div>
+        
+        <!-- Toggle Scientific Mode -->
+        <div class="mt-4 text-center">
+            <button id="scientific-toggle" class="text-blue-500 hover:text-blue-700 text-sm font-medium" onclick="toggleScientific()">
+                Show Scientific Functions
+            </button>
+        </div>
+        
+        <!-- History Panel -->
+        <div id="history-panel" class="hidden mt-4 p-4 bg-gray-50 rounded-lg max-h-40 overflow-y-auto">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-gray-700">History</h3>
+                <button class="text-red-500 hover:text-red-700 text-sm" onclick="clearHistory()">Clear</button>
+            </div>
+            <div id="history-list" class="space-y-1">
+                <div class="text-sm text-gray-500 text-center">No calculations yet</div>
+            </div>
+        </div>
+        
+        <!-- Toggle History -->
+        <div class="mt-2 text-center">
+            <button id="history-toggle" class="text-blue-500 hover:text-blue-700 text-sm font-medium" onclick="toggleHistory()">
+                Show History
+            </button>
         </div>
     </div>
 
     <script>
-        const display = document.getElementById('display');
-        const buttons = document.querySelectorAll('.button');
-        let currentInput = '';
-
-        buttons.forEach(button => {
-            button.addEventListener('click', () => {
-                if (button.innerText === '=') {
-                    try {
-                        currentInput = eval(currentInput);
-                        display.value = currentInput;
-                    } catch {
-                        display.value = 'Error';
-                        currentInput = '';
-                    }
+        class Calculator {
+            constructor() {
+                this.currentValue = '0';
+                this.previousValue = '';
+                this.operator = '';
+                this.waitingForValue = false;
+                this.memory = 0;
+                this.history = [];
+                this.scientificMode = false;
+                this.historyVisible = false;
+                
+                this.display = document.getElementById('current-display');
+                this.previousDisplay = document.getElementById('previous-operation');
+                this.memoryDisplay = document.getElementById('memory-display');
+                this.memoryValue = document.getElementById('memory-value');
+                this.scientificPanel = document.getElementById('scientific-panel');
+                this.scientificToggle = document.getElementById('scientific-toggle');
+                this.historyPanel = document.getElementById('history-panel');
+                this.historyToggle = document.getElementById('history-toggle');
+                this.historyList = document.getElementById('history-list');
+                
+                this.updateDisplay();
+                this.loadFromStorage();
+            }
+            
+            inputNumber(num) {
+                if (this.waitingForValue) {
+                    this.currentValue = num;
+                    this.waitingForValue = false;
                 } else {
-                    currentInput += button.innerText;
-                    display.value = currentInput;
+                    this.currentValue = this.currentValue === '0' ? num : this.currentValue + num;
                 }
-            });
+                this.updateDisplay();
+            }
+            
+            inputDecimal() {
+                if (this.waitingForValue) {
+                    this.currentValue = '0.';
+                    this.waitingForValue = false;
+                } else if (this.currentValue.indexOf('.') === -1) {
+                    this.currentValue += '.';
+                }
+                this.updateDisplay();
+            }
+            
+            inputOperator(nextOperator) {
+                const inputValue = parseFloat(this.currentValue);
+                
+                if (this.previousValue === '') {
+                    this.previousValue = inputValue;
+                } else if (this.operator) {
+                    const currentValue = this.previousValue || 0;
+                    const newValue = this.performCalculation(currentValue, inputValue, this.operator);
+                    
+                    this.currentValue = String(newValue);
+                    this.previousValue = newValue;
+                }
+                
+                this.waitingForValue = true;
+                this.operator = nextOperator;
+                this.updatePreviousDisplay();
+                this.updateDisplay();
+            }
+            
+            calculate() {
+                const inputValue = parseFloat(this.currentValue);
+                
+                if (this.previousValue !== '' && this.operator) {
+                    const newValue = this.performCalculation(this.previousValue, inputValue, this.operator);
+                    const calculation = `${this.previousValue} ${this.operator} ${inputValue} = ${newValue}`;
+                    
+                    this.addToHistory(calculation);
+                    this.currentValue = String(newValue);
+                    this.previousValue = '';
+                    this.operator = '';
+                    this.waitingForValue = true;
+                    this.updateDisplay();
+                    this.clearPreviousDisplay();
+                    this.saveToStorage();
+                }
+            }
+            
+            performCalculation(firstValue, secondValue, operator) {
+                switch (operator) {
+                    case '+':
+                        return firstValue + secondValue;
+                    case '-':
+                        return firstValue - secondValue;
+                    case '×':
+                        return firstValue * secondValue;
+                    case '÷':
+                        return secondValue !== 0 ? firstValue / secondValue : 0;
+                    default:
+                        return secondValue;
+                }
+            }
+            
+            clearAll() {
+                this.currentValue = '0';
+                this.previousValue = '';
+                this.operator = '';
+                this.waitingForValue = false;
+                this.updateDisplay();
+                this.clearPreviousDisplay();
+            }
+            
+            clearEntry() {
+                this.currentValue = '0';
+                this.updateDisplay();
+            }
+            
+            backspace() {
+                if (this.currentValue.length > 1) {
+                    this.currentValue = this.currentValue.slice(0, -1);
+                } else {
+                    this.currentValue = '0';
+                }
+                this.updateDisplay();
+            }
+            
+            toggleSign() {
+                if (this.currentValue !== '0') {
+                    this.currentValue = this.currentValue.charAt(0) === '-' 
+                        ? this.currentValue.slice(1) 
+                        : '-' + this.currentValue;
+                    this.updateDisplay();
+                }
+            }
+            
+            // Memory functions
+            memoryRecall() {
+                this.currentValue = String(this.memory);
+                this.updateDisplay();
+            }
+            
+            memoryClear() {
+                this.memory = 0;
+                this.updateMemoryDisplay();
+            }
+            
+            memoryAdd() {
+                this.memory += parseFloat(this.currentValue);
+                this.updateMemoryDisplay();
+                this.saveToStorage();
+            }
+            
+            memorySubtract() {
+                this.memory -= parseFloat(this.currentValue);
+                this.updateMemoryDisplay();
+                this.saveToStorage();
+            }
+            
+            // Scientific functions
+            scientificFunction(func) {
+                const value = parseFloat(this.currentValue);
+                let result;
+                
+                switch (func) {
+                    case 'sin':
+                        result = Math.sin(value * Math.PI / 180);
+                        break;
+                    case 'cos':
+                        result = Math.cos(value * Math.PI / 180);
+                        break;
+                    case 'tan':
+                        result = Math.tan(value * Math.PI / 180);
+                        break;
+                    case 'log':
+                        result = Math.log10(value);
+                        break;
+                    case 'ln':
+                        result = Math.log(value);
+                        break;
+                    case 'sqrt':
+                        result = Math.sqrt(value);
+                        break;
+                    case 'square':
+                        result = value * value;
+                        break;
+                    case 'power':
+                        // This would need special handling for two-operand function
+                        return;
+                }
+                
+                if (!isNaN(result) && isFinite(result)) {
+                    const calculation = `${func}(${value}) = ${result}`;
+                    this.addToHistory(calculation);
+                    this.currentValue = String(result);
+                    this.updateDisplay();
+                    this.saveToStorage();
+                }
+            }
+            
+            toggleScientific() {
+                this.scientificMode = !this.scientificMode;
+                if (this.scientificMode) {
+                    this.scientificPanel.classList.remove('hidden');
+                    this.scientificToggle.textContent = 'Hide Scientific Functions';
+                } else {
+                    this.scientificPanel.classList.add('hidden');
+                    this.scientificToggle.textContent = 'Show Scientific Functions';
+                }
+            }
+            
+            toggleHistory() {
+                this.historyVisible = !this.historyVisible;
+                if (this.historyVisible) {
+                    this.historyPanel.classList.remove('hidden');
+                    this.historyToggle.textContent = 'Hide History';
+                } else {
+                    this.historyPanel.classList.add('hidden');
+                    this.historyToggle.textContent = 'Show History';
+                }
+            }
+            
+            addToHistory(calculation) {
+                this.history.unshift(calculation);
+                if (this.history.length > 10) {
+                    this.history = this.history.slice(0, 10);
+                }
+                this.updateHistoryDisplay();
+            }
+            
+            clearHistory() {
+                this.history = [];
+                this.updateHistoryDisplay();
+                this.saveToStorage();
+            }
+            
+            updateDisplay() {
+                const value = parseFloat(this.currentValue);
+                this.display.textContent = this.formatNumber(value);
+            }
+            
+            updatePreviousDisplay() {
+                if (this.previousValue && this.operator) {
+                    this.previousDisplay.textContent = `${this.formatNumber(this.previousValue)} ${this.operator}`;
+                }
+            }
+            
+            clearPreviousDisplay() {
+                this.previousDisplay.textContent = '';
+            }
+            
+            updateMemoryDisplay() {
+                if (this.memory !== 0) {
+                    this.memoryDisplay.classList.remove('hidden');
+                    this.memoryValue.textContent = this.formatNumber(this.memory);
+                } else {
+                    this.memoryDisplay.classList.add('hidden');
+                }
+            }
+            
+            updateHistoryDisplay() {
+                if (this.history.length === 0) {
+                    this.historyList.innerHTML = '<div class="text-sm text-gray-500 text-center">No calculations yet</div>';
+                } else {
+                    this.historyList.innerHTML = this.history.map(calc => 
+                        `<div class="text-sm text-gray-700 p-1 hover:bg-gray-200 rounded cursor-pointer" onclick="calculator.useHistoryValue('${calc}')">${calc}</div>`
+                    ).join('');
+                }
+            }
+            
+            useHistoryValue(calculation) {
+                const result = calculation.split(' = ')[1];
+                if (result) {
+                    this.currentValue = result;
+                    this.updateDisplay();
+                }
+            }
+            
+            formatNumber(num) {
+                if (isNaN(num)) return 'Error';
+                if (!isFinite(num)) return 'Infinity';
+                
+                // Handle very large or very small numbers
+                if (Math.abs(num) > 1e10 || (Math.abs(num) < 1e-6 && num !== 0)) {
+                    return num.toExponential(6);
+                }
+                
+                // Format with appropriate decimal places
+                const str = num.toString();
+                if (str.length > 12) {
+                    return parseFloat(num.toPrecision(10)).toString();
+                }
+                
+                return str;
+            }
+            
+            saveToStorage() {
+                const data = {
+                    memory: this.memory,
+                    history: this.history
+                };
+                localStorage.setItem('deepblue-calculator', JSON.stringify(data));
+            }
+            
+            loadFromStorage() {
+                const saved = localStorage.getItem('deepblue-calculator');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.memory = data.memory || 0;
+                    this.history = data.history || [];
+                    this.updateMemoryDisplay();
+                    this.updateHistoryDisplay();
+                }
+            }
+        }
+        
+        // Initialize calculator
+        const calculator = new Calculator();
+        
+        // Global functions for button clicks
+        function inputNumber(num) { calculator.inputNumber(num); }
+        function inputDecimal() { calculator.inputDecimal(); }
+        function inputOperator(op) { calculator.inputOperator(op); }
+        function calculate() { calculator.calculate(); }
+        function clearAll() { calculator.clearAll(); }
+        function clearEntry() { calculator.clearEntry(); }
+        function backspace() { calculator.backspace(); }
+        function toggleSign() { calculator.toggleSign(); }
+        function memoryRecall() { calculator.memoryRecall(); }
+        function memoryClear() { calculator.memoryClear(); }
+        function memoryAdd() { calculator.memoryAdd(); }
+        function memorySubtract() { calculator.memorySubtract(); }
+        function scientificFunction(func) { calculator.scientificFunction(func); }
+        function toggleScientific() { calculator.toggleScientific(); }
+        function toggleHistory() { calculator.toggleHistory(); }
+        function clearHistory() { calculator.clearHistory(); }
+        
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                calculator.inputNumber(e.key);
+            } else if (e.key === '.') {
+                calculator.inputDecimal();
+            } else if (e.key === '+') {
+                calculator.inputOperator('+');
+            } else if (e.key === '-') {
+                calculator.inputOperator('-');
+            } else if (e.key === '*') {
+                calculator.inputOperator('×');
+            } else if (e.key === '/') {
+                e.preventDefault();
+                calculator.inputOperator('÷');
+            } else if (e.key === 'Enter' || e.key === '=') {
+                calculator.calculate();
+            } else if (e.key === 'Escape') {
+                calculator.clearAll();
+            } else if (e.key === 'Backspace') {
+                calculator.backspace();
+            }
         });
     </script>
 </body>
