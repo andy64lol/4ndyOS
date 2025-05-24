@@ -170,17 +170,32 @@
     </div>
     
     <!-- Shutdown Menu -->
-    <div id="shutdown-menu" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-labelledby="shutdown-title" aria-hidden="true">
-        <div class="glass-dark text-white p-6 rounded-2xl">
-            <h3 id="shutdown-title" class="text-xl font-semibold mb-4 text-center">System Control</h3>
+    <div id="shutdown-menu" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" role="dialog" aria-labelledby="shutdown-title" aria-hidden="true">
+        <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-2xl border border-gray-700 w-full max-w-sm">
+            <div class="flex items-center mb-4">
+                <svg class="w-6 h-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v6a1 1 0 11-2 0V3a1 1 0 011-1zm4.707 2.293a1 1 0 010 1.414L11.414 9a1 1 0 01-1.414-1.414l3.293-3.293a1 1 0 011.414 0zm-9.414 0a1 1 0 011.414 0L9 6.586A1 1 0 017.586 8L4.293 4.707a1 1 0 010-1.414zM17 10a7 7 0 11-14 0 7 7 0 0114 0z" clip-rule="evenodd"></path>
+                </svg>
+                <h3 id="shutdown-title" class="text-xl font-semibold">System Control</h3>
+            </div>
+            <p class="text-gray-300 mb-6 text-sm">Choose an action to perform on the system.</p>
             <div class="flex flex-col space-y-3">
-                <button onclick="shutdown()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors">
+                <button onclick="shutdown()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v6a1 1 0 11-2 0V3a1 1 0 011-1zm4.707 2.293a1 1 0 010 1.414L11.414 9a1 1 0 01-1.414-1.414l3.293-3.293a1 1 0 011.414 0zm-9.414 0a1 1 0 011.414 0L9 6.586A1 1 0 017.586 8L4.293 4.707a1 1 0 010-1.414zM17 10a7 7 0 11-14 0 7 7 0 0114 0z" clip-rule="evenodd"></path>
+                    </svg>
                     Shutdown
                 </button>
-                <button onclick="reboot()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                <button onclick="reboot()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                    </svg>
                     Reboot
                 </button>
-                <button onclick="closeShutdownMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                <button onclick="closeShutdownMenu()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
                     Cancel
                 </button>
             </div>
@@ -188,26 +203,39 @@
     </div>
     
     <!-- Settings Menu -->
-    <div id="settings-menu" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-labelledby="settings-title" aria-hidden="true">
-        <div class="glass-dark text-white p-6 rounded-2xl w-80">
-            <h3 id="settings-title" class="text-xl font-semibold mb-4 text-center">Settings</h3>
+    <div id="settings-menu" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" role="dialog" aria-labelledby="settings-title" aria-hidden="true">
+        <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-2xl border border-gray-700 w-full max-w-md">
+            <div class="flex items-center mb-4">
+                <svg class="w-6 h-6 text-blue-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                </svg>
+                <h3 id="settings-title" class="text-xl font-semibold">System Settings</h3>
+            </div>
             <div class="space-y-4">
                 <div>
-                    <label for="theme" class="block text-sm font-medium mb-2">Theme:</label>
-                    <select id="theme" onchange="changeTheme(this.value)" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2">
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
+                    <label for="theme" class="block text-sm font-medium mb-2 text-gray-300">Theme Mode:</label>
+                    <select id="theme" onchange="changeTheme(this.value)" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="light">🌞 Light Mode</option>
+                        <option value="dark">🌙 Dark Mode</option>
                     </select>
                 </div>
                 <div>
-                    <label for="wallpaper" class="block text-sm font-medium mb-2">Wallpaper:</label>
-                    <button onclick="setRandomBackground()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
-                        Random Wallpaper
+                    <label class="block text-sm font-medium mb-2 text-gray-300">Wallpaper:</label>
+                    <button onclick="setRandomBackground()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                        </svg>
+                        Change Wallpaper
                     </button>
                 </div>
-                <button onclick="closeSettingsMenu()" class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                    Close
-                </button>
+                <div class="pt-2 border-t border-gray-700">
+                    <button onclick="closeSettingsMenu()" class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                        Close Settings
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -405,7 +433,7 @@
             animation.querySelector('div div:last-child').textContent = 'Shutting down...';
             
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.reload();
             }, 2000);
         }
         
