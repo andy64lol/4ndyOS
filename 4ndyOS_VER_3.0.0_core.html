@@ -1,817 +1,487 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>4ndyOS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Iceland&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DeepBlueOS - A modern web-based operating system interface">
+    <title>DeepBlueOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: rgba(59, 130, 246, 0.8);
+            --header-height: 40px;
+            --drawer-height: 70px;
+        }
+        
         body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0078d7;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
         }
-
-        #desktop {
-            flex: 1;
-            background: #f0f0f0;
-            display: flex;
-            flex-wrap: wrap;
-            align-content: flex-start;
-            padding: 20px;
-            gap: 20px;
-            position: relative;
-            transition: background 0.3s;
-            overflow: auto;
+        
+        .glass {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-
-        .icon {
-            width: 80px;
-            text-align: center;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            margin-bottom: 10px;
+        
+        .glass-dark {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .icon:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        
+        .app-icon {
+            transition: all 0.2s ease;
         }
-
-        .icon img {
-            width: 60px;
-            height: 60px;
+        
+        .app-icon:hover {
+            transform: scale(1.1);
         }
-
-        .icon p {
-            margin: 5px 0 0 0;
-            font-size: 12px;
-            color: #333;
-            word-break: break-word;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            -webkit-box-orient: vertical;
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
         }
-
-        .taskbar {
-            height: 50px;
-            background-color: #333;
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-            color: white;
-            font-size: 14px;
-            border-top: 2px solid #0078d7;
-            position: relative;
-        }
-
-        .start-menu-icon {
-            width: 40px;
-            height: 40px;
-            background: #0078d7;
-            color: white;
-            font-family: 'Iceland', sans-serif;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-right: 10px;
-            transition: transform 0.2s, text-shadow 0.3s;
-            text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff;
-        }
-
-        .start-menu-icon:hover {
-            transform: scale(1.05);
-            text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff;
-        }
-
-        .taskbar .open-apps {
-            display: flex;
-            gap: 10px;
-            flex-grow: 1;
-        }
-
-        .taskbar .open-app {
-            width: 40px;
-            height: 40px;
-            background: #444;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .taskbar .open-app:hover {
-            background: #666;
-        }
-
-        .taskbar .open-app img {
-            width: 30px;
-            height: 30px;
-        }
-
-        .window {
-            position: absolute;
-            top: 50px;
-            left: 50px;
-            width: 600px;
-            height: 400px;
-            background: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            overflow: hidden;
-            display: none;
-            flex-direction: column;
-            resize: both;
-            overflow: auto;
-            z-index: 10;
-            animation: fadeIn 0.3s;
-        }
-
-        .window-header {
-            background-color: #0078d7;
-            color: white;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            cursor: move;
-            user-select: none;
-        }
-
-        .window-header .close {
-            cursor: pointer;
-            color: red;
-        }
-
-        .window-header .minimize {
-            cursor: pointer;
-            color: yellow;
-            margin-right: 10px;
-        }
-
-        .window-body {
-            flex: 1;
-            padding: 10px;
-            overflow: auto;
-        }
-
-        .settings {
-            font-size: 16px;
-        }
-
-        .settings h2 {
-            margin: 0 0 10px 0;
-        }
-
-        .settings label {
-            margin-right: 10px;
-        }
-
-        .settings button {
-            margin-top: 10px;
-            padding: 5px 10px;
-            background-color: #0078d7;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .settings button:hover {
-            background-color: #0056a1;
-        }
-
-        .version-info {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .start-menu {
-            position: absolute;
-            bottom: 60px;
-            left: 10px;
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-            display: none;
-            flex-direction: column;
-            z-index: 100;
-            animation: fadeIn 0.3s;
-            min-width: 200px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .start-menu .app-item {
-            padding: 10px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .start-menu .app-item:hover {
-            background: #f0f0f0;
-        }
-
-        .shutdown-button {
-            background: red;
-            color: white;
-            text-align: center;
-            border-radius: 5px;
-            margin: 5px;
-            padding: 5px;
-            transition: background 0.3s;
-        }
-
-        .shutdown-button:hover {
-            background: darkred;
-        }
-
-        .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 300px;
-    border-radius: 5px;
-    text-align: center;
-}
-
-.modal-button {
-    margin: 5px;
-    padding: 10px 20px;
-    background-color: #0078d7;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.modal-button:hover {
-    background-color: #0056a1;
-}
-
+        
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes rebootAnimation {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .reboot-animation {
+            animation: rebootAnimation 2s ease-in-out;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #000;
+            color: white;
+            padding: 8px;
+            z-index: 1001;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 0;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
 </head>
-<body>
-    <div id="desktop">
-        <div class="icon" onclick="openWindow('app2')">
-            <img src="icons/search.png" alt="360 Search" />
-            <p>360 Search</p>
+<body class="h-screen overflow-hidden bg-blue-100 text-gray-800">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Header -->
+    <header class="fixed top-0 w-full h-10 glass text-white flex items-center justify-end px-4 z-50">
+        <span id="time" class="font-medium" role="timer" aria-live="polite"></span>
+    </header>
+    
+    <!-- Main Content Area -->
+    <main id="main-content" class="relative h-full pt-10 pb-16 sm:pb-20">
+        <!-- App Container -->
+        <div id="iframe-container" class="hidden absolute inset-2 sm:inset-4 top-12 sm:top-14 bottom-16 sm:bottom-20 glass rounded-xl sm:rounded-2xl overflow-hidden fade-in">
+            <iframe id="app-iframe" src="" title="Application Display" loading="lazy" class="w-full h-full border-none"></iframe>
+            <button id="close-btn" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors z-10">
+                Close
+            </button>
         </div>
-        <div class="icon" onclick="openWindow('app3')">
-            <img src="icons/bilibili.png" alt="Bilibili" />
-            <p>Bilibili</p>
-        </div>
-        <div class="icon" onclick="openWindow('app8')">
-            <img src="https://play-lh.googleusercontent.com/i_lfkfxkGt_v47PUT195nWFcMQEhH0KEGki-oIs4B50n78ILEuYt5mHySwZTEyOe1A" alt="QQ Mail" />
-            <p>QQ Mail</p>
-        </div>
-        <div class="icon" onclick="openWindow('terminal')">
-            <img src="icons/terminal.png" alt="Terminal" />
-            <p>Terminal</p>
-        </div>
-        <div class="icon" onclick="openWindow('calculator')">
-            <img src="icons/calculator.png" alt="Calculator" />
-            <p>Calculator</p>
-        </div>
-        <div class="icon" onclick="openWindow('clicker')">
-            <img src="icons/clicker.png" alt="Clicker" />
-            <p>Clicker</p>
-        </div>
-        <div class="icon" onclick="openWindow('files')">
-            <img src="icons/files.png" alt="Files" />
-            <p>Files</p>
-        </div>
-        <div class="icon" onclick="openWindow('notes')">
-            <img src="icons/notes.png" alt="Notes" />
-            <p>Notes</p>
-        </div>
-        <div class="icon" onclick="openWindow('settings')">
-            <img src="icons/settings.png" alt="Settings" />
-            <p>Settings</p>
-        </div>
-        <div class="icon" onclick="openWindow('andyDraw')">
-            <img src="icons/draw.png" alt="4ndyDraw" />
-            <p>4ndyDraw</p>
-        </div>
-        <div class="icon" onclick="openWindow('pythonConsole')">
-            <img src="icons/Python.svg" alt="Python Console" />
-            <p>Python Console</p>
+    </main>
+    
+    <!-- App Drawer -->
+    <div id="app-drawer" class="fixed bottom-0 w-full h-16 sm:h-20 glass flex items-center justify-start px-2 sm:px-4 z-50 overflow-x-auto" role="navigation" aria-label="Application Drawer">
+        <div class="flex items-center space-x-2 sm:space-x-3 min-w-max">
+        <button class="app-icon w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Notes" onclick="openApp('notes')">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3h4v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Settings" onclick="openSettings()">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Search" onclick="openApp('search')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Calculator" onclick="openApp('calculator')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 0a1 1 0 100 2h.01a1 1 0 100-2H9zm2 0a1 1 0 100 2h.01a1 1 0 100-2H11zm0-2a1 1 0 100 2h.01a1 1 0 100-2H11zm-2 0a1 1 0 100 2h.01a1 1 0 100-2H9zm-2 0a1 1 0 100 2h.01a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Media" onclick="openApp('media')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Files" onclick="openApp('files')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Terminal" onclick="openApp('terminal')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Clicker Game" onclick="openApp('clicker')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open User Profile" onclick="openApp('user')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Shutdown Menu" onclick="openShutdownMenu()">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v6a1 1 0 11-2 0V3a1 1 0 011-1zm4.707 2.293a1 1 0 010 1.414L11.414 9a1 1 0 01-1.414-1.414l3.293-3.293a1 1 0 011.414 0zm-9.414 0a1 1 0 011.414 0L9 6.586A1 1 0 017.586 8L4.293 4.707a1 1 0 010-1.414zM17 10a7 7 0 11-14 0 7 7 0 0114 0z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <!-- Custom Apps will be inserted here -->
+        <div id="custom-apps-container"></div>
         </div>
     </div>
-
-    <div class="taskbar">
-        <div class="start-menu-icon" onclick="toggleStartMenu()">4</div>
-        <div class="open-apps" id="openApps"></div>
-        <div id="clock"></div>
-    </div>
-
-    <div class="start-menu" id="startMenu">
-        <div class="app-item" onclick="openWindow('app2')">360 Search</div>
-        <div class="app-item" onclick="openWindow('app3')">Bilibili</div>
-        <div class="app-item" onclick="openWindow('app8')">QQ Mail</div>
-        <div class="app-item" onclick="openWindow('terminal')">Terminal</div>
-        <div class="app-item" onclick="openWindow('calculator')">Calculator</div>
-        <div class="app-item" onclick="openWindow('clicker')">Clicker</div>
-        <div class="app-item" onclick="openWindow('files')">Files</div>
-        <div class="app-item" onclick="openWindow('notes')">Notes</div>
-        <div class="app-item" onclick="openWindow('andyDraw')">4ndyDraw</div>
-        <div class="app-item" onclick="openWindow('pythonConsole')">Python Console</div>
-        <div class="app-item" onclick="openWindow('settings')">Settings</div>
-        <div class="shutdown-button" onclick="showShutdownMenu()">Turn Off</div>
-    </div>
-
-    <div id="app2" class="window">
-        <div class="window-header">
-            <span>360 Search</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('app2')">_</span>
-                <span class="close" onclick="closeWindow('app2')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="https://m.so.com/" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="app3" class="window">
-        <div class="window-header">
-            <span>Bilibili</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('app3')">_</span>
-                <span class="close" onclick="closeWindow('app3')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="https://www.bilibili.com" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="app8" class="window">
-        <div class="window-header">
-            <span>QQ Mail</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('app8')">_</span>
-                <span class="close" onclick="closeWindow('app8')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="https://mail.qq.com" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="terminal" class="window">
-        <div class="window-header">
-            <span>Terminal</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('terminal')">_</span>
-                <span class="close" onclick="closeWindow('terminal')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="apps/4ndyTerminal.html" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="calculator" class="window">
-        <div class="window-header">
-            <span>Calculator</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('calculator')">_</span>
-                <span class="close" onclick="closeWindow('calculator')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="apps/calculator.html" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="clicker" class="window">
-        <div class="window-header">
-            <span>Clicker</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('clicker')">_</span>
-                <span class="close" onclick="closeWindow('clicker')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="apps/clicker.html" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="files" class="window">
-        <div class="window-header">
-            <span>Files</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('files')">_</span>
-                <span class="close" onclick="closeWindow('files')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="apps/files.html" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="notes" class="window">
-        <div class="window-header">
-            <span>Notes</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('notes')">_</span>
-                <span class="close" onclick="closeWindow('notes')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="apps/notes.html" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="andyDraw" class="window">
-        <div class="window-header">
-            <span>4ndyDraw</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('andyDraw')">_</span>
-                <span class="close" onclick="closeWindow('andyDraw')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="apps/draw.html" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="settings" class="window">
-        <div class="window-header">
-            <span>Settings</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('settings')">_</span>
-                <span class="close" onclick="closeWindow('settings')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <div class="settings">
-                <h2>Settings</h2>
-                <div>
-                    <h3>Background</h3>
-                    <label for="bgColor">Change Background Color:</label>
-                    <input type="color" id="bgColor" onchange="changeBackground(this.value)" />
-                    <label for="bgUpload">Upload Background Image:</label>
-                    <input type="file" id="bgUpload" accept="image/*" onchange="uploadBackground(event)" />
-                </div>
-                <div>
-                    <h3>Window Settings</h3>
-                    <label for="outlineColor">Outline Color:</label>
-                    <input type="color" id="outlineColor" onchange="changeOutlineColor(this.value)" />
-                </div>
-                <div>
-                    <h3>Screen Settings</h3>
-                    <label for="screenResolution">Screen Resolution:</label>
-                    <input
-                        type="text"
-                        id="screenResolution"
-                        placeholder="e.g., 1920x1080"
-                        onchange="changeScreenResolution(this.value)"
-                    />
-                </div>
-                <button onclick="saveSettings()">Save Changes</button>
-                <div class="version-info">Version: 4ndyOS_VER_3.0.0_core</div>
+    
+    <!-- Shutdown Menu -->
+    <div id="shutdown-menu" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" role="dialog" aria-labelledby="shutdown-title" aria-hidden="true">
+        <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-2xl border border-gray-700 w-full max-w-sm">
+            <div class="flex items-center mb-4">
+                <svg class="w-6 h-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v6a1 1 0 11-2 0V3a1 1 0 011-1zm4.707 2.293a1 1 0 010 1.414L11.414 9a1 1 0 01-1.414-1.414l3.293-3.293a1 1 0 011.414 0zm-9.414 0a1 1 0 011.414 0L9 6.586A1 1 0 017.586 8L4.293 4.707a1 1 0 010-1.414zM17 10a7 7 0 11-14 0 7 7 0 0114 0z" clip-rule="evenodd"></path>
+                </svg>
+                <h3 id="shutdown-title" class="text-xl font-semibold">System Control</h3>
+            </div>
+            <p class="text-gray-300 mb-6 text-sm">Choose an action to perform on the system.</p>
+            <div class="flex flex-col space-y-3">
+                <button onclick="shutdown()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v6a1 1 0 11-2 0V3a1 1 0 011-1zm4.707 2.293a1 1 0 010 1.414L11.414 9a1 1 0 01-1.414-1.414l3.293-3.293a1 1 0 011.414 0zm-9.414 0a1 1 0 011.414 0L9 6.586A1 1 0 017.586 8L4.293 4.707a1 1 0 010-1.414zM17 10a7 7 0 11-14 0 7 7 0 0114 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    Shutdown
+                </button>
+                <button onclick="reboot()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                    </svg>
+                    Reboot
+                </button>
+                <button onclick="closeShutdownMenu()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
-
-    <div id="pythonConsole" class="window">
-        <div class="window-header">
-            <span>4ndyPython</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('pythonConsole')">_</span>
-                <span class="close" onclick="closeWindow('pythonConsole')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="apps/4ndyPython.html" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="shutdownModal" class="modal">
-        <div class="modal-content">
-            <h3>Shut Down</h3>
-            <p>What would you like to do?</p>
-            <button class="modal-button" onclick="turnOff()">Shut Down</button>
-            <button class="modal-button" onclick="restart()">Restart</button>
-            <button class="modal-button" onclick="closeModal()">Cancel</button>
-        </div>
-    </div>
-    <!--upcoming apps-->
     
-    <div id="pixelArt" class="window">
-        <div class="window-header">
-            <span>4ndyPixelArt</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('pixelArt')">_</span>
-                <span class="close" onclick="closeWindow('pixelArt')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="NeoM4trixApps/4ndyPixelArt.html" style="width: 100%; height: 100%; border: none;"></iframe>
+    <!-- Settings Menu -->
+    <div id="settings-menu" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" role="dialog" aria-labelledby="settings-title" aria-hidden="true">
+        <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-2xl border border-gray-700 w-full max-w-md">
+            <div class="flex items-center mb-4">
+                <svg class="w-6 h-6 text-blue-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                </svg>
+                <h3 id="settings-title" class="text-xl font-semibold">System Settings</h3>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="theme" class="block text-sm font-medium mb-2 text-gray-300">Theme Mode:</label>
+                    <select id="theme" onchange="changeTheme(this.value)" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="light">🌞 Light Mode</option>
+                        <option value="dark">🌙 Dark Mode</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-300">Wallpaper:</label>
+                    <button onclick="setRandomBackground()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                        </svg>
+                        Change Wallpaper
+                    </button>
+                </div>
+                <div class="pt-2 border-t border-gray-700">
+                    <button onclick="closeSettingsMenu()" class="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                        Close Settings
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div id="minecraft" class="window">
-        <div class="window-header">
-            <span>Paper Minecraft</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('minecraft')">_</span>
-                <span class="close" onclick="closeWindow('minecraft')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="NeoM4trixApps/Paper Minecraft .html" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <div id="game24" class="window">
-        <div class="window-header">
-            <span>24 game</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('game24')">_</span>
-                <span class="close" onclick="closeWindow('game24')">X</span>
-            </span>
-        </div>
-        <div class="window-body">
-            <iframe src="NeoM4trixApps/24game.html" style="width: 100%; height: 100%; border: none;"></iframe>
+    
+    <!-- Reboot Animation -->
+    <div id="reboot-animation" class="hidden fixed inset-0 bg-black text-white flex items-center justify-center text-2xl font-bold z-50" aria-live="assertive">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <div>Rebooting...</div>
         </div>
     </div>
     
     <script>
-        let highestZIndex = 1000;
-        let activeWindow = null;
-        let isDragging = false;
-        let initialX;
-        let initialY;
-
-        window.addEventListener('load', async () => {
-            loadSettings();
-            window.pyodide = await loadPyodide();
+        // Global state
+        let currentTheme = 'light';
+        
+        // Initialize the OS
+        document.addEventListener('DOMContentLoaded', () => {
+            setRandomBackground();
+            updateTime();
+            setInterval(updateTime, 1000);
+            initializeTheme();
+            loadCustomApps();
         });
-
-        async function runPythonCode() {
-            const input = document.getElementById('pythonInput').value;
-            const output = document.getElementById('pythonOutput');
-            try {
-                let result = await window.pyodide.runPythonAsync(input);
-                output.textContent = result === undefined ? '' : result.toString();
-            } catch (err) {
-                output.textContent = err;
+        
+        // Time management
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('time').textContent = timeString;
+        }
+        
+        // Theme management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('deepblue-theme') || 'light';
+            changeTheme(savedTheme);
+            document.getElementById('theme').value = savedTheme;
+        }
+        
+        function changeTheme(theme) {
+            currentTheme = theme;
+            const body = document.body;
+            
+            if (theme === 'dark') {
+                body.classList.remove('bg-blue-100', 'text-gray-800');
+                body.classList.add('bg-gray-900', 'text-white');
+            } else {
+                body.classList.remove('bg-gray-900', 'text-white');
+                body.classList.add('bg-blue-100', 'text-gray-800');
+            }
+            
+            localStorage.setItem('deepblue-theme', theme);
+        }
+        
+        // Wallpaper management
+        function setRandomBackground() {
+            const wallpaperCount = 5;
+            const randomNum = Math.floor(Math.random() * wallpaperCount) + 1;
+            const paddedNum = String(randomNum).padStart(3, '0');
+            
+            // Try SVG first, fallback to PNG
+            const svgUrl = `wallpapers/wallpaper_${paddedNum}.svg`;
+            const pngUrl = `wallpapers/wallpaper_${paddedNum}.png`;
+            
+            // Test if SVG exists
+            fetch(svgUrl, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        document.body.style.backgroundImage = `url('${svgUrl}')`;
+                    } else {
+                        // Fallback to PNG
+                        document.body.style.backgroundImage = `url('${pngUrl}')`;
+                    }
+                })
+                .catch(() => {
+                    // If fetch fails, try PNG
+                    document.body.style.backgroundImage = `url('${pngUrl}')`;
+                });
+        }
+        
+        // Custom apps management
+        function loadCustomApps() {
+            const customApps = JSON.parse(localStorage.getItem('deepblue-custom-apps') || '[]');
+            const container = document.getElementById('custom-apps-container');
+            
+            container.innerHTML = customApps.map(app => `
+                <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" 
+                        aria-label="Open ${app.name}" onclick="openCustomApp('${app.id}')">
+                    ${app.icon.startsWith('http') ? 
+                        `<img src="${app.icon}" class="w-6 h-6" alt="${app.name}">` : 
+                        `<span class="text-lg">${app.icon}</span>`
+                    }
+                </button>
+            `).join('');
+        }
+        
+        function openCustomApp(appId) {
+            const customApps = JSON.parse(localStorage.getItem('deepblue-custom-apps') || '[]');
+            const app = customApps.find(a => a.id === appId);
+            
+            if (app) {
+                const blob = new Blob([app.code], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                
+                const iframe = document.getElementById('app-iframe');
+                const container = document.getElementById('iframe-container');
+                
+                iframe.src = url;
+                container.classList.remove('hidden');
+                
+                const closeBtn = document.getElementById('close-btn');
+                closeBtn.onclick = () => {
+                    closeApp();
+                    URL.revokeObjectURL(url);
+                };
             }
         }
-
-        function openWindow(appId) {
-            const window = document.getElementById(appId);
-            if (!window) {
-                console.error(`Window with ID ${appId} not found`);
+        
+        // Listen for app installations from app builder
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'install-app') {
+                loadCustomApps();
+            }
+        });
+        
+        // App management
+        function openApp(appName) {
+            const appUrls = {
+                notes: 'apps/notes.html',
+                search: 'https://www.so.com/',
+                calculator: 'apps/calculator.html',
+                media: 'https://ntim.me/media-player/',
+                files: 'apps/files.html',
+                terminal: 'apps/enhanced-terminal.html',
+                user: 'apps/user.html',
+                clicker: 'apps/clicker.html',
+                'app-builder': 'apps/app-builder.html'
+            };
+            
+            const iframe = document.getElementById('app-iframe');
+            const container = document.getElementById('iframe-container');
+            const src = appUrls[appName];
+            
+            if (!src) {
+                alert('Application not found!');
                 return;
             }
             
-            window.style.display = 'flex';
-            updateWindowStack(appId);
-            addToTaskbar(appId);
+            iframe.src = src;
+            container.classList.remove('hidden');
+            
+            // Setup close button
+            const closeBtn = document.getElementById('close-btn');
+            closeBtn.onclick = closeApp;
         }
-
-        function closeWindow(appId) {
-            document.getElementById(appId).style.display = 'none';
-            removeFromTaskbar(appId);
+        
+        function closeApp() {
+            const iframe = document.getElementById('app-iframe');
+            const container = document.getElementById('iframe-container');
+            
+            iframe.src = '';
+            container.classList.add('hidden');
         }
-
-        function minimizeWindow(appId) {
-            document.getElementById(appId).style.display = 'none';
+        
+        // Menu management
+        function openShutdownMenu() {
+            const menu = document.getElementById('shutdown-menu');
+            menu.classList.remove('hidden');
+            menu.setAttribute('aria-hidden', 'false');
         }
-
-        function addToTaskbar(appId) {
-            const openApps = document.getElementById('openApps');
-            const existingApp = Array.from(openApps.children).find(
-                (child) => child.getAttribute('data-app-id') === appId
-            );
-
-            if (!existingApp) {
-                const app = document.createElement('div');
-                app.className = 'open-app';
-                app.setAttribute('data-app-id', appId);
-
-                const windowHeader = document.querySelector(`#${appId} .window-header span:first-child`);
-                const altText = windowHeader ? windowHeader.textContent.trim() : appId;
-                const iconElement = document.querySelector(`.icon[onclick*="${appId}"] img`);
-
-                app.innerHTML = `<img src="${iconElement?.src || 'default-icon.png'}" alt="${altText}" />`;
-                app.onclick = () => toggleWindow(appId);
-                openApps.appendChild(app);
+        
+        function closeShutdownMenu() {
+            const menu = document.getElementById('shutdown-menu');
+            menu.classList.add('hidden');
+            menu.setAttribute('aria-hidden', 'true');
+        }
+        
+        function openSettings() {
+            const menu = document.getElementById('settings-menu');
+            menu.classList.remove('hidden');
+            menu.setAttribute('aria-hidden', 'false');
+        }
+        
+        function closeSettingsMenu() {
+            const menu = document.getElementById('settings-menu');
+            menu.classList.add('hidden');
+            menu.setAttribute('aria-hidden', 'true');
+        }
+        
+        // System actions
+        function shutdown() {
+            closeShutdownMenu();
+            const animation = document.getElementById('reboot-animation');
+            animation.classList.remove('hidden');
+            animation.querySelector('div div:last-child').textContent = 'Shutting down...';
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+        
+        function reboot() {
+            closeShutdownMenu();
+            const animation = document.getElementById('reboot-animation');
+            animation.classList.remove('hidden');
+            
+            setTimeout(() => {
+                animation.classList.add('hidden');
+                setRandomBackground();
+                // Reset any open apps
+                closeApp();
+            }, 3000);
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        openApp('notes');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        openApp('calculator');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        openApp('files');
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        openApp('terminal');
+                        break;
+                    case ',':
+                        e.preventDefault();
+                        openSettings();
+                        break;
+                }
             }
-        }
-
-        function removeFromTaskbar(appId) {
-            const openApps = document.getElementById('openApps');
-            const app = Array.from(openApps.children).find((child) => child.getAttribute('data-app-id') === appId);
-            if (app) openApps.removeChild(app);
-        }
-
-        function toggleWindow(appId) {
-            const window = document.getElementById(appId);
-            if (window.style.display === 'none') {
-                window.style.display = 'flex';
-                updateWindowStack(appId);
-            } else {
-                window.style.display = 'none';
+            
+            if (e.key === 'Escape') {
+                closeApp();
+                closeShutdownMenu();
+                closeSettingsMenu();
             }
-        }
-
-        function toggleStartMenu() {
-            const startMenu = document.getElementById('startMenu');
-            startMenu.style.display = startMenu.style.display === 'none' ? 'flex' : 'none';
-        }
-
-function showShutdownMenu() {
-    document.getElementById('shutdownModal').style.display = 'block';
-    document.getElementById('startMenu').style.display = 'none';
-}
-
-function closeModal() {
-    document.getElementById('shutdownModal').style.display = 'none';
-}
-
-function restart() {
-    document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">Restarting System...</div>';
-    setTimeout(() => location.reload(), 2000);
-}
-
-function turnOff() {
-    document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">System Powered Off</div>';
-    setTimeout(() => window.location.href = 'index.html', 2000);
-}
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        function updateWindowStack(windowId) {
-            const window = document.getElementById(windowId);
-            highestZIndex += 1;
-            window.style.zIndex = highestZIndex;
-        }
-
-        document.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.window-header')) {
-                const window = e.target.closest('.window');
-                const rect = window.getBoundingClientRect();
-                initialX = e.pageX - rect.left;
-                initialY = e.pageY - rect.top;
-                activeWindow = window;
-                isDragging = true;
-                updateWindowStack(window.id);
-            }
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging && activeWindow) {
-                e.preventDefault();
-                let newX = e.pageX - initialX;
-                let newY = e.pageY - initialY;
-
-                newX = Math.max(0, Math.min(newX, window.innerWidth - activeWindow.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - activeWindow.offsetHeight));
-
-                activeWindow.style.left = `${newX}px`;
-                activeWindow.style.top = `${newY}px`;
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            activeWindow = null;
-        });
-
-        function loadSettings() {
-            const bgColor = localStorage.getItem('bgColor');
-            if (bgColor) {
-                document.getElementById('desktop').style.background = bgColor;
-                document.getElementById('bgColor').value = bgColor;
-            }
-
-            const bgImage = localStorage.getItem('bgImage');
-            if (bgImage) {
-                document.getElementById('desktop').style.backgroundImage = `url(${bgImage})`;
-            }
-
-            const outlineColor = localStorage.getItem('outlineColor');
-            if (outlineColor) {
-                document.querySelectorAll('.window').forEach((window) => {
-                    window.style.borderColor = outlineColor;
-                });
-                document.getElementById('outlineColor').value = outlineColor;
-            }
-        }
-
-        function changeBackground(color) {
-            document.getElementById('desktop').style.background = color;
-        }
-
-        function uploadBackground(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const imageUrl = e.target.result;
-                document.getElementById('desktop').style.backgroundImage = `url(${imageUrl})`;
-                localStorage.setItem('bgImage', imageUrl);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function changeOutlineColor(color) {
-            document.querySelectorAll('.window').forEach((window) => {
-                window.style.borderColor = color;
-            });
-        }
-
-        function changeScreenResolution(resolution) {
-            const [width, height] = resolution.split('x');
-            if (width && height) {
-                alert('Screen resolution changes will take effect after restart');
-                localStorage.setItem('screenResolution', resolution);
-            }
-        }
-
-        function saveSettings() {
-            const bgColor = document.getElementById('bgColor').value;
-            localStorage.setItem('bgColor', bgColor);
-
-            const outlineColor = document.getElementById('outlineColor').value;
-            localStorage.setItem('outlineColor', outlineColor);
-
-            const bgImage = document.getElementById('desktop').style.backgroundImage;
-            if (bgImage && bgImage !== 'none') {
-                localStorage.setItem('bgImage', bgImage);
-            }
-
-            alert('Settings saved!');
-        }
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#startMenu') && !e.target.closest('.start-menu-icon')) {
-                document.getElementById('startMenu').style.display = 'none';
-            }
-        });
-
-        document.querySelectorAll('.window').forEach((window) => {
-            window.addEventListener('mousedown', () => {
-                updateWindowStack(window.id);
-            });
         });
     </script>
 </body>
