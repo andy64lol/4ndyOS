@@ -88,9 +88,9 @@
     </header>
     
     <!-- Main Content Area -->
-    <main id="main-content" class="relative h-full pt-10 pb-16">
+    <main id="main-content" class="relative h-full pt-10 pb-16 sm:pb-20">
         <!-- App Container -->
-        <div id="iframe-container" class="hidden absolute inset-4 top-14 bottom-20 glass rounded-2xl overflow-hidden fade-in">
+        <div id="iframe-container" class="hidden absolute inset-2 sm:inset-4 top-12 sm:top-14 bottom-16 sm:bottom-20 glass rounded-xl sm:rounded-2xl overflow-hidden fade-in">
             <iframe id="app-iframe" src="" title="Application Display" loading="lazy" class="w-full h-full border-none"></iframe>
             <button id="close-btn" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors z-10">
                 Close
@@ -99,17 +99,17 @@
     </main>
     
     <!-- App Drawer -->
-    <div id="app-drawer" class="fixed bottom-0 w-full h-20 glass flex items-center justify-start px-4 z-50 overflow-x-auto" role="navigation" aria-label="Application Drawer">
-        <div class="flex items-center space-x-3 min-w-max">
-        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Notes" onclick="openApp('notes')">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+    <div id="app-drawer" class="fixed bottom-0 w-full h-16 sm:h-20 glass flex items-center justify-start px-2 sm:px-4 z-50 overflow-x-auto" role="navigation" aria-label="Application Drawer">
+        <div class="flex items-center space-x-2 sm:space-x-3 min-w-max">
+        <button class="app-icon w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Notes" onclick="openApp('notes')">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
                 <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3h4v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
             </svg>
         </button>
         
-        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Settings" onclick="openSettings()">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <button class="app-icon w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Settings" onclick="openSettings()">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
             </svg>
         </button>
@@ -156,11 +156,17 @@
             </svg>
         </button>
         
+
+        
         <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Shutdown Menu" onclick="openShutdownMenu()">
             <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v6a1 1 0 11-2 0V3a1 1 0 011-1zm4.707 2.293a1 1 0 010 1.414L11.414 9a1 1 0 01-1.414-1.414l3.293-3.293a1 1 0 011.414 0zm-9.414 0a1 1 0 011.414 0L9 6.586A1 1 0 017.586 8L4.293 4.707a1 1 0 010-1.414zM17 10a7 7 0 11-14 0 7 7 0 0114 0z" clip-rule="evenodd"></path>
             </svg>
         </button>
+        
+        <!-- Custom Apps will be inserted here -->
+        <div id="custom-apps-container"></div>
+        </div>
     </div>
     
     <!-- Shutdown Menu -->
@@ -261,8 +267,25 @@
             const wallpaperCount = 5;
             const randomNum = Math.floor(Math.random() * wallpaperCount) + 1;
             const paddedNum = String(randomNum).padStart(3, '0');
-            const imageUrl = `wallpapers/wallpaper_${paddedNum}.png`;
-            document.body.style.backgroundImage = `url('${imageUrl}')`;
+            
+            // Try SVG first, fallback to PNG
+            const svgUrl = `wallpapers/wallpaper_${paddedNum}.svg`;
+            const pngUrl = `wallpapers/wallpaper_${paddedNum}.png`;
+            
+            // Test if SVG exists
+            fetch(svgUrl, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        document.body.style.backgroundImage = `url('${svgUrl}')`;
+                    } else {
+                        // Fallback to PNG
+                        document.body.style.backgroundImage = `url('${pngUrl}')`;
+                    }
+                })
+                .catch(() => {
+                    // If fetch fails, try PNG
+                    document.body.style.backgroundImage = `url('${pngUrl}')`;
+                });
         }
         
         // Custom apps management
@@ -318,9 +341,10 @@
                 calculator: 'apps/calculator.html',
                 media: 'https://ntim.me/media-player/',
                 files: 'apps/files.html',
-                terminal: 'apps/4ndyTerminal.html',
+                terminal: 'apps/enhanced-terminal.html',
                 user: 'apps/user.html',
                 clicker: 'apps/clicker.html',
+                'app-builder': 'apps/app-builder.html'
             };
             
             const iframe = document.getElementById('app-iframe');
@@ -375,13 +399,14 @@
         
         // System actions
         function shutdown() {
-            alert('System is shutting down...');
             closeShutdownMenu();
-            // Simulate shutdown by hiding all content
+            const animation = document.getElementById('reboot-animation');
+            animation.classList.remove('hidden');
+            animation.querySelector('div div:last-child').textContent = 'Shutting down...';
+            
             setTimeout(() => {
-                document.body.style.background = '#000';
-                document.body.innerHTML = '<div class="flex items-center justify-center h-screen text-white text-2xl">System Shutdown</div>';
-            }, 1000);
+                window.location.href = 'index.html';
+            }, 2000);
         }
         
         function reboot() {
