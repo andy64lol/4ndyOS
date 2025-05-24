@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DeepBlueOS - A modern web-based operating system interface">
+    <title>DeepBlueOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: rgba(59, 130, 246, 0.8);
+            --header-height: 40px;
+            --drawer-height: 70px;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+        
+        .glass {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .glass-dark {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .app-icon {
+            transition: all 0.2s ease;
+        }
+        
+        .app-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes rebootAnimation {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .reboot-animation {
+            animation: rebootAnimation 2s ease-in-out;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #000;
+            color: white;
+            padding: 8px;
+            z-index: 1001;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+    </style>
+</head>
+<body class="h-screen overflow-hidden bg-blue-100 text-gray-800">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Header -->
+    <header class="fixed top-0 w-full h-10 glass text-white flex items-center justify-end px-4 z-50">
+        <span id="time" class="font-medium" role="timer" aria-live="polite"></span>
+    </header>
+    
+    <!-- Main Content Area -->
+    <main id="main-content" class="relative h-full pt-10 pb-16">
+        <!-- App Container -->
+        <div id="iframe-container" class="hidden absolute inset-4 top-14 bottom-20 glass rounded-2xl overflow-hidden fade-in">
+            <iframe id="app-iframe" src="" title="Application Display" loading="lazy" class="w-full h-full border-none"></iframe>
+            <button id="close-btn" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors z-10">
+                Close
+            </button>
+        </div>
+    </main>
+    
+    <!-- App Drawer -->
+    <div id="app-drawer" class="fixed bottom-0 w-full h-20 glass flex items-center justify-start px-4 z-50 overflow-x-auto" role="navigation" aria-label="Application Drawer">
+        <div class="flex items-center space-x-3 min-w-max">
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Notes" onclick="openApp('notes')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 102 0V3h4v1a1 1 0 102 0V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Settings" onclick="openSettings()">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Search" onclick="openApp('search')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Calculator" onclick="openApp('calculator')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 0a1 1 0 100 2h.01a1 1 0 100-2H9zm2 0a1 1 0 100 2h.01a1 1 0 100-2H11zm0-2a1 1 0 100 2h.01a1 1 0 100-2H11zm-2 0a1 1 0 100 2h.01a1 1 0 100-2H9zm-2 0a1 1 0 100 2h.01a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Media" onclick="openApp('media')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Files" onclick="openApp('files')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Terminal" onclick="openApp('terminal')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Clicker Game" onclick="openApp('clicker')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open User Profile" onclick="openApp('user')">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+        
+        <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" aria-label="Open Shutdown Menu" onclick="openShutdownMenu()">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v6a1 1 0 11-2 0V3a1 1 0 011-1zm4.707 2.293a1 1 0 010 1.414L11.414 9a1 1 0 01-1.414-1.414l3.293-3.293a1 1 0 011.414 0zm-9.414 0a1 1 0 011.414 0L9 6.586A1 1 0 017.586 8L4.293 4.707a1 1 0 010-1.414zM17 10a7 7 0 11-14 0 7 7 0 0114 0z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+    </div>
+    
+    <!-- Shutdown Menu -->
+    <div id="shutdown-menu" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-labelledby="shutdown-title" aria-hidden="true">
+        <div class="glass-dark text-white p-6 rounded-2xl">
+            <h3 id="shutdown-title" class="text-xl font-semibold mb-4 text-center">System Control</h3>
+            <div class="flex flex-col space-y-3">
+                <button onclick="shutdown()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors">
+                    Shutdown
+                </button>
+                <button onclick="reboot()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                    Reboot
+                </button>
+                <button onclick="closeShutdownMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Menu -->
+    <div id="settings-menu" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-labelledby="settings-title" aria-hidden="true">
+        <div class="glass-dark text-white p-6 rounded-2xl w-80">
+            <h3 id="settings-title" class="text-xl font-semibold mb-4 text-center">Settings</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="theme" class="block text-sm font-medium mb-2">Theme:</label>
+                    <select id="theme" onchange="changeTheme(this.value)" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-3 py-2">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="wallpaper" class="block text-sm font-medium mb-2">Wallpaper:</label>
+                    <button onclick="setRandomBackground()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Random Wallpaper
+                    </button>
+                </div>
+                <button onclick="closeSettingsMenu()" class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reboot Animation -->
+    <div id="reboot-animation" class="hidden fixed inset-0 bg-black text-white flex items-center justify-center text-2xl font-bold z-50" aria-live="assertive">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <div>Rebooting...</div>
+        </div>
+    </div>
+    
+    <script>
+        // Global state
+        let currentTheme = 'light';
+        
+        // Initialize the OS
+        document.addEventListener('DOMContentLoaded', () => {
+            setRandomBackground();
+            updateTime();
+            setInterval(updateTime, 1000);
+            initializeTheme();
+            loadCustomApps();
+        });
+        
+        // Time management
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('time').textContent = timeString;
+        }
+        
+        // Theme management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('deepblue-theme') || 'light';
+            changeTheme(savedTheme);
+            document.getElementById('theme').value = savedTheme;
+        }
+        
+        function changeTheme(theme) {
+            currentTheme = theme;
+            const body = document.body;
+            
+            if (theme === 'dark') {
+                body.classList.remove('bg-blue-100', 'text-gray-800');
+                body.classList.add('bg-gray-900', 'text-white');
+            } else {
+                body.classList.remove('bg-gray-900', 'text-white');
+                body.classList.add('bg-blue-100', 'text-gray-800');
+            }
+            
+            localStorage.setItem('deepblue-theme', theme);
+        }
+        
+        // Wallpaper management
+        function setRandomBackground() {
+            const wallpaperCount = 5;
+            const randomNum = Math.floor(Math.random() * wallpaperCount) + 1;
+            const paddedNum = String(randomNum).padStart(3, '0');
+            const imageUrl = `wallpapers/wallpaper_${paddedNum}.png`;
+            document.body.style.backgroundImage = `url('${imageUrl}')`;
+        }
+        
+        // Custom apps management
+        function loadCustomApps() {
+            const customApps = JSON.parse(localStorage.getItem('deepblue-custom-apps') || '[]');
+            const container = document.getElementById('custom-apps-container');
+            
+            container.innerHTML = customApps.map(app => `
+                <button class="app-icon w-12 h-12 rounded-xl bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-30" 
+                        aria-label="Open ${app.name}" onclick="openCustomApp('${app.id}')">
+                    ${app.icon.startsWith('http') ? 
+                        `<img src="${app.icon}" class="w-6 h-6" alt="${app.name}">` : 
+                        `<span class="text-lg">${app.icon}</span>`
+                    }
+                </button>
+            `).join('');
+        }
+        
+        function openCustomApp(appId) {
+            const customApps = JSON.parse(localStorage.getItem('deepblue-custom-apps') || '[]');
+            const app = customApps.find(a => a.id === appId);
+            
+            if (app) {
+                const blob = new Blob([app.code], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                
+                const iframe = document.getElementById('app-iframe');
+                const container = document.getElementById('iframe-container');
+                
+                iframe.src = url;
+                container.classList.remove('hidden');
+                
+                const closeBtn = document.getElementById('close-btn');
+                closeBtn.onclick = () => {
+                    closeApp();
+                    URL.revokeObjectURL(url);
+                };
+            }
+        }
+        
+        // Listen for app installations from app builder
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'install-app') {
+                loadCustomApps();
+            }
+        });
+        
+        // App management
+        function openApp(appName) {
+            const appUrls = {
+                notes: 'apps/notes.html',
+                search: 'https://www.so.com/',
+                calculator: 'apps/calculator.html',
+                media: 'https://ntim.me/media-player/',
+                files: 'apps/files.html',
+                terminal: 'apps/4ndyTerminal.html',
+                user: 'apps/user.html',
+                clicker: 'apps/clicker.html',
+            };
+            
+            const iframe = document.getElementById('app-iframe');
+            const container = document.getElementById('iframe-container');
+            const src = appUrls[appName];
+            
+            if (!src) {
+                alert('Application not found!');
+                return;
+            }
+            
+            iframe.src = src;
+            container.classList.remove('hidden');
+            
+            // Setup close button
+            const closeBtn = document.getElementById('close-btn');
+            closeBtn.onclick = closeApp;
+        }
+        
+        function closeApp() {
+            const iframe = document.getElementById('app-iframe');
+            const container = document.getElementById('iframe-container');
+            
+            iframe.src = '';
+            container.classList.add('hidden');
+        }
+        
+        // Menu management
+        function openShutdownMenu() {
+            const menu = document.getElementById('shutdown-menu');
+            menu.classList.remove('hidden');
+            menu.setAttribute('aria-hidden', 'false');
+        }
+        
+        function closeShutdownMenu() {
+            const menu = document.getElementById('shutdown-menu');
+            menu.classList.add('hidden');
+            menu.setAttribute('aria-hidden', 'true');
+        }
+        
+        function openSettings() {
+            const menu = document.getElementById('settings-menu');
+            menu.classList.remove('hidden');
+            menu.setAttribute('aria-hidden', 'false');
+        }
+        
+        function closeSettingsMenu() {
+            const menu = document.getElementById('settings-menu');
+            menu.classList.add('hidden');
+            menu.setAttribute('aria-hidden', 'true');
+        }
+        
+        // System actions
+        function shutdown() {
+            alert('System is shutting down...');
+            closeShutdownMenu();
+            // Simulate shutdown by hiding all content
+            setTimeout(() => {
+                document.body.style.background = '#000';
+                document.body.innerHTML = '<div class="flex items-center justify-center h-screen text-white text-2xl">System Shutdown</div>';
+            }, 1000);
+        }
+        
+        function reboot() {
+            closeShutdownMenu();
+            const animation = document.getElementById('reboot-animation');
+            animation.classList.remove('hidden');
+            
+            setTimeout(() => {
+                animation.classList.add('hidden');
+                setRandomBackground();
+                // Reset any open apps
+                closeApp();
+            }, 3000);
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        openApp('notes');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        openApp('calculator');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        openApp('files');
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        openApp('terminal');
+                        break;
+                    case ',':
+                        e.preventDefault();
+                        openSettings();
+                        break;
+                }
+            }
+            
+            if (e.key === 'Escape') {
+                closeApp();
+                closeShutdownMenu();
+                closeSettingsMenu();
+            }
+        });
+    </script>
+</body>
+</html>
