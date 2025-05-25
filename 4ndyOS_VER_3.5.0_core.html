@@ -1842,17 +1842,35 @@ Start typing to see the live character count update!`;
         // Code Editor Functions
         let currentLanguage = 'python';
         let codeTemplates = {
-            python: `# Python Template
-print("Hello from Python!")
+            python: `# Brython Python Demo
+print("🐍 Python with Brython!")
 
+# Basic Python operations
+numbers = [1, 2, 3, 4, 5]
+print(f"Numbers: {numbers}")
+print(f"Sum: {sum(numbers)}")
+print(f"Average: {sum(numbers) / len(numbers)}")
+
+# Functions and loops
 def fibonacci(n):
     if n <= 1:
         return n
     return fibonacci(n-1) + fibonacci(n-2)
 
-# Example usage
+print("Fibonacci sequence:")
 for i in range(10):
-    print(f"Fibonacci({i}) = {fibonacci(i)}")`,
+    print(f"F({i}) = {fibonacci(i)}")
+
+# List comprehensions
+squares = [x**2 for x in range(1, 6)]
+print(f"Squares: {squares}")
+
+# Dictionary operations
+data = {"name": "4ndyOS", "version": "3.5.0", "runtime": "Brython"}
+for key, value in data.items():
+    print(f"{key}: {value}")
+
+print("✅ Brython Python ready!")`,
 
             javascript: `// JavaScript Template
 console.log("Hello from JavaScript!");
@@ -1946,16 +1964,28 @@ h1 {
             document.querySelectorAll('.lang-option').forEach(option => {
                 option.classList.remove('active');
             });
-            document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+            document.querySelector(`[data-lang="${lang}"]`)?.classList.add('active');
             
-            // Clear output
-            document.getElementById('code-output').textContent = `Switched to ${lang.toUpperCase()}. Ready to execute code...`;
+            // Clear output and show language info
+            const output = document.getElementById('code-output');
+            if (output) {
+                output.textContent = `Switched to ${lang.toUpperCase()}. Ready to execute code...`;
+            }
+            
+            // Load template for the selected language
+            if (codeTemplates[lang]) {
+                document.getElementById('code-content').placeholder = `Start writing ${lang.toUpperCase()} code here...`;
+            }
         }
 
         function loadTemplate() {
+            const codeContent = document.getElementById('code-content');
+            if (!codeContent) return;
+            
             const template = codeTemplates[currentLanguage] || `// ${currentLanguage.toUpperCase()} Template
 console.log("Hello from ${currentLanguage}!");`;
-            document.getElementById('code-content').value = template;
+            
+            codeContent.value = template;
             showNotification(`Loaded ${currentLanguage.toUpperCase()} template`, 'success');
         }
 
@@ -1991,43 +2021,64 @@ console.log("Hello from ${currentLanguage}!");`;
             output.textContent = `Executing ${currentLanguage.toUpperCase()} code...\n`;
             
             if (currentLanguage === 'python') {
-                // Auto-load Pyodide if not available
-                if (!window.pyodide) {
-                    output.textContent = 'Loading Python runtime...\n';
+                // Initialize Brython if not available
+                if (!window.pythonRuntime) {
+                    output.textContent = 'Loading Brython Python runtime...\n';
                     try {
-                        await loadPyodide();
-                        output.textContent += 'Python runtime loaded successfully!\n';
+                        initializePythonRuntime();
+                        output.textContent += 'Brython ready!\n';
                     } catch (error) {
-                        output.textContent = `Failed to load Python runtime: ${error.message}`;
+                        output.textContent = `Failed to load Brython: ${error.message}`;
                         return;
                     }
                 }
                 
                 try {
-                    // Create a new stdout capture for each execution
-                    await window.pyodide.runPython(`
-import sys
-from io import StringIO
-import traceback
-
-# Capture stdout
-old_stdout = sys.stdout
-sys.stdout = mystdout = StringIO()
-
-try:
-    exec("""${code.replace(/"/g, '\\"').replace(/\n/g, '\\n')}""")
-    output = mystdout.getvalue()
-except Exception as e:
-    output = f"Error: {type(e).__name__}: {str(e)}\\n{traceback.format_exc()}"
-finally:
-    sys.stdout = old_stdout
-                    `);
+                    // Simple and reliable Brython execution
+                    let capturedOutput = '';
                     
-                    const result = window.pyodide.globals.get('output');
-                    output.textContent = result || 'Code executed successfully (no output)';
+                    // Override print function to capture output
+                    const originalPrint = window.print;
+                    window.pythonOutput = '';
+                    
+                    // Create a Python script element
+                    const scriptElement = document.createElement('script');
+                    scriptElement.type = 'text/python';
+                    scriptElement.textContent = `
+import sys
+from browser import console
+
+# Redirect print to capture output
+_output = []
+def custom_print(*args, sep=' ', end='\\n'):
+    _output.append(sep.join(str(arg) for arg in args) + end)
+    
+import builtins
+builtins.print = custom_print
+
+# Execute user code
+try:
+${code.split('\n').map(line => '    ' + line).join('\n')}
+except Exception as e:
+    _output.append(f"Error: {type(e).__name__}: {str(e)}")
+
+# Store output for retrieval
+from browser import window
+window.pythonOutput = ''.join(_output)
+                    `;
+                    
+                    document.body.appendChild(scriptElement);
+                    
+                    // Wait a moment for execution
+                    setTimeout(() => {
+                        const result = window.pythonOutput || 'Code executed successfully';
+                        output.textContent = result;
+                        document.body.removeChild(scriptElement);
+                    }, 100);
                     
                 } catch (error) {
                     output.textContent = `Runtime Error: ${error.message}`;
+                    console.error('Python execution error:', error);
                 }
             } else if (currentLanguage === 'javascript') {
                 try {
@@ -2037,8 +2088,11 @@ finally:
                     const originalError = console.error;
                     const originalWarn = console.warn;
                     
+                    // Override console methods
                     console.log = (...args) => {
-                        consoleOutput += args.join(' ') + '\n';
+                        consoleOutput += args.map(arg => 
+                            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+                        ).join(' ') + '\n';
                     };
                     console.error = (...args) => {
                         consoleOutput += 'ERROR: ' + args.join(' ') + '\n';
@@ -2047,8 +2101,17 @@ finally:
                         consoleOutput += 'WARNING: ' + args.join(' ') + '\n';
                     };
                     
-                    // Execute in a try-catch to handle syntax errors
-                    const result = eval(`(function() { ${code} })()`);
+                    // Execute code in isolated function scope
+                    let result;
+                    try {
+                        result = eval(`(function() { 
+                            "use strict";
+                            ${code}
+                        })()`);
+                    } catch (evalError) {
+                        // Try direct evaluation for expressions
+                        result = eval(code);
+                    }
                     
                     // Restore console functions
                     console.log = originalLog;
@@ -2057,13 +2120,19 @@ finally:
                     
                     let finalOutput = consoleOutput;
                     if (result !== undefined) {
-                        finalOutput += `\nReturn value: ${JSON.stringify(result, null, 2)}`;
+                        finalOutput += `\n→ Return value: ${typeof result === 'object' ? JSON.stringify(result, null, 2) : result}`;
                     }
                     
                     output.textContent = finalOutput || 'Code executed successfully (no output)';
                 } catch (error) {
-                    console.log = console.error = console.warn = arguments.callee;
-                    output.textContent = `JavaScript Error: ${error.name}: ${error.message}\nLine: ${error.lineNumber || 'Unknown'}`;
+                    // Restore console functions if not already restored
+                    try {
+                        console.log = originalLog;
+                        console.error = originalError;
+                        console.warn = originalWarn;
+                    } catch (e) {}
+                    
+                    output.textContent = `JavaScript Error: ${error.name}: ${error.message}${error.stack ? '\n\nStack trace:\n' + error.stack : ''}`;
                 }
             } else if (currentLanguage === 'html') {
                 // HTML preview functionality
@@ -2149,70 +2218,104 @@ finally:
             }
         }
 
-        // Enhanced Python Lab functions
-        async function loadPyodide() {
-            if (window.pyodide) return window.pyodide;
-            
-            const output = document.getElementById('python-output');
-            output.innerHTML = '<div style="color: #fbbf24;">🔄 Loading Pyodide runtime...</div>';
+        // Brython-only Python runtime
+        function initializePythonRuntime() {
+            const output = document.getElementById('python-output') || document.getElementById('code-output');
             
             try {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
-                script.onload = async () => {
-                    pyodide = await loadPyodide();
-                    await pyodide.loadPackage(['numpy', 'matplotlib']);
-                    output.innerHTML = `
-                        <div style="color: #00ff00;">✅ Pyodide loaded successfully!</div>
-                        <div style="color: #06b6d4;">📦 Available: NumPy, Matplotlib</div>
-                        <div style="color: #8b5cf6;">🚀 Ready for enhanced Python computing</div>
-                    `;
-                };
-                document.head.appendChild(script);
+                if (typeof brython !== 'undefined') {
+                    brython({debug: 0, pythonpath: ['.', '/src/lib']});
+                    window.pythonRuntime = 'brython';
+                    
+                    if (output) {
+                        output.innerHTML = `
+                            <div style="color: #00ff00;">✅ Brython Python runtime ready!</div>
+                            <div style="color: #8b5cf6;">🚀 Fast Python execution in browser</div>
+                        `;
+                    }
+                    return 'brython';
+                } else {
+                    throw new Error('Brython not available');
+                }
             } catch (error) {
-                output.innerHTML = `<div style="color: #ef4444;">❌ Error loading Pyodide: ${error.message}</div>`;
+                if (output) {
+                    output.innerHTML = `<div style="color: #ef4444;">❌ Failed to load Brython: ${error.message}</div>`;
+                }
+                throw error;
             }
         }
 
-        function runPython() {
+        async function runPython() {
             const code = document.getElementById('python-input').value;
             const output = document.getElementById('python-output');
             
             if (!code.trim()) return;
             
-            if (!pyodide) {
-                output.innerHTML += '<div style="color: #f59e0b;">⚠️ Please load Pyodide first</div>';
-                return;
+            // Auto-load Pyodide if not available
+            if (!window.pyodide) {
+                output.innerHTML += '<div style="color: #f59e0b;">Loading Python runtime...</div>';
+                try {
+                    await loadPyodide();
+                } catch (error) {
+                    return;
+                }
             }
             
             try {
-                pyodide.runPython(`
+                // Create isolated execution context
+                await window.pyodide.runPython(`
 import sys
 from io import StringIO
-sys.stdout = StringIO()
+import traceback
+
+# Capture stdout
+old_stdout = sys.stdout
+sys.stdout = mystdout = StringIO()
+
+try:
+    exec("""${code.replace(/"/g, '\\"').replace(/\n/g, '\\n')}""")
+    output = mystdout.getvalue()
+except Exception as e:
+    output = f"Error: {type(e).__name__}: {str(e)}\\n{traceback.format_exc()}"
+finally:
+    sys.stdout = old_stdout
                 `);
                 
-                pyodide.runPython(code);
-                const result = pyodide.runPython('sys.stdout.getvalue()');
+                const result = window.pyodide.globals.get('output');
                 
                 output.innerHTML += `
-                    <div style="color: #06b6d4;">>>> Executing code...</div>
+                    <div style="color: #06b6d4;">>>> Executing Python code...</div>
                     <div style="color: #00ff00;">${result || 'Code executed successfully'}</div>
                 `;
                 
-                pyodide.runPython('sys.stdout = sys.__stdout__');
+                // Clean up stdout
+                try {
+                    window.pyodide.runPython('sys.stdout = sys.__stdout__');
+                } catch (cleanupError) {
+                    console.warn('Cleanup warning:', cleanupError);
+                }
                 
             } catch (error) {
                 output.innerHTML += `<div style="color: #ef4444;">❌ Error: ${error.message}</div>`;
+                console.error('Python Lab execution error:', error);
             }
             
             output.scrollTop = output.scrollHeight;
         }
 
         function clearPython() {
-            document.getElementById('python-output').innerHTML = '<div style="color: #00ff00;">🐍 Python console cleared</div>';
+            document.getElementById('python-output').innerHTML = '<div style="color: #00ff00;">🐍 Brython console cleared</div>';
             document.getElementById('python-input').value = '';
         }
+        
+        // Initialize Brython on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof brython !== 'undefined') {
+                brython({debug: 0, pythonpath: ['.', '/src/lib']});
+                window.pythonRuntime = 'brython';
+                console.log('Brython initialized successfully');
+            }
+        });
 
         // Library demo functions
         function demoAlpine() {
