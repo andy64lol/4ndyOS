@@ -3,799 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Manager - DeepBlueOS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../js/shared-filesystem.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>.txt File Storage App</title>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .file-item:hover { background-color: rgba(59, 130, 246, 0.1); }
-        .breadcrumb-item:hover { background-color: rgba(59, 130, 246, 0.1); }
-        .context-menu {
-            display: none;
-            position: absolute;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .file-slot {
+            background: #fff;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-slot input {
+            width: 60%;
+            padding: 5px;
+        }
+        .file-slot button {
+            padding: 5px 10px;
+        }
+        .file-list {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .message {
+            text-align: center;
+            color: green;
+        }
+        .upload {
+            margin: 20px 0;
+            text-align: center;
         }
     </style>
 </head>
-<body class="bg-gray-50 h-screen overflow-hidden">
-    <div class="flex h-full">
-        <!-- Sidebar -->
-        <div class="w-48 sm:w-64 bg-white border-r border-gray-200 flex flex-col">
-            <!-- Header -->
-            <div class="p-3 sm:p-4 border-b border-gray-200">
-                <h1 class="text-base sm:text-lg font-semibold text-gray-800">Enhanced Files</h1>
-                <div class="flex items-center mt-2">
-                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    <span class="text-xs text-gray-600">Connected to Terminal</span>
-                </div>
-            </div>
-            
-            <!-- Quick Access -->
-            <div class="p-4">
-                <h3 class="text-sm font-medium text-gray-700 mb-3">Quick Access</h3>
-                <div class="space-y-1">
-                    <button class="quick-access w-full flex items-center px-3 py-2 text-left text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" data-path="/">
-                        <svg class="w-4 h-4 mr-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-9 9a1 1 0 001.414 1.414L2 12.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-4.586l.293.293a1 1 0 001.414-1.414l-9-9z"></path>
-                        </svg>
-                        Home
-                    </button>
-                    <button class="quick-access w-full flex items-center px-3 py-2 text-left text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" data-path="/Documents">
-                        <svg class="w-4 h-4 mr-3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-5L9 2H4z"></path>
-                        </svg>
-                        Documents
-                    </button>
-                    <button class="quick-access w-full flex items-center px-3 py-2 text-left text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" data-path="/Downloads">
-                        <svg class="w-4 h-4 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
-                        Downloads
-                    </button>
-                    <button class="quick-access w-full flex items-center px-3 py-2 text-left text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" data-path="/Pictures">
-                        <svg class="w-4 h-4 mr-3 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                        </svg>
-                        Pictures
-                    </button>
-                    <button class="quick-access w-full flex items-center px-3 py-2 text-left text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition-colors" data-path="/Music">
-                        <svg class="w-4 h-4 mr-3 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path>
-                        </svg>
-                        Music
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Storage Info -->
-            <div class="mt-auto p-4 border-t border-gray-200">
-                <div class="text-sm text-gray-600">
-                    <div class="flex justify-between mb-1">
-                        <span>Storage</span>
-                        <span id="storage-usage">Used: 0 MB</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="storage-bar" class="bg-blue-500 h-2 rounded-full" style="width: 15%"></div>
-                    </div>
-                    <div class="text-xs text-gray-500 mt-1">Available: 950 MB</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
-            <!-- Toolbar -->
-            <div class="bg-white border-b border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <!-- Navigation -->
-                    <div class="flex items-center space-x-2">
-                        <button id="back-btn" class="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                        <button id="forward-btn" class="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                        <button id="up-btn" class="p-2 text-gray-400 hover:text-gray-600">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    <!-- Breadcrumb -->
-                    <div id="breadcrumb" class="flex items-center space-x-1 flex-1 mx-4">
-                        <!-- Breadcrumb items will be inserted here -->
-                    </div>
-                    
-                    <!-- Actions -->
-                    <div class="flex items-center space-x-1 sm:space-x-2">
-                        <button id="terminal-btn" class="bg-green-600 hover:bg-green-700 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-colors">
-                            Terminal
-                        </button>
-                        <button id="new-folder-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-colors">
-                            New Folder
-                        </button>
-                        <button id="new-file-btn" class="bg-purple-500 hover:bg-purple-600 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-colors">
-                            New File
-                        </button>
-                        <button id="upload-btn" class="bg-orange-500 hover:bg-orange-600 text-white px-2 sm:px-3 py-1 rounded text-xs sm:text-sm transition-colors">
-                            Upload
-                        </button>
-                        <input type="file" id="file-upload" accept=".txt,.md,.json,.csv,.log" multiple class="hidden">
-                        <button id="view-toggle" class="p-1 sm:p-2 text-gray-600 hover:text-gray-800" title="Toggle view">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- File List -->
-            <div id="file-list" class="flex-1 overflow-auto p-4">
-                <!-- Files will be dynamically inserted here -->
-            </div>
-        </div>
+<body>
+    <h1>.txt File Storage App</h1>
+    <div class="upload">
+        <input type="file" id="fileInput" accept=".txt">
+        <button onclick="uploadFile()">Upload</button>
     </div>
-    
-    <!-- Context Menu -->
-    <div id="context-menu" class="context-menu">
-        <div class="py-1">
-            <button class="context-item w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100" data-action="open">Open</button>
-            <button class="context-item w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100" data-action="rename">Rename</button>
-            <button class="context-item w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100" data-action="copy">Copy</button>
-            <button class="context-item w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100" data-action="cut">Cut</button>
-            <div class="border-t border-gray-200 my-1"></div>
-            <button class="context-item w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50" data-action="delete">Delete</button>
-        </div>
-    </div>
-    
-    <!-- Modals -->
-    <div id="rename-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-96">
-            <h3 class="text-lg font-semibold mb-4">Rename</h3>
-            <input type="text" id="rename-input" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <div class="flex justify-end space-x-2 mt-4">
-                <button id="rename-cancel" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                <button id="rename-confirm" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Rename</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="new-folder-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-96 max-w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4">New Folder</h3>
-            <input type="text" id="folder-name-input" placeholder="Folder name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <div class="flex justify-end space-x-2 mt-4">
-                <button id="folder-cancel" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                <button id="folder-confirm" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Create</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="new-file-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-96 max-w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4">New File</h3>
-            <input type="text" id="file-name-input" placeholder="File name (e.g. document.txt)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 mb-3">
-            <textarea id="file-content-input" placeholder="File content (optional)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 h-32 resize-none"></textarea>
-            <div class="flex justify-end space-x-2 mt-4">
-                <button id="file-cancel" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                <button id="file-confirm" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">Create</button>
-            </div>
-        </div>
-    </div>
-
+    <div class="file-list" id="fileList"></div>
+    <div class="message" id="message"></div>
     <script>
-        class EnhancedFileManager {
-            constructor() {
-                this.currentPath = '/home/user';
-                this.navigationHistory = ['/home/user'];
-                this.historyIndex = 0;
-                this.viewMode = 'grid'; // 'grid' or 'list'
-                this.selectedItem = null;
-                
-                // Wait for shared filesystem to be ready
-                this.waitForFileSystem();
-            }
-            
-            waitForFileSystem() {
-                if (window.sharedFS) {
-                    this.fileSystem = window.sharedFS;
-                    this.fileSystem.addObserver(this);
-                    this.initialize();
-                } else {
-                    setTimeout(() => this.waitForFileSystem(), 100);
-                }
-            }
-            
-            initialize() {
-                this.initializeElements();
-                this.bindEvents();
-                this.renderCurrentDirectory();
-                this.updateStorageInfo();
-            }
-            
-            onFileSystemChange(event, path, data) {
-                // React to file system changes from terminal or other sources
-                this.renderCurrentDirectory();
-                this.updateStorageInfo();
-                
-                // Show notification
-                this.showNotification(`File system updated: ${event} ${path}`, 'info');
-            }
-            
-            initializeElements() {
-                this.fileList = document.getElementById('file-list');
-                this.breadcrumb = document.getElementById('breadcrumb');
-                this.backBtn = document.getElementById('back-btn');
-                this.forwardBtn = document.getElementById('forward-btn');
-                this.upBtn = document.getElementById('up-btn');
-                this.viewToggle = document.getElementById('view-toggle');
-                this.newFolderBtn = document.getElementById('new-folder-btn');
-                this.newFileBtn = document.getElementById('new-file-btn');
-                this.uploadBtn = document.getElementById('upload-btn');
-                this.fileUpload = document.getElementById('file-upload');
-                this.terminalBtn = document.getElementById('terminal-btn');
-                this.contextMenu = document.getElementById('context-menu');
-                this.renameModal = document.getElementById('rename-modal');
-                this.newFolderModal = document.getElementById('new-folder-modal');
-                this.newFileModal = document.getElementById('new-file-modal');
-                this.storageUsage = document.getElementById('storage-usage');
-                this.storageBar = document.getElementById('storage-bar');
-            }
-            
-            bindEvents() {
-                // Navigation
-                this.backBtn.addEventListener('click', () => this.navigateBack());
-                this.forwardBtn.addEventListener('click', () => this.navigateForward());
-                this.upBtn.addEventListener('click', () => this.navigateUp());
-                this.viewToggle.addEventListener('click', () => this.toggleView());
-                this.newFolderBtn.addEventListener('click', () => this.showNewFolderModal());
-                this.newFileBtn.addEventListener('click', () => this.showNewFileModal());
-                this.uploadBtn.addEventListener('click', () => this.fileUpload.click());
-                this.fileUpload.addEventListener('change', (e) => this.handleFileUpload(e));
-                this.terminalBtn.addEventListener('click', () => this.openTerminal());
-                
-                // Quick access
-                document.querySelectorAll('.quick-access').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        this.navigateToPath(btn.dataset.path);
-                    });
-                });
-                
-                // Context menu
-                document.addEventListener('click', () => this.hideContextMenu());
-                document.querySelectorAll('.context-item').forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        const action = e.target.dataset.action;
-                        this.handleContextAction(action);
-                        this.hideContextMenu();
-                    });
-                });
-                
-                // Modals
-                document.getElementById('rename-cancel').addEventListener('click', () => this.hideRenameModal());
-                document.getElementById('rename-confirm').addEventListener('click', () => this.confirmRename());
-                document.getElementById('folder-cancel').addEventListener('click', () => this.hideNewFolderModal());
-                document.getElementById('folder-confirm').addEventListener('click', () => this.confirmNewFolder());
-                document.getElementById('file-cancel').addEventListener('click', () => this.hideNewFileModal());
-                document.getElementById('file-confirm').addEventListener('click', () => this.confirmNewFile());
-                
-                // Keyboard shortcuts
-                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
-            }
-            
-            createDefaultFileSystem() {
-                return {
-                    '/': {
-                        type: 'folder',
-                        name: 'Home',
-                        children: {
-                            'Documents': {
-                                type: 'folder',
-                                name: 'Documents',
-                                children: {
-                                    'Welcome.txt': {
-                                        type: 'file',
-                                        name: 'Welcome.txt',
-                                        size: 1234,
-                                        modified: new Date().toISOString(),
-                                        content: 'Welcome to DeepBlueOS File Manager!'
-                                    },
-                                    'Notes': {
-                                        type: 'folder',
-                                        name: 'Notes',
-                                        children: {}
-                                    }
-                                }
-                            },
-                            'Downloads': {
-                                type: 'folder',
-                                name: 'Downloads',
-                                children: {}
-                            },
-                            'Pictures': {
-                                type: 'folder',
-                                name: 'Pictures',
-                                children: {
-                                    'sample.jpg': {
-                                        type: 'file',
-                                        name: 'sample.jpg',
-                                        size: 256000,
-                                        modified: new Date().toISOString()
-                                    }
-                                }
-                            },
-                            'Music': {
-                                type: 'folder',
-                                name: 'Music',
-                                children: {}
-                            }
-                        }
-                    }
-                };
-            }
-            
-            navigateToPath(path) {
-                if (this.pathExists(path)) {
-                    this.currentPath = path;
-                    this.addToHistory(path);
-                    this.renderCurrentDirectory();
-                    this.updateNavigationButtons();
-                }
-            }
-            
-            navigateBack() {
-                if (this.historyIndex > 0) {
-                    this.historyIndex--;
-                    this.currentPath = this.navigationHistory[this.historyIndex];
-                    this.renderCurrentDirectory();
-                    this.updateNavigationButtons();
-                }
-            }
-            
-            navigateForward() {
-                if (this.historyIndex < this.navigationHistory.length - 1) {
-                    this.historyIndex++;
-                    this.currentPath = this.navigationHistory[this.historyIndex];
-                    this.renderCurrentDirectory();
-                    this.updateNavigationButtons();
-                }
-            }
-            
-            navigateUp() {
-                if (this.currentPath !== '/') {
-                    const parentPath = this.getParentPath(this.currentPath);
-                    this.navigateToPath(parentPath);
-                }
-            }
-            
-            addToHistory(path) {
-                // Remove any forward history
-                this.navigationHistory = this.navigationHistory.slice(0, this.historyIndex + 1);
-                
-                // Add new path if it's different from current
-                if (this.navigationHistory[this.navigationHistory.length - 1] !== path) {
-                    this.navigationHistory.push(path);
-                    this.historyIndex = this.navigationHistory.length - 1;
-                }
-            }
-            
-            updateNavigationButtons() {
-                this.backBtn.disabled = this.historyIndex <= 0;
-                this.forwardBtn.disabled = this.historyIndex >= this.navigationHistory.length - 1;
-                this.upBtn.disabled = this.currentPath === '/';
-            }
-            
-            renderCurrentDirectory() {
-                const currentDir = this.getDirectoryAtPath(this.currentPath);
-                if (!currentDir) return;
-                
-                this.updateBreadcrumb();
-                this.renderFileList(currentDir.children || {});
-            }
-            
-            updateBreadcrumb() {
-                const pathParts = this.currentPath === '/' ? ['/'] : this.currentPath.split('/').filter(Boolean);
-                let currentPath = '';
-                
-                this.breadcrumb.innerHTML = pathParts.map((part, index) => {
-                    currentPath += index === 0 ? (part === '/' ? '/' : `/${part}`) : `/${part}`;
-                    const isLast = index === pathParts.length - 1;
-                    
-                    return `
-                        <span class="breadcrumb-item ${isLast ? 'text-gray-900 font-medium' : 'text-blue-600 hover:text-blue-800 cursor-pointer'} px-2 py-1 rounded transition-colors" 
-                              ${!isLast ? `onclick="fileManager.navigateToPath('${currentPath}')"` : ''}>
-                            ${part === '/' ? 'Home' : part}
-                        </span>
-                        ${!isLast ? '<svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>' : ''}
-                    `;
-                }).join('');
-            }
-            
-            renderFileList(children) {
-                const items = Object.values(children).sort((a, b) => {
-                    // Folders first, then files
-                    if (a.type !== b.type) {
-                        return a.type === 'folder' ? -1 : 1;
-                    }
-                    return a.name.localeCompare(b.name);
-                });
-                
-                if (items.length === 0) {
-                    this.fileList.innerHTML = `
-                        <div class="flex items-center justify-center h-64 text-gray-500">
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                </svg>
-                                <p>This folder is empty</p>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                if (this.viewMode === 'grid') {
-                    this.fileList.innerHTML = `
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                            ${items.map(item => this.renderFileItem(item)).join('')}
-                        </div>
-                    `;
-                } else {
-                    this.fileList.innerHTML = `
-                        <div class="space-y-1">
-                            ${items.map(item => this.renderFileItemList(item)).join('')}
-                        </div>
-                    `;
-                }
-            }
-            
-            renderFileItem(item) {
-                const icon = this.getFileIcon(item);
-                const size = item.type === 'file' ? this.formatFileSize(item.size) : '';
-                
-                return `
-                    <div class="file-item p-3 rounded-lg cursor-pointer text-center transition-colors" 
-                         data-name="${item.name}" data-type="${item.type}"
-                         ondblclick="fileManager.openItem('${item.name}')"
-                         oncontextmenu="fileManager.showContextMenu(event, '${item.name}')">
-                        <div class="mb-2">
-                            ${icon}
-                        </div>
-                        <div class="text-sm font-medium text-gray-900 truncate">${item.name}</div>
-                        ${size ? `<div class="text-xs text-gray-500">${size}</div>` : ''}
-                    </div>
-                `;
-            }
-            
-            renderFileItemList(item) {
-                const icon = this.getFileIcon(item, 'sm');
-                const size = item.type === 'file' ? this.formatFileSize(item.size) : '';
-                const modified = new Date(item.modified || Date.now()).toLocaleDateString();
-                
-                return `
-                    <div class="file-item flex items-center p-2 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors" 
-                         data-name="${item.name}" data-type="${item.type}"
-                         ondblclick="fileManager.openItem('${item.name}')"
-                         oncontextmenu="fileManager.showContextMenu(event, '${item.name}')">
-                        <div class="mr-3">
-                            ${icon}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="text-sm font-medium text-gray-900 truncate">${item.name}</div>
-                        </div>
-                        <div class="text-sm text-gray-500 w-20 text-right">${size}</div>
-                        <div class="text-sm text-gray-500 w-24 text-right">${modified}</div>
-                    </div>
-                `;
-            }
-            
-            getFileIcon(item, size = 'md') {
-                const sizeClass = size === 'sm' ? 'w-6 h-6' : 'w-12 h-12';
-                
-                if (item.type === 'folder') {
-                    return `<svg class="${sizeClass} text-blue-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
-                    </svg>`;
-                }
-                
-                const extension = item.name.split('.').pop().toLowerCase();
-                
-                switch (extension) {
-                    case 'txt':
-                    case 'md':
-                        return `<svg class="${sizeClass} text-gray-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
-                        </svg>`;
-                    case 'jpg':
-                    case 'jpeg':
-                    case 'png':
-                    case 'gif':
-                        return `<svg class="${sizeClass} text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                        </svg>`;
-                    case 'mp3':
-                    case 'wav':
-                    case 'ogg':
-                        return `<svg class="${sizeClass} text-purple-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path>
-                        </svg>`;
-                    default:
-                        return `<svg class="${sizeClass} text-gray-400 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path>
-                        </svg>`;
-                }
-            }
-            
-            formatFileSize(bytes) {
-                if (bytes === 0) return '0 B';
-                const k = 1024;
-                const sizes = ['B', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-            }
-            
-            openItem(name) {
-                const currentDir = this.getDirectoryAtPath(this.currentPath);
-                const item = currentDir.children[name];
-                
-                if (item.type === 'folder') {
-                    const newPath = this.currentPath === '/' ? `/${name}` : `${this.currentPath}/${name}`;
-                    this.navigateToPath(newPath);
-                } else {
-                    // For files, show a simple viewer
-                    this.viewFile(item);
-                }
-            }
-            
-            viewFile(file) {
-                let content = 'File content not available for viewing.';
-                
-                if (file.content) {
-                    content = file.content;
-                } else if (file.name.endsWith('.txt') || file.name.endsWith('.md')) {
-                    content = 'This is a sample text file.';
-                }
-                
-                alert(`File: ${file.name}\nSize: ${this.formatFileSize(file.size)}\n\nContent:\n${content}`);
-            }
-            
-            showContextMenu(event, itemName) {
-                event.preventDefault();
-                this.selectedItem = itemName;
-                
-                const menu = this.contextMenu;
-                menu.style.display = 'block';
-                menu.style.left = event.pageX + 'px';
-                menu.style.top = event.pageY + 'px';
-            }
-            
-            hideContextMenu() {
-                this.contextMenu.style.display = 'none';
-                this.selectedItem = null;
-            }
-            
-            handleContextAction(action) {
-                if (!this.selectedItem) return;
-                
-                switch (action) {
-                    case 'open':
-                        this.openItem(this.selectedItem);
-                        break;
-                    case 'rename':
-                        this.showRenameModal(this.selectedItem);
-                        break;
-                    case 'copy':
-                        this.copyItem(this.selectedItem);
-                        break;
-                    case 'cut':
-                        this.cutItem(this.selectedItem);
-                        break;
-                    case 'delete':
-                        this.deleteItem(this.selectedItem);
-                        break;
-                }
-            }
-            
-            showRenameModal(itemName) {
-                this.renameModal.classList.remove('hidden');
-                const input = document.getElementById('rename-input');
-                input.value = itemName;
-                input.select();
-            }
-            
-            hideRenameModal() {
-                this.renameModal.classList.add('hidden');
-            }
-            
-            confirmRename() {
-                const newName = document.getElementById('rename-input').value.trim();
-                if (newName && newName !== this.selectedItem) {
-                    this.renameItem(this.selectedItem, newName);
-                }
-                this.hideRenameModal();
-            }
-            
-            showNewFolderModal() {
-                this.newFolderModal.classList.remove('hidden');
-                const input = document.getElementById('folder-name-input');
-                input.value = '';
-                input.focus();
-            }
-            
-            hideNewFolderModal() {
-                this.newFolderModal.classList.add('hidden');
-            }
-            
-            confirmNewFolder() {
-                const name = document.getElementById('folder-name-input').value.trim();
-                if (name) {
-                    this.createFolder(name);
-                }
-                this.hideNewFolderModal();
-            }
-            
-            createFolder(name) {
-                const currentDir = this.getDirectoryAtPath(this.currentPath);
-                if (currentDir && !currentDir.children[name]) {
-                    currentDir.children[name] = {
-                        type: 'folder',
-                        name: name,
-                        children: {},
-                        modified: new Date().toISOString()
-                    };
-                    this.saveFileSystem();
-                    this.renderCurrentDirectory();
-                }
-            }
-            
-            renameItem(oldName, newName) {
-                const currentDir = this.getDirectoryAtPath(this.currentPath);
-                if (currentDir && currentDir.children[oldName] && !currentDir.children[newName]) {
-                    const item = currentDir.children[oldName];
-                    item.name = newName;
-                    currentDir.children[newName] = item;
-                    delete currentDir.children[oldName];
-                    this.saveFileSystem();
-                    this.renderCurrentDirectory();
-                }
-            }
-            
-            deleteItem(name) {
-                if (confirm(`Are you sure you want to delete "${name}"?`)) {
-                    const currentDir = this.getDirectoryAtPath(this.currentPath);
-                    if (currentDir && currentDir.children[name]) {
-                        delete currentDir.children[name];
-                        this.saveFileSystem();
-                        this.renderCurrentDirectory();
-                    }
-                }
-            }
-            
-            copyItem(name) {
-                const currentDir = this.getDirectoryAtPath(this.currentPath);
-                if (currentDir && currentDir.children[name]) {
-                    this.clipboard.item = { ...currentDir.children[name] };
-                    this.clipboard.operation = 'copy';
-                }
-            }
-            
-            cutItem(name) {
-                const currentDir = this.getDirectoryAtPath(this.currentPath);
-                if (currentDir && currentDir.children[name]) {
-                    this.clipboard.item = { ...currentDir.children[name] };
-                    this.clipboard.operation = 'cut';
-                    this.clipboard.sourcePath = this.currentPath;
-                    this.clipboard.sourceName = name;
-                }
-            }
-            
-            toggleView() {
-                this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
-                this.renderCurrentDirectory();
-            }
-            
-            handleKeyboard(e) {
-                if (e.ctrlKey || e.metaKey) {
-                    switch (e.key) {
-                        case 'n':
-                            if (e.shiftKey) {
-                                e.preventDefault();
-                                this.showNewFolderModal();
-                            }
-                            break;
-                    }
-                }
-                
-                if (e.key === 'F2' && this.selectedItem) {
-                    e.preventDefault();
-                    this.showRenameModal(this.selectedItem);
-                }
-                
-                if (e.key === 'Delete' && this.selectedItem) {
-                    e.preventDefault();
-                    this.deleteItem(this.selectedItem);
-                }
-            }
-            
-            // Utility methods
-            pathExists(path) {
-                return this.getDirectoryAtPath(path) !== null;
-            }
-            
-            getDirectoryAtPath(path) {
-                if (path === '/') return this.fileSystem['/'];
-                
-                const parts = path.split('/').filter(Boolean);
-                let current = this.fileSystem['/'];
-                
-                for (const part of parts) {
-                    if (current.children && current.children[part]) {
-                        current = current.children[part];
-                    } else {
-                        return null;
-                    }
-                }
-                
-                return current;
-            }
-            
-            getParentPath(path) {
-                if (path === '/') return '/';
-                const parts = path.split('/').filter(Boolean);
-                parts.pop();
-                return parts.length === 0 ? '/' : '/' + parts.join('/');
-            }
-            
-            updateStorageInfo() {
-                // Simulate storage calculation
-                const totalSize = this.calculateDirectorySize(this.fileSystem['/']);
-                const totalMB = Math.round(totalSize / (1024 * 1024));
-                const usagePercent = Math.min((totalMB / 1000) * 100, 100);
-                
-                this.storageUsage.textContent = `Used: ${totalMB} MB`;
-                this.storageBar.style.width = `${usagePercent}%`;
-            }
-            
-            calculateDirectorySize(dir) {
-                let size = 0;
-                
-                if (dir.children) {
-                    for (const item of Object.values(dir.children)) {
-                        if (item.type === 'file') {
-                            size += item.size || 0;
-                        } else if (item.type === 'folder') {
-                            size += this.calculateDirectorySize(item);
-                        }
-                    }
-                }
-                
-                return size;
-            }
-            
-            saveFileSystem() {
-                localStorage.setItem('deepblue-filesystem', JSON.stringify(this.fileSystem));
-                this.updateStorageInfo();
-            }
-            
-            loadFileSystem() {
-                const saved = localStorage.getItem('deepblue-filesystem');
-                return saved ? JSON.parse(saved) : null;
+        const fileList = document.getElementById('fileList');
+        const message = document.getElementById('message');
+        const maxFiles = 20;
+
+        function loadFiles() {
+            fileList.innerHTML = '';
+            for (let i = 0; i < maxFiles; i++) {
+                const fileName = localStorage.getItem(`file_${i}`);
+                const fileSlot = document.createElement('div');
+                fileSlot.className = 'file-slot';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = fileName ? fileName : '';
+                input.placeholder = `File ${i + 1}`;
+                input.readOnly = true;
+                const viewButton = document.createElement('button');
+                viewButton.innerText = 'View';
+                viewButton.onclick = () => viewFile(i);
+                const downloadButton = document.createElement('button');
+                downloadButton.innerText = 'Download';
+                downloadButton.onclick = () => downloadFile(i);
+                const deleteButton = document.createElement('button');
+                deleteButton.innerText = 'Delete';
+                deleteButton.onclick = () => deleteFile(i);
+                fileSlot.appendChild(input);
+                fileSlot.appendChild(viewButton);
+                fileSlot.appendChild(downloadButton);
+                fileSlot.appendChild(deleteButton);
+                fileList.appendChild(fileSlot);
             }
         }
-        
-        // Initialize the file manager
-        const fileManager = new FileManager();
+
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                message.innerText = 'Please select a file to upload.';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const fileContent = event.target.result;
+                for (let i = 0; i < maxFiles; i++) {
+                    if (!localStorage.getItem(`file_${i}`)) {
+                        localStorage.setItem(`file_${i}`, file.name);
+                        localStorage.setItem(`fileContent_${i}`, fileContent);
+                        message.innerText = `File "${file.name}" uploaded successfully.`;
+                        loadFiles();
+                        return;
+                    }
+                }
+                message.innerText = 'No available slots to upload the file.';
+            };
+            reader.readAsText(file);
+        }
+
+        function viewFile(index) {
+            const fileContent = localStorage.getItem(`fileContent_${index}`);
+            if (fileContent) {
+                alert(`Content of File ${index + 1}:\n\n${fileContent}`);
+            } else {
+                message.innerText = 'No file found.';
+            }
+        }
+
+        function downloadFile(index) {
+            const fileName = localStorage.getItem(`file_${index}`);
+            const fileContent = localStorage.getItem(`fileContent_${index}`);
+            if (fileName && fileContent) {
+                const blob = new Blob([fileContent], { type: ' text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                message.innerText = `File "${fileName}" downloaded successfully.`;
+            } else {
+                message.innerText = 'No file found to download.';
+            }
+        }
+
+        function deleteFile(index) {
+            localStorage.removeItem(`file_${index}`);
+            localStorage.removeItem(`fileContent_${index}`);
+            loadFiles();
+            message.innerText = `File ${index + 1} deleted successfully.`;
+        }
+
+        loadFiles();
     </script>
 </body>
 </html>
