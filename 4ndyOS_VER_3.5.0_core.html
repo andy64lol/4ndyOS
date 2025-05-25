@@ -6,6 +6,8 @@
     <title>4ndyOS VER 3.5.0 Core</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Iceland&display=swap" rel="stylesheet" />
     
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython_stdlib.js"></script>
     <!-- Enhanced Libraries -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -2060,11 +2062,9 @@ builtins.print = custom_print
 try:
 ${code.split('\n').map(line => '    ' + line).join('\n')}
 except Exception as e:
-    _output.append(f"Error: {type(e).__name__}: {str(e)}")
-
-# Store output for retrieval
-from browser import window
-window.pythonOutput = ''.join(_output)
+    _output.append(f"Error: {type(e).__name__}: {str(e)}\\n{traceback.format_exc()}")
+finally:
+    sys.stdout = old_stdout
                     `;
                     
                     document.body.appendChild(scriptElement);
@@ -2253,7 +2253,7 @@ window.pythonOutput = ''.join(_output)
             
             // Auto-load Pyodide if not available
             if (!window.pyodide) {
-                output.innerHTML += '<div style="color: #f59e0b;">Loading Python runtime...</div>';
+                output.innerHTML = '<div style="color: #f59e0b;">Loading Python runtime...</div>';
                 try {
                     await loadPyodide();
                 } catch (error) {
