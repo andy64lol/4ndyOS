@@ -34,5 +34,23 @@
         "name": "Clicker Game",
         "path": "NeoM4trixApps/clicker.html",
         "description": "A simple clicker game."
-    }
+    },
+    {
+        "command": "blb!",
+        "name": "Block Blast!",
+        "path": "NeoM4trixApps/Block Blast! .html",
+        "description": "A simple block blast clone."
+    },
+    {
+        "command": "br",
+        "name": "Backrooms",
+        "path": "NeoM4trixApps/Backrooms.html",
+        "description": "Backrooms 3d game."
+    },
+    {
+        "command": "gm1",
+        "name": "Games",
+        "path": "NeoM4trixApps/Games.html",
+        "description": "A simple 3 in 1 game."
+    },
 ]
