@@ -168,6 +168,14 @@
             border: 1px solid rgba(0, 255, 65, 0.2);
         }
 
+        .app-window.maximized {
+            width: 96vw !important;
+            height: 90vh !important;
+            left: 2vw !important;
+            top: 5vh !important;
+            resize: none;
+        }
+
         .window-header {
             background: linear-gradient(145deg, #2d2d2d, #252525);
             padding: 12px;
@@ -196,11 +204,33 @@
             border-radius: 50%;
             cursor: pointer;
             transition: transform 0.2s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #000;
+            font-weight: bold;
         }
 
         .window-button:hover {
             opacity: 0.8;
             transform: scale(1.1);
+        }
+
+        .window-button.close {
+            background: var(--error);
+        }
+
+        .window-button.minimize {
+            background: var(--warning);
+        }
+
+        .window-button.maximize {
+            background: var(--accent);
+        }
+
+        .window-close {
+            background: var(--error);
         }
 
         .shutdown-screen {
@@ -356,7 +386,7 @@
     <div class="terminal" id="terminal">
         <div class="title-bar">
             <div class="buttons">
-                <div class="button close" onclick="shutdownSystem()"></div>
+                <div class="button close" onclick="confirmCloseTerminal()"></div>
                 <div class="button minimize" onclick="minimizeTerminal()"></div>
                 <div class="button maximize" onclick="maximizeTerminal()"></div>
             </div>
@@ -437,12 +467,18 @@
                 let offset = [0, 0];
 
                 const startDrag = (e) => {
+                    if (windowEl.classList.contains('maximized')) return;
+                    if (e.target.classList.contains('window-button')) return;
+                    if (e.target.closest('.window-button')) return;
+                    if (e.target.closest('.window-controls')) return;
+                    
                     isDragging = true;
                     offset = [
                         windowEl.offsetLeft - e.clientX,
                         windowEl.offsetTop - e.clientY
                     ];
                     windowEl.style.zIndex = zIndex++;
+                    e.preventDefault();
                 };
 
                 const drag = (e) => {
@@ -526,12 +562,16 @@
 
             const startDrag = (e) => {
                 if (terminal.classList.contains('maximized')) return;
+                if (e.target.classList.contains('button')) return;
+                if (e.target.closest('.button')) return;
+                
                 isDragging = true;
                 offset = [
                     terminal.offsetLeft - e.clientX,
                     terminal.offsetTop - e.clientY
                 ];
                 terminal.style.zIndex = zIndex++;
+                e.preventDefault();
             };
 
             const drag = (e) => {
@@ -572,6 +612,11 @@
             if (terminal.classList.contains('maximized')) {
                 terminal.style.opacity = '1';
             }
+        }
+
+        function confirmCloseTerminal() {
+            addOutput('Close terminal? This will exit NeoM4trix. (y/n)');
+            isShutdownConfirmation = true;
         }
 
         function shutdownSystem() {
