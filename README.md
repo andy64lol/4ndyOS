@@ -39,10 +39,7 @@ Our OS to simulate gaming console's OS. (discontinued due to several problems wi
 
 ## Future Plans
 - Add more versions and updates.
-- Add developer-friendly versions for development in HTML,CSS and JavaScript,but who knows if we will ever add more?
 - Add more apps and improve it.
-- Start focusing on a single language. (Originally intended to be English only)
-- Add our own browser. (Working on it)
 - Never sleep
 
 
