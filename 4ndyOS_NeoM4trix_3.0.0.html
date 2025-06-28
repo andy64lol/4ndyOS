@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4ndyOS NeoM4trix v3.0.0</title>
+    
+    <!-- CDN Libraries -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    
     <style>
         :root {
             --bg-color: #0a0a0a;
@@ -166,6 +173,7 @@
             min-height: 200px;
             transition: all 0.3s ease;
             border: 1px solid rgba(0, 255, 65, 0.2);
+            z-index: 1001;
         }
 
         .app-window.maximized {
@@ -335,25 +343,40 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(17, 17, 17, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(5px);
             padding: 8px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
+            font-size: 13px;
             z-index: 999;
-            border-top: 1px solid rgba(0, 255, 65, 0.1);
+            border-top: 1px solid rgba(0, 255, 65, 0.3);
+            font-weight: 500;
         }
 
         .status-left, .status-right {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             align-items: center;
         }
 
         .status-indicator {
-            color: var(--accent);
+            color: #00ff41;
+            text-shadow: 0 0 3px #00ff41;
+        }
+
+        .status-time {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .status-location {
+            color: #00d4aa;
+        }
+
+        .status-system {
+            color: #ffaa00;
         }
 
         /* Enhanced Theme Support */
@@ -361,24 +384,106 @@
         .theme-blue { --accent: #00b8ff; --accent-secondary: #0088cc; }
         .theme-purple { --accent: #a855f7; --accent-secondary: #7c3aed; }
         .theme-red { --accent: #ff4757; --accent-secondary: #cc1e2e; }
+
+        /* Terminal Taskbar */
+        .terminal-taskbar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 999;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            max-width: 400px;
+            flex-wrap: wrap;
+        }
+
+        .terminal-tab {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            color: var(--accent);
+            position: relative;
+            user-select: none;
+        }
+
+        .terminal-tab:hover {
+            background: rgba(0, 255, 65, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .terminal-tab.active {
+            background: rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.7);
+        }
+
+        .terminal-tab .close-tab {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 16px;
+            height: 16px;
+            background: var(--error);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .terminal-tab:hover .close-tab {
+            opacity: 1;
+        }
+
+        .terminal-counter {
+            color: var(--accent);
+            font-size: 12px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="theme-green">
     <!-- Matrix Background Canvas -->
     <canvas id="matrix-canvas"></canvas>
 
+    <!-- Background Upload -->
+    <input type="file" id="background-upload" accept="image/*" style="display: none;">
+    
+    <!-- Terminal Taskbar -->
+    <div class="terminal-taskbar" id="terminal-taskbar">
+        <div class="terminal-counter" id="terminal-counter">Terminals: 0/10</div>
+    </div>
+    
     <!-- Status Bar -->
-    <div class="status-bar">
+    <div class="status-bar" x-data="statusData()">
         <div class="status-left">
             <span class="status-indicator">NeoM4trix v3.0.0</span>
-            <span id="system-time"></span>
-            <span id="cpu-usage">CPU: 0%</span>
-            <span id="memory-usage">MEM: 0%</span>
+            <span class="status-time" x-text="currentTime"></span>
+            <span class="status-location" x-text="location"></span>
+            <span class="status-system" x-text="'CPU: ' + cpuUsage + '%'"></span>
         </div>
         <div class="status-right">
-            <span id="theme-indicator">Theme: Matrix Green</span>
-            <span id="network-status">Online</span>
-            <span id="app-count">Apps: 0</span>
+            <span class="status-indicator" x-text="'Bundle: ' + currentBundle"></span>
+            <span class="status-indicator" x-text="'Online'"></span>
+            <span class="status-indicator" x-text="'Apps: ' + activeApps"></span>
         </div>
     </div>
 
@@ -395,7 +500,7 @@
         <div class="content">
             <div id="output"></div>
             <div class="input-line">
-                <span class="prompt" id="prompt">neo@matrix:~$</span>
+                <span class="prompt" id="prompt">tester@user:~$</span>
                 <input type="text" id="command-input" autocomplete="off" autofocus>
             </div>
         </div>
@@ -412,11 +517,45 @@
     <script>
         // System Variables
         let apps = [];
-        let zIndex = 1001;
+        let zIndex = 1002;
         let isMinimized = false;
         let isShutdownConfirmation = false;
         let currentTheme = 'green';
         let systemStats = { cpu: 0, memory: 0, activeApps: 0 };
+        let customBackground = false;
+
+        // Terminal Management
+        let terminalInstances = new Map();
+        let nextTerminalId = 1;
+        let activeTerminalId = null;
+        const MAX_TERMINALS = 10;
+
+        // Alpine.js Data
+        function statusData() {
+            return {
+                currentTime: '',
+                location: 'San Francisco, CA',
+                cpuUsage: 0,
+                currentBundle: 'apps',
+                activeApps: 0,
+                
+                init() {
+                    this.updateTime();
+                    setInterval(() => this.updateTime(), 1000);
+                    setInterval(() => this.updateStats(), 3000);
+                },
+                
+                updateTime() {
+                    this.currentTime = moment().format('HH:mm:ss');
+                },
+                
+                updateStats() {
+                    this.cpuUsage = Math.floor(Math.random() * 30) + 10;
+                    this.activeApps = systemStats.activeApps;
+                    this.currentBundle = currentBundle.replace('.json', '');
+                }
+            }
+        }
 
         // Matrix Canvas Variables
         let matrixCanvas = document.getElementById('matrix-canvas');
@@ -467,10 +606,273 @@
                 let offset = [0, 0];
 
                 const startDrag = (e) => {
+                    // Don't drag if window is maximized
                     if (windowEl.classList.contains('maximized')) return;
-                    if (e.target.classList.contains('window-button')) return;
-                    if (e.target.closest('.window-button')) return;
+                    
+                    // Don't drag if clicking on window controls (close button)
+                    if (e.target.classList.contains('window-close')) return;
+                    if (e.target.closest('.window-close')) return;
                     if (e.target.closest('.window-controls')) return;
+                    
+                    isDragging = true;
+                    offset = [
+                        windowEl.offsetLeft - e.clientX,
+                        windowEl.offsetTop - e.clientY
+                    ];
+                    windowEl.style.zIndex = zIndex++;
+                    
+                    // Add visual feedback
+                    windowEl.style.cursor = 'grabbing';
+                    document.body.style.userSelect = 'none';
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                };
+
+                const drag = (e) => {
+                    if (isDragging) {
+                        e.preventDefault();
+                        
+                        const x = e.clientX + offset[0];
+                        const y = e.clientY + offset[1];
+                        
+                        // Constrain to viewport with padding
+                        const padding = 50;
+                        const maxX = window.innerWidth - windowEl.offsetWidth;
+                        const maxY = window.innerHeight - windowEl.offsetHeight;
+                        const minX = -windowEl.offsetWidth + padding;
+                        const minY = 0;
+
+                        windowEl.style.left = `${Math.max(minX, Math.min(x, maxX))}px`;
+                        windowEl.style.top = `${Math.max(minY, Math.min(y, maxY))}px`;
+                    }
+                };
+
+                const stopDrag = (e) => {
+                    if (isDragging) {
+                        isDragging = false;
+                        windowEl.style.cursor = '';
+                        document.body.style.userSelect = '';
+                        e.preventDefault();
+                    }
+                };
+
+                // Add event listeners
+                header.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                // Also handle mouse leave to stop dragging
+                document.addEventListener('mouseleave', stopDrag);
+            }
+
+            static closeWindow(windowId) {
+                const windowEl = document.getElementById(windowId);
+                if (windowEl && !windowEl.classList.contains('terminal')) {
+                    windowEl.classList.add('closing');
+                    setTimeout(() => {
+                        windowEl.remove();
+                        systemStats.activeApps = Math.max(0, systemStats.activeApps - 1);
+                        updateStatusBar();
+                    }, 300);
+                }
+            }
+
+            static centerWindow(windowId) {
+                const windowEl = document.getElementById(windowId);
+                windowEl.style.left = `${(window.innerWidth - windowEl.offsetWidth) / 2}px`;
+                windowEl.style.top = `${(window.innerHeight - windowEl.offsetHeight) / 2}px`;
+            }
+        }
+
+        window.WindowManager = WindowManager;
+
+        // Terminal Manager Class
+        class TerminalManager {
+            static createTerminal() {
+                if (terminalInstances.size >= MAX_TERMINALS) {
+                    addOutput(`Maximum number of terminals (${MAX_TERMINALS}) reached.`);
+                    return null;
+                }
+
+                const terminalId = nextTerminalId++;
+                const windowId = `terminal-${terminalId}`;
+                
+                const terminalHTML = `
+                    <div class="terminal" id="${windowId}" data-terminal-id="${terminalId}">
+                        <div class="title-bar">
+                            <div class="buttons">
+                                <div class="button close" onclick="TerminalManager.closeTerminal(${terminalId})"></div>
+                                <div class="button minimize" onclick="TerminalManager.minimizeTerminal(${terminalId})"></div>
+                                <div class="button maximize" onclick="TerminalManager.maximizeTerminal(${terminalId})"></div>
+                            </div>
+                            <div class="window-title">NeoM4trix Terminal v3.0.0 - Terminal ${terminalId}</div>
+                        </div>
+                        <div class="content">
+                            <div class="terminal-output"></div>
+                            <div class="input-line">
+                                <span class="prompt">tester@user:~$</span>
+                                <input type="text" class="command-input" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>`;
+                
+                document.body.insertAdjacentHTML('beforeend', terminalHTML);
+                
+                const terminalEl = document.getElementById(windowId);
+                this.makeDraggable(windowId);
+                this.centerWindow(windowId);
+                this.setupTerminalEvents(terminalId);
+                
+                // Register terminal instance
+                terminalInstances.set(terminalId, {
+                    windowId: windowId,
+                    element: terminalEl,
+                    isMinimized: false
+                });
+                
+                this.addToTaskbar(terminalId);
+                this.setActiveTerminal(terminalId);
+                this.updateCounter();
+                
+                // Add welcome message
+                const output = terminalEl.querySelector('.terminal-output');
+                this.addOutput(terminalId, `Terminal ${terminalId} initialized.`);
+                this.addOutput(terminalId, 'Type "help" for available commands.');
+                
+                return terminalId;
+            }
+
+            static closeTerminal(terminalId) {
+                const terminal = terminalInstances.get(terminalId);
+                if (terminal) {
+                    terminal.element.remove();
+                    terminalInstances.delete(terminalId);
+                    this.removeFromTaskbar(terminalId);
+                    this.updateCounter();
+                    
+                    // Set focus to another terminal if this was active
+                    if (activeTerminalId === terminalId) {
+                        const remainingTerminals = Array.from(terminalInstances.keys());
+                        if (remainingTerminals.length > 0) {
+                            this.setActiveTerminal(remainingTerminals[0]);
+                        } else {
+                            activeTerminalId = null;
+                        }
+                    }
+                }
+            }
+
+            static minimizeTerminal(terminalId) {
+                const terminal = terminalInstances.get(terminalId);
+                if (terminal) {
+                    if (terminal.isMinimized) {
+                        terminal.element.style.transform = '';
+                        terminal.element.style.opacity = '1';
+                        terminal.isMinimized = false;
+                        this.setActiveTerminal(terminalId);
+                    } else {
+                        terminal.element.style.transform = 'translateY(calc(100vh - 100px))';
+                        terminal.element.style.opacity = '0.3';
+                        terminal.isMinimized = true;
+                    }
+                    this.updateTaskbarTab(terminalId);
+                }
+            }
+
+            static maximizeTerminal(terminalId) {
+                const terminal = terminalInstances.get(terminalId);
+                if (terminal) {
+                    terminal.element.classList.toggle('maximized');
+                    terminal.element.style.zIndex = zIndex++;
+                    this.setActiveTerminal(terminalId);
+                }
+            }
+
+            static focusTerminal(terminalId) {
+                const terminal = terminalInstances.get(terminalId);
+                if (terminal) {
+                    if (terminal.isMinimized) {
+                        this.minimizeTerminal(terminalId); // Toggle minimize
+                    } else {
+                        terminal.element.style.zIndex = zIndex++;
+                        this.setActiveTerminal(terminalId);
+                    }
+                }
+            }
+
+            static setActiveTerminal(terminalId) {
+                // Remove active class from all tabs
+                document.querySelectorAll('.terminal-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Add active class to current tab
+                const tab = document.querySelector(`[data-terminal-id="${terminalId}"]`);
+                if (tab) {
+                    tab.classList.add('active');
+                }
+                
+                activeTerminalId = terminalId;
+                
+                // Focus the input
+                const terminal = terminalInstances.get(terminalId);
+                if (terminal) {
+                    const input = terminal.element.querySelector('.command-input');
+                    if (input) input.focus();
+                }
+            }
+
+            static addToTaskbar(terminalId) {
+                const taskbar = document.getElementById('terminal-taskbar');
+                const tab = document.createElement('div');
+                tab.className = 'terminal-tab';
+                tab.setAttribute('data-terminal-id', terminalId);
+                tab.innerHTML = `
+                    T${terminalId}
+                    <div class="close-tab" onclick="event.stopPropagation(); TerminalManager.closeTerminal(${terminalId})">×</div>
+                `;
+                tab.onclick = () => this.focusTerminal(terminalId);
+                
+                // Insert before counter
+                const counter = document.getElementById('terminal-counter');
+                taskbar.insertBefore(tab, counter);
+            }
+
+            static removeFromTaskbar(terminalId) {
+                const tab = document.querySelector(`[data-terminal-id="${terminalId}"]`);
+                if (tab) {
+                    tab.remove();
+                }
+            }
+
+            static updateTaskbarTab(terminalId) {
+                const tab = document.querySelector(`[data-terminal-id="${terminalId}"]`);
+                const terminal = terminalInstances.get(terminalId);
+                
+                if (tab && terminal) {
+                    if (terminal.isMinimized) {
+                        tab.style.opacity = '0.5';
+                    } else {
+                        tab.style.opacity = '1';
+                    }
+                }
+            }
+
+            static updateCounter() {
+                const counter = document.getElementById('terminal-counter');
+                counter.textContent = `Terminals: ${terminalInstances.size}/${MAX_TERMINALS}`;
+            }
+
+            static makeDraggable(windowId) {
+                const windowEl = document.getElementById(windowId);
+                const titleBar = windowEl.querySelector('.title-bar');
+                let isDragging = false;
+                let offset = [0, 0];
+
+                const startDrag = (e) => {
+                    if (windowEl.classList.contains('maximized')) return;
+                    if (e.target.classList.contains('button')) return;
                     
                     isDragging = true;
                     offset = [
@@ -495,31 +897,77 @@
 
                 const stopDrag = () => isDragging = false;
 
-                header.addEventListener('mousedown', startDrag);
+                titleBar.addEventListener('mousedown', startDrag);
                 document.addEventListener('mousemove', drag);
                 document.addEventListener('mouseup', stopDrag);
             }
 
-            static closeWindow(windowId) {
-                const windowEl = document.getElementById(windowId);
-                if (windowEl && !windowEl.classList.contains('terminal')) {
-                    windowEl.classList.add('closing');
-                    setTimeout(() => {
-                        windowEl.remove();
-                        systemStats.activeApps = Math.max(0, systemStats.activeApps - 1);
-                        updateStatusBar();
-                    }, 300);
-                }
-            }
-
             static centerWindow(windowId) {
                 const windowEl = document.getElementById(windowId);
-                windowEl.style.left = `${(window.innerWidth - windowEl.offsetWidth) / 2}px`;
-                windowEl.style.top = `${(window.innerHeight - windowEl.offsetHeight) / 2}px`;
+                const offset = (terminalInstances.size - 1) * 30; // Cascade effect
+                windowEl.style.left = `${(window.innerWidth - windowEl.offsetWidth) / 2 + offset}px`;
+                windowEl.style.top = `${(window.innerHeight - windowEl.offsetHeight) / 2 + offset}px`;
+            }
+
+            static setupTerminalEvents(terminalId) {
+                const terminal = terminalInstances.get(terminalId);
+                if (!terminal) return;
+
+                const input = terminal.element.querySelector('.command-input');
+                const output = terminal.element.querySelector('.terminal-output');
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const command = input.value.trim();
+                        if (command) {
+                            this.addOutput(terminalId, `tester@user:~$ ${command}`, 'command');
+                            const result = executeCommand(command);
+                            if (result) this.addOutput(terminalId, result);
+                        }
+                        input.value = '';
+                    }
+                });
+
+                // Focus when clicking on terminal
+                terminal.element.addEventListener('click', () => {
+                    this.setActiveTerminal(terminalId);
+                });
+            }
+
+            static addOutput(terminalId, text, className = '') {
+                const terminal = terminalInstances.get(terminalId);
+                if (!terminal) return;
+
+                const output = terminal.element.querySelector('.terminal-output');
+                const div = document.createElement('div');
+                div.className = `output-text ${className}`;
+                div.textContent = text;
+                output.appendChild(div);
+                output.scrollTop = output.scrollHeight;
             }
         }
 
-        window.WindowManager = WindowManager;
+        window.TerminalManager = TerminalManager;
+
+        // Background Upload Functionality
+        function initBackgroundUpload() {
+            const uploadInput = document.getElementById('background-upload');
+            uploadInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        document.body.style.backgroundImage = `url(${event.target.result})`;
+                        document.body.style.backgroundSize = 'cover';
+                        document.body.style.backgroundPosition = 'center';
+                        matrixCanvas.style.display = 'none';
+                        customBackground = true;
+                        addOutput('Custom background applied. Matrix rain disabled.');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
 
         // Matrix Background Animation
         function initMatrix() {
@@ -628,7 +1076,7 @@
             addOutput('Shutting down NeoM4trix...');
             document.getElementById('shutdown-screen').style.display = 'flex';
             setTimeout(() => {
-                window.location.href = '../4ndyOS/index.html';
+                window.location.href = '../index.html';
             }, 3000);
         }
 
@@ -690,6 +1138,11 @@ cowsay <text>     - ASCII art text display
 figlet <text>     - Large ASCII text
 uname             - System information
 ps                - List running processes
+background <cmd>  - Background management (upload/reset)
+location          - Show current location
+
+KEYBOARD SHORTCUTS:
+Press 'n'         - Open new terminal window
 
 Type any command to get started!`;
 
@@ -770,22 +1223,26 @@ Active Applications: ${systemStats.activeApps}
 Theme: ${currentTheme}
 Matrix Effect: ${matrixCanvas.style.display !== 'none' ? 'Active' : 'Inactive'}`;
 
-                case 'weather':
-                    const conditions = ['Digital Storm', 'Code Rain', 'Data Clouds', 'Matrix Fog'];
-                    const temp = Math.floor(Math.random() * 20) + 15;
-                    const condition = conditions[Math.floor(Math.random() * conditions.length)];
-                    return `Matrix Weather:
-Condition: ${condition}
-Temperature: ${temp}°C
-Humidity: ${Math.floor(Math.random() * 40) + 40}%
-Matrix Density: High`;
+                case 'background':
+                    if (args[0] === 'upload') {
+                        document.getElementById('background-upload').click();
+                        return 'Background upload dialog opened.';
+                    } else if (args[0] === 'reset') {
+                        document.body.style.backgroundImage = '';
+                        matrixCanvas.style.display = 'block';
+                        customBackground = false;
+                        return 'Background reset. Matrix rain enabled.';
+                    }
+                    return 'Usage: background <upload/reset>';
 
                 case 'whoami':
-                    return `User: Neo
-Role: The One
-Status: Awakened
-Security Level: Admin
-Location: The Matrix`;
+                    return `User: tester
+Hostname: user
+Location: San Francisco, CA, USA
+IP: 192.168.1.${Math.floor(Math.random() * 200) + 50}
+Timezone: PST (UTC-8)
+Shell: /bin/bash
+Groups: sudo, admin, developers`;
 
                 case 'echo':
                     return args.join(' ');
@@ -817,6 +1274,18 @@ Location: The Matrix`;
 Platform: ${navigator.platform}
 Browser: ${navigator.userAgent.split(' ')[0]}
 Cores: ${navigator.hardwareConcurrency || 'Unknown'}`;
+
+                case 'location':
+                    return `Current Location Information:
+═══════════════════════════════════════
+City: San Francisco
+State: California
+Country: United States
+Coordinates: 37.7749° N, 122.4194° W
+Timezone: Pacific Standard Time (PST)
+Local Time: ${new Date().toLocaleString('en-US', {timeZone: 'America/Los_Angeles'})}
+ISP: Replit Networks
+Connection: High-Speed Fiber`;
 
                 case 'ps':
                     return `PID  CMD
@@ -968,20 +1437,36 @@ Type 'help' for available commands.`;
             div.textContent = text;
             output.appendChild(div);
             output.scrollTop = output.scrollHeight;
+            
+            // Add subtle animation to new output
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: div,
+                    translateX: [-20, 0],
+                    opacity: [0, 1],
+                    duration: 300,
+                    easing: 'easeOutQuad'
+                });
+            }
         }
 
         function updateStatusBar() {
-            document.getElementById('system-time').textContent = new Date().toLocaleTimeString();
-            document.getElementById('cpu-usage').textContent = `CPU: ${systemStats.cpu}%`;
-            document.getElementById('memory-usage').textContent = `MEM: ${systemStats.memory}%`;
-            document.getElementById('theme-indicator').textContent = `Bundle: ${currentBundle.replace('.json', '')}`;
-            document.getElementById('app-count').textContent = `Apps: ${apps.length}/${systemStats.activeApps}`;
-            document.getElementById('network-status').textContent = navigator.onLine ? 'Online' : 'Offline';
+            // Update the Alpine.js data directly
+            const statusElement = document.querySelector('[x-data]');
+            if (statusElement && statusElement._x_dataStack) {
+                const data = statusElement._x_dataStack[0];
+                if (data) {
+                    data.cpuUsage = systemStats.cpu;
+                    data.activeApps = systemStats.activeApps;
+                    data.currentBundle = currentBundle.replace('.json', '');
+                }
+            }
         }
 
         function simulateSystemStats() {
             systemStats.cpu = Math.floor(Math.random() * 30) + 10;
             systemStats.memory = Math.floor(Math.random() * 40) + 30;
+            systemStats.activeApps = terminalInstances.size + apps.filter(app => document.querySelector(`#window-${app.name}`)).length;
             updateStatusBar();
         }
 
@@ -1011,28 +1496,55 @@ Type 'help' for available commands.`;
             initMatrix();
         });
 
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.altKey && !e.target.classList.contains('command-input') && document.activeElement !== commandInput) {
+                const newTerminalId = TerminalManager.createTerminal();
+                if (newTerminalId) {
+                    addOutput(`New terminal ${newTerminalId} opened. Press "n" to open another.`);
+                }
+            }
+        });
+
         // Initialization
         function initialize() {
             initMatrix();
             initializeTerminalDrag();
+            initBackgroundUpload();
             loadApps();
             
-            addOutput('NeoM4trix v3.0.0 - Enhanced Matrix Terminal System');
-            addOutput('='.repeat(50));
-            addOutput('Welcome to the Matrix, Neo.');
-            addOutput('Reality is just another layer of code.');
+            // Create first terminal
+            TerminalManager.createTerminal();
+            
+            // Enhanced terminal animation
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: '.terminal',
+                    scale: [0.8, 1],
+                    opacity: [0, 1],
+                    duration: 1000,
+                    easing: 'easeOutElastic(1, .8)'
+                });
+            }
+            
+            addOutput('NeoM4trix v3.0.0 - Enhanced with Alpine.js & Anime.js');
+            addOutput('='.repeat(60));
+            addOutput('Welcome to AndyOS NeoM4trix version 3.0.0, tester.');
+            addOutput('System location: San Francisco, CA');
             addOutput('');
             addOutput('Type "help" for available commands.');
+            addOutput('Type "background upload" to set custom background.');
+            addOutput('Press "n" key to open new terminal window.');
             addOutput('Type "bundles" to see available app bundles.');
-            addOutput('Type "switch games.json" to load games, "switch 4ndyTools.json" for dev tools.');
+            addOutput(`Maximum ${MAX_TERMINALS} terminals allowed.`);
             addOutput('');
 
             // Start matrix animation
             setInterval(drawMatrix, 50);
             
-            // Update system stats
+            // Initialize and update system stats
+            simulateSystemStats();
             setInterval(simulateSystemStats, 2000);
-            updateStatusBar();
         }
 
         // Start the system
