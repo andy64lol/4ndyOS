@@ -14,9 +14,15 @@ Simply visit the following link to access 4ndyOS:
 - Core:
 
 Our first OS to start looking computer-ish.
+
 - M4trix:
 
-Our first OS,based on DOS.
+Our first OS,based on DOS and Linux.
+
+- NeoM4trix:
+
+Sub-editions of the Matrix editions, heavily based on Linux and my own ideas.
+
 - DeepBlueOS:
 
 Our attempt to create a ChromeOS-Android like OS.
