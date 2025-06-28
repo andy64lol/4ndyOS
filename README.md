@@ -1,4 +1,4 @@
-# 4ndyOS (~DISCONTINUED!~)
+# 4ndyOS 
 
 Welcome to **4ndyOS Emulation**, a web-based interface for launching different versions of 4ndyOS. This project provides an interactive way to explore various builds of 4ndyOS.
 ## Features
@@ -9,10 +9,6 @@ Welcome to **4ndyOS Emulation**, a web-based interface for launching different v
 ## Usage
 Simply visit the following link to access 4ndyOS:
 👉 [4ndyOS Emulation](https://andy64lol.github.io/4ndyOS.github.io/index.html)
-
-Doesn't work?
-
-Here's an alternative: [4ndyOS Emulation alternative link](https://4ndyos.netlify.app/)
 
 ## All editions:
 - Core:
@@ -27,11 +23,11 @@ Our attempt to create a ChromeOS-Android like OS.
 
 - CyberDyneOS:
 
-Our OS to simulate Hacker experience LOL. (Note:Our programm **only simulates and does not perform any actual illegal action nor purchase anything actually real in real life**.)
+Our OS to simulate Hacker experience LOL. (Note:Our programm **only simulates and does not perform any actual illegal action in real life**.)
 
 - StellarOS
 
-Our **most recent** OS to simulate gaming console's OS.
+Our OS to simulate gaming console's OS. (discontinued due to several problems with apps)
 
 ---
 
