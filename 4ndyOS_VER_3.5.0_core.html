@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>4ndyOS VER 3.5.0 Core</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Iceland&display=swap" rel="stylesheet" />
-    
     <script src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython_stdlib.js"></script>
-    <!-- Enhanced Libraries -->
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -763,10 +761,7 @@
             <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #ec4899, #db2777); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">🎨</div>
             <p>4ndyDraw Pro</p>
         </div>
-        <div class="icon" onclick="openWindow('codeEditor')">
-            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #1f2937, #111827); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">💻</div>
-            <p>Code Editor</p>
-        </div>
+        
         <div class="icon" onclick="openWindow('info')">
             <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-green)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">ℹ️</div>
             <p>System Info</p>
@@ -805,7 +800,7 @@
         <div class="app-item" onclick="openWindow('files')">📁 Files</div>
         <div class="app-item" onclick="openWindow('notes')">📝 Notes</div>
         <div class="app-item" onclick="openWindow('andyDraw')">🎨 4ndyDraw</div>
-        <div class="app-item" onclick="openWindow('codeEditor')">💻 Code Editor</div>
+        
         <div class="app-item" onclick="openWindow('info')">ℹ️ System Info</div>
         <div class="app-item" onclick="openWindow('taskManager')">⚡ Task Manager</div>
         <div class="app-item" onclick="openWindow('textEditor')">📄 Text Editor</div>
@@ -1183,52 +1178,7 @@ print('Ready for enhanced computing!')"></textarea>
 
 
 
-    <!-- Enhanced Code Editor -->
-    <div id="codeEditor" class="window" style="width: 1000px; height: 700px;">
-        <div class="window-header">
-            <span>💻 Advanced Code Editor</span>
-            <span>
-                <span class="minimize" onclick="minimizeWindow('codeEditor')">_</span>
-                <span class="close" onclick="closeWindow('codeEditor')">X</span>
-            </span>
-        </div>
-        <div class="window-body" style="padding: 0; background: var(--bg-secondary);">
-            <div style="display: flex; height: 100%;">
-                <!-- Language Selection Sidebar -->
-                <div style="width: 200px; background: var(--bg-accent); padding: 15px; border-right: 1px solid var(--glass-border);">
-                    <h4 style="color: var(--text-primary); margin-bottom: 15px;">Languages</h4>
-                    <div class="lang-option" onclick="selectLanguage('python')" data-lang="python">🐍 Python</div>
-                    <div class="lang-option" onclick="selectLanguage('javascript')" data-lang="javascript">🟨 JavaScript</div>
-                    <div class="lang-option" onclick="selectLanguage('ruby')" data-lang="ruby">💎 Ruby</div>
-                    <div class="lang-option" onclick="selectLanguage('cpp')" data-lang="cpp">⚡ C++</div>
-                    <div class="lang-option" onclick="selectLanguage('html')" data-lang="html">🌐 HTML</div>
-                    <div class="lang-option" onclick="selectLanguage('css')" data-lang="css">🎨 CSS</div>
-                </div>
-                
-                <!-- Code Editor Area -->
-                <div style="flex: 1; padding: 20px;">
-                    <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
-                        <span style="color: var(--text-primary); font-weight: 500;">Current: <span id="current-lang">Python</span></span>
-                        <button class="btn btn-primary" onclick="runCode()">▶️ Run Code</button>
-                        <button class="btn btn-secondary" onclick="saveCode()">💾 Save</button>
-                        <button class="btn btn-secondary" onclick="loadTemplate()">📋 Template</button>
-                    </div>
-                    
-                    <textarea id="code-content" 
-                             style="width: 100%; height: 400px; background: #1a1a1a; color: #f8f8f2; border: 1px solid var(--glass-border); border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; resize: vertical; tab-size: 4;"
-                             placeholder="# Welcome to the Advanced Code Editor
-# Select a language from the sidebar and start coding!"></textarea>
-                    
-                    <div style="margin-top: 15px;">
-                        <h4 style="color: var(--text-primary); margin-bottom: 10px;">Output:</h4>
-                        <div id="code-output" style="background: #1a1a1a; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.4; min-height: 150px; max-height: 200px; overflow-y: auto; border: 1px solid var(--glass-border);">
-                            Ready to execute code...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Image Viewer Window -->
     <div id="imageViewer" class="window" style="width: 700px; height: 600px;">
@@ -1393,7 +1343,6 @@ print('Ready for enhanced computing!')"></textarea>
                         notes: '📝',
                         settings: '⚙️',
                         andyDraw: '🎨',
-                        codeEditor: '💻',
                         info: 'ℹ️',
                         taskManager: '⚡',
                         textEditor: '📄',
@@ -1841,382 +1790,7 @@ Start typing to see the live character count update!`;
         // Update task manager periodically
         setInterval(updateTaskManager, 2000);
 
-        // Code Editor Functions
-        let currentLanguage = 'python';
-        let codeTemplates = {
-            python: `# Brython Python Demo
-print("🐍 Python with Brython!")
-
-# Basic Python operations
-numbers = [1, 2, 3, 4, 5]
-print(f"Numbers: {numbers}")
-print(f"Sum: {sum(numbers)}")
-print(f"Average: {sum(numbers) / len(numbers)}")
-
-# Functions and loops
-def fibonacci(n):
-    if n <= 1:
-        return n
-    return fibonacci(n-1) + fibonacci(n-2)
-
-print("Fibonacci sequence:")
-for i in range(10):
-    print(f"F({i}) = {fibonacci(i)}")
-
-# List comprehensions
-squares = [x**2 for x in range(1, 6)]
-print(f"Squares: {squares}")
-
-# Dictionary operations
-data = {"name": "4ndyOS", "version": "3.5.0", "runtime": "Brython"}
-for key, value in data.items():
-    print(f"{key}: {value}")
-
-print("✅ Brython Python ready!")`,
-
-            javascript: `// JavaScript Template
-console.log("Hello from JavaScript!");
-
-function factorial(n) {
-    if (n <= 1) return 1;
-    return n * factorial(n - 1);
-}
-
-// Example usage
-for (let i = 1; i <= 10; i++) {
-    console.log(\`Factorial(\${i}) = \${factorial(i)}\`);
-}`,
-
-            ruby: `# Ruby Template
-puts "Hello from Ruby!"
-
-def prime?(n)
-    return false if n < 2
-    (2..Math.sqrt(n)).none? { |i| n % i == 0 }
-end
-
-# Example usage
-(1..20).each do |i|
-    puts "#{i} is #{prime?(i) ? 'prime' : 'not prime'}"
-end`,
-
-            cpp: `// C++ Template
-#include <iostream>
-#include <vector>
-using namespace std;
-
-int main() {
-    cout << "Hello from C++!" << endl;
-    
-    vector<int> numbers = {1, 2, 3, 4, 5};
-    
-    cout << "Numbers: ";
-    for(int num : numbers) {
-        cout << num << " ";
-    }
-    cout << endl;
-    
-    return 0;
-}`,
-
-            html: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Template</title>
-</head>
-<body>
-    <h1>Hello from HTML!</h1>
-    <p>This is a sample HTML document.</p>
-    <button onclick="alert('Hello World!')">Click me!</button>
-</body>
-</html>`,
-
-            css: `/* CSS Template */
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    backdrop-filter: blur(10px);
-}
-
-h1 {
-    text-align: center;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}`
-        };
-
-        function selectLanguage(lang) {
-            currentLanguage = lang;
-            document.getElementById('current-lang').textContent = lang.toUpperCase();
-            
-            // Update active language
-            document.querySelectorAll('.lang-option').forEach(option => {
-                option.classList.remove('active');
-            });
-            document.querySelector(`[data-lang="${lang}"]`)?.classList.add('active');
-            
-            // Clear output and show language info
-            const output = document.getElementById('code-output');
-            if (output) {
-                output.textContent = `Switched to ${lang.toUpperCase()}. Ready to execute code...`;
-            }
-            
-            // Load template for the selected language
-            if (codeTemplates[lang]) {
-                document.getElementById('code-content').placeholder = `Start writing ${lang.toUpperCase()} code here...`;
-            }
-        }
-
-        function loadTemplate() {
-            const codeContent = document.getElementById('code-content');
-            if (!codeContent) return;
-            
-            const template = codeTemplates[currentLanguage] || `// ${currentLanguage.toUpperCase()} Template
-console.log("Hello from ${currentLanguage}!");`;
-            
-            codeContent.value = template;
-            showNotification(`Loaded ${currentLanguage.toUpperCase()} template`, 'success');
-        }
-
-        function saveCode() {
-            const content = document.getElementById('code-content').value;
-            const extensions = {
-                python: 'py',
-                javascript: 'js',
-                ruby: 'rb',
-                cpp: 'cpp',
-                html: 'html',
-                css: 'css'
-            };
-            
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `code.${extensions[currentLanguage] || 'txt'}`;
-            a.click();
-            showNotification(`Code saved as ${a.download}`, 'success');
-        }
-
-        async function runCode() {
-            const code = document.getElementById('code-content').value;
-            const output = document.getElementById('code-output');
-            
-            if (!code.trim()) {
-                output.textContent = 'Error: No code to execute';
-                return;
-            }
-            
-            output.textContent = `Executing ${currentLanguage.toUpperCase()} code...\n`;
-            
-            if (currentLanguage === 'python') {
-                // Initialize Brython if not available
-                if (!window.pythonRuntime) {
-                    output.textContent = 'Loading Brython Python runtime...\n';
-                    try {
-                        initializePythonRuntime();
-                        output.textContent += 'Brython ready!\n';
-                    } catch (error) {
-                        output.textContent = `Failed to load Brython: ${error.message}`;
-                        return;
-                    }
-                }
-                
-                try {
-                    // Simple and reliable Brython execution
-                    let capturedOutput = '';
-                    
-                    // Override print function to capture output
-                    const originalPrint = window.print;
-                    window.pythonOutput = '';
-                    
-                    // Create a Python script element
-                    const scriptElement = document.createElement('script');
-                    scriptElement.type = 'text/python';
-                    scriptElement.textContent = `
-import sys
-from browser import console
-
-# Redirect print to capture output
-_output = []
-def custom_print(*args, sep=' ', end='\\n'):
-    _output.append(sep.join(str(arg) for arg in args) + end)
-    
-import builtins
-builtins.print = custom_print
-
-# Execute user code
-try:
-${code.split('\n').map(line => '    ' + line).join('\n')}
-except Exception as e:
-    _output.append(f"Error: {type(e).__name__}: {str(e)}\\n{traceback.format_exc()}")
-finally:
-    sys.stdout = old_stdout
-                    `;
-                    
-                    document.body.appendChild(scriptElement);
-                    
-                    // Wait a moment for execution
-                    setTimeout(() => {
-                        const result = window.pythonOutput || 'Code executed successfully';
-                        output.textContent = result;
-                        document.body.removeChild(scriptElement);
-                    }, 100);
-                    
-                } catch (error) {
-                    output.textContent = `Runtime Error: ${error.message}`;
-                    console.error('Python execution error:', error);
-                }
-            } else if (currentLanguage === 'javascript') {
-                try {
-                    // Enhanced JavaScript execution with better error handling
-                    let consoleOutput = '';
-                    const originalLog = console.log;
-                    const originalError = console.error;
-                    const originalWarn = console.warn;
-                    
-                    // Override console methods
-                    console.log = (...args) => {
-                        consoleOutput += args.map(arg => 
-                            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-                        ).join(' ') + '\n';
-                    };
-                    console.error = (...args) => {
-                        consoleOutput += 'ERROR: ' + args.join(' ') + '\n';
-                    };
-                    console.warn = (...args) => {
-                        consoleOutput += 'WARNING: ' + args.join(' ') + '\n';
-                    };
-                    
-                    // Execute code in isolated function scope
-                    let result;
-                    try {
-                        result = eval(`(function() { 
-                            "use strict";
-                            ${code}
-                        })()`);
-                    } catch (evalError) {
-                        // Try direct evaluation for expressions
-                        result = eval(code);
-                    }
-                    
-                    // Restore console functions
-                    console.log = originalLog;
-                    console.error = originalError;
-                    console.warn = originalWarn;
-                    
-                    let finalOutput = consoleOutput;
-                    if (result !== undefined) {
-                        finalOutput += `\n→ Return value: ${typeof result === 'object' ? JSON.stringify(result, null, 2) : result}`;
-                    }
-                    
-                    output.textContent = finalOutput || 'Code executed successfully (no output)';
-                } catch (error) {
-                    // Restore console functions if not already restored
-                    try {
-                        console.log = originalLog;
-                        console.error = originalError;
-                        console.warn = originalWarn;
-                    } catch (e) {}
-                    
-                    output.textContent = `JavaScript Error: ${error.name}: ${error.message}${error.stack ? '\n\nStack trace:\n' + error.stack : ''}`;
-                }
-            } else if (currentLanguage === 'html') {
-                // HTML preview functionality
-                try {
-                    const iframe = document.createElement('iframe');
-                    iframe.style.width = '100%';
-                    iframe.style.height = '300px';
-                    iframe.style.border = '1px solid var(--glass-border)';
-                    iframe.style.borderRadius = '8px';
-                    iframe.style.background = 'white';
-                    
-                    output.innerHTML = '';
-                    output.appendChild(iframe);
-                    
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    iframeDoc.open();
-                    iframeDoc.write(code);
-                    iframeDoc.close();
-                    
-                    // Add text info
-                    const info = document.createElement('div');
-                    info.style.marginTop = '10px';
-                    info.style.color = '#00ff00';
-                    info.textContent = 'HTML rendered successfully above';
-                    output.appendChild(info);
-                    
-                } catch (error) {
-                    output.textContent = `HTML Error: ${error.message}`;
-                }
-            } else if (currentLanguage === 'css') {
-                // CSS preview functionality
-                try {
-                    const preview = document.createElement('div');
-                    preview.innerHTML = `
-                        <style>${code}</style>
-                        <div style="padding: 20px; background: white; color: black; border-radius: 8px;">
-                            <h1>CSS Preview</h1>
-                            <p>This is a sample paragraph to demonstrate your CSS styling.</p>
-                            <button>Sample Button</button>
-                            <div class="container">
-                                <div class="box">Box 1</div>
-                                <div class="box">Box 2</div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    output.innerHTML = '';
-                    output.appendChild(preview);
-                    
-                    const info = document.createElement('div');
-                    info.style.marginTop = '10px';
-                    info.style.color = '#00ff00';
-                    info.textContent = 'CSS applied to preview above';
-                    output.appendChild(info);
-                    
-                } catch (error) {
-                    output.textContent = `CSS Error: ${error.message}`;
-                }
-            } else {
-                // Enhanced analysis for other languages
-                const lines = code.split('\n');
-                const nonEmptyLines = lines.filter(line => line.trim().length > 0);
-                const comments = lines.filter(line => {
-                    const trimmed = line.trim();
-                    return trimmed.startsWith('//') || trimmed.startsWith('#') || 
-                           trimmed.startsWith('/*') || trimmed.startsWith('*');
-                }).length;
-                
-                output.textContent = `${currentLanguage.toUpperCase()} Code Analysis:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 Statistics:
-  • Total lines: ${lines.length}
-  • Code lines: ${nonEmptyLines.length}
-  • Comments: ${comments}
-  • Characters: ${code.length}
-  • Language: ${currentLanguage.toUpperCase()}
-
-🔍 Syntax Check: ✅ PASSED
-📝 Code appears well-structured
-
-⚠️  Note: ${currentLanguage.toUpperCase()} runtime not available in browser environment.
-💡 Consider using an external ${currentLanguage.toUpperCase()} compiler for execution.`;
-            }
-        }
+        
 
         // Brython-only Python runtime
         function initializePythonRuntime() {
