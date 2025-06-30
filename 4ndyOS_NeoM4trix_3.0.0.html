@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4ndyOS NeoM4trix v3.0.0</title>
-
-    <!-- CDN Libraries -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
@@ -319,8 +317,7 @@
             justify-content: center;
             font-weight: bold;
         }
-
-        /* Enhanced Matrix Effects */
+        
         .matrix-glow {
             text-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent);
         }
@@ -380,7 +377,6 @@
             color: #ffaa00;
         }
 
-        /* Enhanced Theme Support */
         .theme-green { --accent: #00ff41; --accent-secondary: #00d4aa; }
         .theme-blue { --accent: #00b8ff; --accent-secondary: #0088cc; }
         .theme-purple { --accent: #a855f7; --accent-secondary: #7c3aed; }
@@ -521,7 +517,6 @@
         </div>
     </div>
 
-    <!-- Terminal Window -->
     <div class="terminal" id="terminal">
         <div class="title-bar">
             <div class="buttons">
@@ -529,13 +524,13 @@
                 <div class="button minimize" onclick="minimizeTerminal()"></div>
                 <div class="button maximize" onclick="maximizeTerminal()"></div>
             </div>
-            <div class="window-title">NeoM4trix Terminal v3.0.0 - Enhanced Matrix System</div>
+            <div class="window-title">NeoM4trix Terminal v3.0.0</div>
         </div>
         <div class="content">
-            <div id="output"></div>
+            <div class="terminal-output" id="output"></div>
             <div class="input-line">
                 <span class="prompt" id="prompt">tester@user:~$</span>
-                <input type="text" id="command-input" autocomplete="off" autofocus>
+                <input type="text" class="command-input" autocomplete="off" autofocus>
             </div>
         </div>
     </div>
@@ -600,7 +595,8 @@
 
         // DOM Elements
         const output = document.getElementById('output');
-        const commandInput = document.getElementById('command-input');
+        const mainTerminal = document.getElementById('terminal');
+        const commandInput = mainTerminal.querySelector('.command-input');
         const prompt = document.getElementById('prompt');
 
         // Window Manager Class
@@ -722,15 +718,14 @@
 
         window.WindowManager = WindowManager;
 
-        // Terminal Manager Class
+        // --- New Terminal System Rewrite ---
         class TerminalManager {
             static createTerminal() {
                 if (terminalInstances.size >= MAX_TERMINALS) {
                     addOutput(`Maximum number of terminals (${MAX_TERMINALS}) reached.`);
                     return null;
                 }
-
-                // Reuse available IDs or create new one
+                // Assign terminalId
                 let terminalId;
                 if (availableIds.size > 0) {
                     terminalId = Math.min(...availableIds);
@@ -738,9 +733,8 @@
                 } else {
                     terminalId = nextTerminalId++;
                 }
-                
                 const windowId = `terminal-${terminalId}`;
-
+                // Terminal HTML
                 const terminalHTML = `
                     <div class="terminal" id="${windowId}" data-terminal-id="${terminalId}">
                         <div class="title-bar">
@@ -749,69 +743,50 @@
                                 <div class="button minimize" onclick="TerminalManager.minimizeTerminal(${terminalId})"></div>
                                 <div class="button maximize" onclick="TerminalManager.maximizeTerminal(${terminalId})"></div>
                             </div>
-                            <div class="window-title">NeoM4trix Terminal v3.0.0 - Terminal ${terminalId}</div>
+                            <div class="window-title">NeoM4trix Terminal v3.0.0</div>
                         </div>
                         <div class="content">
-                            <div class="terminal-output" style="flex: 1; overflow-y: auto; margin-bottom: 10px; scrollbar-width: thin; scrollbar-color: var(--accent) transparent;"></div>
+                            <div class="terminal-output"></div>
                             <div class="input-line">
                                 <span class="prompt">tester@user:~$</span>
                                 <input type="text" class="command-input" autocomplete="off">
                             </div>
                         </div>
                     </div>`;
-
                 document.body.insertAdjacentHTML('beforeend', terminalHTML);
-
                 const terminalEl = document.getElementById(windowId);
-                this.makeDraggable(windowId);
-                this.centerWindow(windowId);
-                this.setupTerminalEvents(terminalId);
-
-                // Register terminal instance
+                // Register instance
                 terminalInstances.set(terminalId, {
                     windowId: windowId,
                     element: terminalEl,
                     isMinimized: false
                 });
-
+                this.makeDraggable(windowId);
+                this.centerWindow(windowId);
+                this.setupTerminalEvents(terminalId);
                 this.addToTaskbar(terminalId);
                 this.setActiveTerminal(terminalId);
                 this.updateCounter();
-
-                // Add welcome message
-                const output = terminalEl.querySelector('.terminal-output');
+                // Welcome message
                 this.addOutput(terminalId, `Terminal ${terminalId} initialized.`);
                 this.addOutput(terminalId, 'Type "help" for available commands.');
-
                 return terminalId;
             }
-
             static closeTerminal(terminalId) {
                 const terminal = terminalInstances.get(terminalId);
                 if (terminal) {
                     terminal.element.remove();
                     terminalInstances.delete(terminalId);
                     this.removeFromTaskbar(terminalId);
-                    
-                    // Add ID back to available pool (except main terminal ID 1)
-                    if (terminalId !== 1) {
-                        availableIds.add(terminalId);
-                    }
-                    
+                    if (terminalId !== 1) availableIds.add(terminalId);
                     this.updateCounter();
-
-                    // Set focus to another terminal if this was active
                     if (activeTerminalId === terminalId) {
-                        const remainingTerminals = Array.from(terminalInstances.keys());
-                        if (remainingTerminals.length > 0) {
-                            this.setActiveTerminal(remainingTerminals[0]);
-                        } else {
-                            activeTerminalId = null;
-                        }
+                        const remaining = Array.from(terminalInstances.keys());
+                        if (remaining.length > 0) this.setActiveTerminal(remaining[0]);
+                        else activeTerminalId = null;
                     }
                 }
             }
-
             static minimizeTerminal(terminalId) {
                 const terminal = terminalInstances.get(terminalId);
                 if (terminal) {
@@ -828,7 +803,6 @@
                     this.updateTaskbarTab(terminalId);
                 }
             }
-
             static maximizeTerminal(terminalId) {
                 const terminal = terminalInstances.get(terminalId);
                 if (terminal) {
@@ -837,216 +811,164 @@
                     this.setActiveTerminal(terminalId);
                 }
             }
-
             static focusTerminal(terminalId) {
                 const terminal = terminalInstances.get(terminalId);
                 if (terminal) {
-                    if (terminal.isMinimized) {
-                        this.minimizeTerminal(terminalId); // Toggle minimize
-                    } else {
+                    if (terminal.isMinimized) this.minimizeTerminal(terminalId);
+                    else {
                         terminal.element.style.zIndex = zIndex++;
                         this.setActiveTerminal(terminalId);
                     }
                 }
             }
-
             static setActiveTerminal(terminalId) {
-                // Remove active class from all tabs
-                document.querySelectorAll('.terminal-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-
-                // Add active class to current tab
+                document.querySelectorAll('.terminal-tab').forEach(tab => tab.classList.remove('active'));
                 const tab = document.querySelector(`[data-terminal-id="${terminalId}"]`);
-                if (tab) {
-                    tab.classList.add('active');
-                }
-
+                if (tab) tab.classList.add('active');
                 activeTerminalId = terminalId;
-
-                // Bring terminal to front and focus the input
                 const terminal = terminalInstances.get(terminalId);
                 if (terminal) {
                     terminal.element.style.zIndex = zIndex++;
                     const input = terminal.element.querySelector('.command-input');
-                    if (input) {
-                        setTimeout(() => {
-                            input.focus();
-                        }, 50);
-                    }
+                    if (input) setTimeout(() => input.focus(), 50);
                 }
             }
-
             static addToTaskbar(terminalId) {
                 const taskbar = document.getElementById('terminal-taskbar');
                 const tab = document.createElement('div');
                 tab.className = 'terminal-tab';
                 tab.setAttribute('data-terminal-id', terminalId);
-                tab.innerHTML = `
-                    T${terminalId}
-                    <div class="close-tab" onclick="event.stopPropagation(); TerminalManager.closeTerminal(${terminalId})">×</div>
-                `;
+                tab.innerHTML = `T${terminalId}<div class="close-tab" onclick="event.stopPropagation(); TerminalManager.closeTerminal(${terminalId})">×</div>`;
                 tab.onclick = () => this.focusTerminal(terminalId);
-
-                // Insert before counter
                 const counter = document.getElementById('terminal-counter');
                 taskbar.insertBefore(tab, counter);
             }
-
             static removeFromTaskbar(terminalId) {
                 const tab = document.querySelector(`[data-terminal-id="${terminalId}"]`);
-                if (tab) {
-                    tab.remove();
-                }
+                if (tab) tab.remove();
             }
-
             static updateTaskbarTab(terminalId) {
                 const tab = document.querySelector(`[data-terminal-id="${terminalId}"]`);
                 const terminal = terminalInstances.get(terminalId);
-
-                if (tab && terminal) {
-                    if (terminal.isMinimized) {
-                        tab.style.opacity = '0.5';
-                    } else {
-                        tab.style.opacity = '1';
-                    }
-                }
+                if (tab && terminal) tab.style.opacity = terminal.isMinimized ? '0.5' : '1';
             }
-
             static updateCounter() {
                 const counter = document.getElementById('terminal-counter');
                 counter.textContent = `Terminals: ${terminalInstances.size}/${MAX_TERMINALS}`;
             }
-
             static makeDraggable(windowId) {
                 const windowEl = document.getElementById(windowId);
                 const titleBar = windowEl.querySelector('.title-bar');
                 let isDragging = false;
                 let offset = [0, 0];
-
                 const startDrag = (e) => {
                     if (windowEl.classList.contains('maximized')) return;
                     if (e.target.classList.contains('button')) return;
-
                     isDragging = true;
-                    offset = [
-                        windowEl.offsetLeft - e.clientX,
-                        windowEl.offsetTop - e.clientY
-                    ];
+                    offset = [windowEl.offsetLeft - e.clientX, windowEl.offsetTop - e.clientY];
                     windowEl.style.zIndex = zIndex++;
                     e.preventDefault();
                 };
-
                 const drag = (e) => {
                     if (isDragging) {
                         const x = e.clientX + offset[0];
                         const y = e.clientY + offset[1];
                         const maxX = window.innerWidth - windowEl.offsetWidth;
                         const maxY = window.innerHeight - windowEl.offsetHeight;
-
                         windowEl.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
                         windowEl.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
                     }
                 };
-
                 const stopDrag = () => isDragging = false;
-
                 titleBar.addEventListener('mousedown', startDrag);
                 document.addEventListener('mousemove', drag);
                 document.addEventListener('mouseup', stopDrag);
             }
-
             static centerWindow(windowId) {
                 const windowEl = document.getElementById(windowId);
-                const offset = (terminalInstances.size - 1) * 30; // Cascade effect
+                const offset = (terminalInstances.size - 1) * 30;
                 windowEl.style.left = `${(window.innerWidth - windowEl.offsetWidth) / 2 + offset}px`;
                 windowEl.style.top = `${(window.innerHeight - windowEl.offsetHeight) / 2 + offset}px`;
             }
-
             static setupTerminalEvents(terminalId) {
                 const terminal = terminalInstances.get(terminalId);
                 if (!terminal) return;
-
                 const input = terminal.element.querySelector('.command-input');
                 const output = terminal.element.querySelector('.terminal-output');
-
                 if (!input || !output) return;
-
-                // Store reference to TerminalManager for proper context
                 const self = TerminalManager;
-
-                // Clear any existing event listeners and add new one
+                // Per-terminal history
+                terminal.history = [];
+                terminal.historyIndex = -1;
                 input.onkeydown = function(e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         e.stopPropagation();
-                        
                         const command = this.value.trim();
                         if (command) {
-                            self.addOutput(terminalId, `tester@user:~$ ${command}`, 'command');
-                            
-                            // Handle shutdown confirmation for new terminals
+                            // Add to history (avoid duplicate consecutive)
+                            if (terminal.history.length === 0 || terminal.history[terminal.history.length-1] !== command) {
+                                terminal.history.push(command);
+                            }
+                            terminal.historyIndex = terminal.history.length;
+                            if (terminalId !== 1) console.log(`[T${terminalId}] ${command}`);
+                            self.addOutput(terminalId, `[T${terminalId}] ${command}`, 'command');
                             if (isShutdownConfirmation) {
-                                if (command.toLowerCase() === 'y' || command.toLowerCase() === 'yes') {
-                                    confirmShutdown();
-                                } else {
+                                if (command.toLowerCase() === 'y' || command.toLowerCase() === 'yes') confirmShutdown();
+                                else {
                                     self.addOutput(terminalId, 'Shutdown canceled.');
                                     isShutdownConfirmation = false;
                                 }
                             } else {
-                                const result = executeCommand(command);
-                                if (result === 'CLEAR_TERMINAL') {
-                                    // Clear this terminal's output
-                                    output.innerHTML = '';
-                                } else if (result) {
-                                    self.addOutput(terminalId, result);
-                                }
+                                const result = executeCommand(command, terminalId);
+                                if (result === 'CLEAR_TERMINAL') output.innerHTML = '';
+                                else if (result) self.addOutput(terminalId, result);
                             }
                         }
                         this.value = '';
                         return false;
+                    } else if (e.key === 'ArrowUp') {
+                        if (terminal.history && terminal.history.length > 0) {
+                            if (terminal.historyIndex > 0) terminal.historyIndex--;
+                            else terminal.historyIndex = 0;
+                            this.value = terminal.history[terminal.historyIndex] || '';
+                            setTimeout(() => this.setSelectionRange(this.value.length, this.value.length), 0);
+                            e.preventDefault();
+                        }
+                    } else if (e.key === 'ArrowDown') {
+                        if (terminal.history && terminal.history.length > 0) {
+                            if (terminal.historyIndex < terminal.history.length - 1) terminal.historyIndex++;
+                            else terminal.historyIndex = terminal.history.length;
+                            this.value = terminal.history[terminal.historyIndex] || '';
+                            setTimeout(() => this.setSelectionRange(this.value.length, this.value.length), 0);
+                            e.preventDefault();
+                        } else if (terminal.historyIndex === terminal.history.length) {
+                            this.value = '';
+                        }
                     }
                 };
-
-                // Focus when clicking on terminal
                 terminal.element.onclick = function() {
                     self.setActiveTerminal(terminalId);
                     const currentInput = terminal.element.querySelector('.command-input');
                     if (currentInput) currentInput.focus();
                 };
-
-                // Auto-focus the input
-                setTimeout(() => {
-                    input.focus();
-                }, 100);
+                setTimeout(() => { input.focus(); }, 100);
             }
-
             static addOutput(terminalId, text, className = '') {
                 const terminal = terminalInstances.get(terminalId);
                 if (!terminal) return;
-
                 const output = terminal.element.querySelector('.terminal-output');
                 if (!output) return;
-                
                 const div = document.createElement('div');
                 div.className = `output-text ${className}`;
                 div.textContent = text;
                 output.appendChild(div);
                 output.scrollTop = output.scrollHeight;
-
-                // Add subtle animation to new output
                 if (typeof anime !== 'undefined') {
-                    anime({
-                        targets: div,
-                        translateX: [-20, 0],
-                        opacity: [0, 1],
-                        duration: 300,
-                        easing: 'easeOutQuad'
-                    });
+                    anime({ targets: div, translateX: [-20, 0], opacity: [0, 1], duration: 300, easing: 'easeOutQuad' });
                 }
             }
         }
-
         window.TerminalManager = TerminalManager;
 
         // Background Upload Functionality
@@ -1130,8 +1052,7 @@
             isShutdownConfirmation = false;
         }
 
-        // Enhanced Command System
-        function executeCommand(c) {
+        function executeCommand(c, terminalId = 1) {
             const fullCommand = c.trim();
             const [cmd, ...args] = fullCommand.split(' ');
             const app = apps.find(a => a.command === cmd.toLowerCase());
@@ -1143,7 +1064,7 @@
 
             switch (cmd.toLowerCase()) {
                 case 'help':
-                    return `NeoM4trix v3.0.0 - Enhanced Commands:
+                    return `NeoM4trix v3.0.0 - Commands:
 ═══════════════════════════════════════════════
 
 SYSTEM COMMANDS:
@@ -1156,7 +1077,7 @@ status            - Show system status
 APP BUNDLES:
 apps              - List current bundle apps
 bundles           - Show available bundles
-switch <bundle>   - Switch app bundle (apps.json/games.json/4ndyTools.json)
+switch <bundle>   - Switch app bundle
 
 BUILT-IN APPS:
 calc              - Launch Calculator
@@ -1363,7 +1284,7 @@ ${systemStats.activeApps > 0 ? `5-${4 + systemStats.activeApps}  user-apps` : ''
                 case 'status':
                     return `NeoM4trix System Status:
 ═══════════════════════════════════════
-Version: 3.0.0 Enhanced
+Version: 3.0.0
 Status: Operational
 Theme: ${currentTheme}
 Current Bundle: ${availableBundles[currentBundle] || currentBundle}
@@ -1595,30 +1516,55 @@ Type 'help' for available commands.`;
             TerminalManager.centerWindow('terminal');
             
             // Setup event handlers for main terminal
-            const input = mainTerminal.querySelector('#command-input');
+            const input = mainTerminal.querySelector('.command-input');
+            mainTerminal.history = [];
+            mainTerminal.historyIndex = -1;
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     const command = input.value.trim();
                     if (command) {
-                        addOutput(`${prompt.textContent} ${command}`, 'command');
-
+                        // Add to history (avoid duplicate consecutive)
+                        if (mainTerminal.history.length === 0 || mainTerminal.history[mainTerminal.history.length-1] !== command) {
+                            mainTerminal.history.push(command);
+                        }
+                        mainTerminal.historyIndex = mainTerminal.history.length;
+                        TerminalManager.addOutput(1, `[T1] ${command}`, 'command');
                         if (isShutdownConfirmation) {
                             if (command.toLowerCase() === 'y' || command.toLowerCase() === 'yes') {
                                 confirmShutdown();
                             } else {
-                                cancelShutdown();
+                                TerminalManager.addOutput(1, 'Shutdown canceled.');
+                                isShutdownConfirmation = false;
                             }
                         } else {
-                            const result = executeCommand(command);
+                            const result = executeCommand(command, 1);
                             if (result === 'CLEAR_TERMINAL') {
                                 output.innerHTML = '';
                             } else if (result) {
-                                addOutput(result);
+                                TerminalManager.addOutput(1, result);
                             }
                         }
                     }
                     input.value = '';
                     e.preventDefault();
+                } else if (e.key === 'ArrowUp') {
+                    if (mainTerminal.history && mainTerminal.history.length > 0) {
+                        if (mainTerminal.historyIndex > 0) mainTerminal.historyIndex--;
+                        else mainTerminal.historyIndex = 0;
+                        input.value = mainTerminal.history[mainTerminal.historyIndex] || '';
+                        setTimeout(() => input.setSelectionRange(input.value.length, input.value.length), 0);
+                        e.preventDefault();
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    if (mainTerminal.history && mainTerminal.history.length > 0) {
+                        if (mainTerminal.historyIndex < mainTerminal.history.length - 1) mainTerminal.historyIndex++;
+                        else mainTerminal.historyIndex = mainTerminal.history.length;
+                        input.value = mainTerminal.history[mainTerminal.historyIndex] || '';
+                        setTimeout(() => input.setSelectionRange(input.value.length, input.value.length), 0);
+                        e.preventDefault();
+                    } else if (mainTerminal.historyIndex === mainTerminal.history.length) {
+                        input.value = '';
+                    }
                 }
             });
 
@@ -1626,7 +1572,6 @@ Type 'help' for available commands.`;
                 TerminalManager.setActiveTerminal(1);
             });
 
-            // Enhanced terminal animation
             if (typeof anime !== 'undefined') {
                 anime({
                     targets: '.terminal',
@@ -1637,17 +1582,17 @@ Type 'help' for available commands.`;
                 });
             }
 
-            addOutput('NeoM4trix v3.0.0 - Enhanced with Alpine.js & Anime.js');
-            addOutput('='.repeat(60));
-            addOutput(`Welcome to AndyOS NeoM4trix version 3.0.0, ${generateUsername()}.`);
-            addOutput('System location: San Francisco, CA');
-            addOutput('');
-            addOutput('Type "help" for available commands.');
-            addOutput('Type "background upload" to set custom background.');
-            addOutput('Press "n" key to open new terminal window.');
-            addOutput('Type "bundles" to see available app bundles.');
-            addOutput(`Maximum ${MAX_TERMINALS} terminals allowed.`);
-            addOutput('');
+            TerminalManager.addOutput(1, 'NeoM4trix v3.0.0 - Made with Alpine.js & Anime.js');
+            TerminalManager.addOutput(1, '='.repeat(60));
+            TerminalManager.addOutput(1, `Welcome to AndyOS NeoM4trix version 3.0.0, ${generateUsername()}.`);
+            TerminalManager.addOutput(1, 'System location: San Francisco, CA');
+            TerminalManager.addOutput(1, '');
+            TerminalManager.addOutput(1, 'Type "help" for available commands.');
+            TerminalManager.addOutput(1, 'Type "background upload" to set custom background.');
+            TerminalManager.addOutput(1, 'Press "n" key to open new terminal window.');
+            TerminalManager.addOutput(1, 'Type "bundles" to see available app bundles.');
+            TerminalManager.addOutput(1, `Maximum ${MAX_TERMINALS} terminals allowed.`);
+            TerminalManager.addOutput(1, '');
 
             // Start matrix animation
             setInterval(drawMatrix, 50);
