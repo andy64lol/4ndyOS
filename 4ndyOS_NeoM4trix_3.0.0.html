@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4ndyOS NeoM4trix v3.0.0</title>
-    
+
     <!-- CDN Libraries -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+
     <style>
         :root {
             --bg-color: #0a0a0a;
@@ -418,6 +419,7 @@
             color: var(--accent);
             position: relative;
             user-select: none;
+            font-size: 12px;
         }
 
         .terminal-tab:hover {
@@ -458,6 +460,38 @@
             margin-left: 10px;
             font-weight: bold;
         }
+
+        /* New Terminal Styling */
+        .terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .terminal-output::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .terminal-output::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .command-input {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            width: 100%;
+            caret-color: var(--accent);
+            outline: none;
+            padding: 10px 0;
+        }
     </style>
 </head>
 <body class="theme-green">
@@ -466,12 +500,12 @@
 
     <!-- Background Upload -->
     <input type="file" id="background-upload" accept="image/*" style="display: none;">
-    
+
     <!-- Terminal Taskbar -->
     <div class="terminal-taskbar" id="terminal-taskbar">
         <div class="terminal-counter" id="terminal-counter">Terminals: 0/10</div>
     </div>
-    
+
     <!-- Status Bar -->
     <div class="status-bar" x-data="statusData()">
         <div class="status-left">
@@ -526,42 +560,43 @@
 
         // Terminal Management
         let terminalInstances = new Map();
-        let nextTerminalId = 1;
+        let nextTerminalId = 2; // Start at 2 since 1 is the main terminal
         let activeTerminalId = null;
         const MAX_TERMINALS = 10;
+        let availableIds = new Set(); // Track reusable IDs
 
-        // Alpine.js Data
-        function statusData() {
+        // Alpine.js Data - Define globally before DOM content
+        window.statusData = function() {
             return {
                 currentTime: '',
                 location: 'San Francisco, CA',
                 cpuUsage: 0,
                 currentBundle: 'apps',
                 activeApps: 0,
-                
+
                 init() {
                     this.updateTime();
                     setInterval(() => this.updateTime(), 1000);
                     setInterval(() => this.updateStats(), 3000);
                 },
-                
+
                 updateTime() {
                     this.currentTime = moment().format('HH:mm:ss');
                 },
-                
+
                 updateStats() {
                     this.cpuUsage = Math.floor(Math.random() * 30) + 10;
                     this.activeApps = systemStats.activeApps;
                     this.currentBundle = currentBundle.replace('.json', '');
                 }
-            }
-        }
+            };
+        };
 
         // Matrix Canvas Variables
         let matrixCanvas = document.getElementById('matrix-canvas');
         let matrixCtx = matrixCanvas.getContext('2d');
         let matrixDrops = [];
-        let matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        let matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}';
 
         // DOM Elements
         const output = document.getElementById('output');
@@ -572,7 +607,7 @@
         class WindowManager {
             static createWindow(app) {
                 const windowId = `window-${Date.now()}`;
-                
+
                 const windowHTML = `
                     <div class="app-window" id="${windowId}">
                         <div class="window-header">
@@ -590,7 +625,7 @@
                                     onerror="this.previousElementSibling.textContent = 'Failed to load ${app.name}'"></iframe>
                         </div>
                     </div>`;
-                
+
                 document.body.insertAdjacentHTML('beforeend', windowHTML);
                 this.makeDraggable(windowId);
                 this.centerWindow(windowId);
@@ -608,23 +643,23 @@
                 const startDrag = (e) => {
                     // Don't drag if window is maximized
                     if (windowEl.classList.contains('maximized')) return;
-                    
+
                     // Don't drag if clicking on window controls (close button)
                     if (e.target.classList.contains('window-close')) return;
                     if (e.target.closest('.window-close')) return;
                     if (e.target.closest('.window-controls')) return;
-                    
+
                     isDragging = true;
                     offset = [
                         windowEl.offsetLeft - e.clientX,
                         windowEl.offsetTop - e.clientY
                     ];
                     windowEl.style.zIndex = zIndex++;
-                    
+
                     // Add visual feedback
                     windowEl.style.cursor = 'grabbing';
                     document.body.style.userSelect = 'none';
-                    
+
                     e.preventDefault();
                     e.stopPropagation();
                 };
@@ -632,10 +667,10 @@
                 const drag = (e) => {
                     if (isDragging) {
                         e.preventDefault();
-                        
+
                         const x = e.clientX + offset[0];
                         const y = e.clientY + offset[1];
-                        
+
                         // Constrain to viewport with padding
                         const padding = 50;
                         const maxX = window.innerWidth - windowEl.offsetWidth;
@@ -661,7 +696,7 @@
                 header.addEventListener('mousedown', startDrag);
                 document.addEventListener('mousemove', drag);
                 document.addEventListener('mouseup', stopDrag);
-                
+
                 // Also handle mouse leave to stop dragging
                 document.addEventListener('mouseleave', stopDrag);
             }
@@ -695,9 +730,17 @@
                     return null;
                 }
 
-                const terminalId = nextTerminalId++;
-                const windowId = `terminal-${terminalId}`;
+                // Reuse available IDs or create new one
+                let terminalId;
+                if (availableIds.size > 0) {
+                    terminalId = Math.min(...availableIds);
+                    availableIds.delete(terminalId);
+                } else {
+                    terminalId = nextTerminalId++;
+                }
                 
+                const windowId = `terminal-${terminalId}`;
+
                 const terminalHTML = `
                     <div class="terminal" id="${windowId}" data-terminal-id="${terminalId}">
                         <div class="title-bar">
@@ -709,37 +752,37 @@
                             <div class="window-title">NeoM4trix Terminal v3.0.0 - Terminal ${terminalId}</div>
                         </div>
                         <div class="content">
-                            <div class="terminal-output"></div>
+                            <div class="terminal-output" style="flex: 1; overflow-y: auto; margin-bottom: 10px; scrollbar-width: thin; scrollbar-color: var(--accent) transparent;"></div>
                             <div class="input-line">
                                 <span class="prompt">tester@user:~$</span>
                                 <input type="text" class="command-input" autocomplete="off">
                             </div>
                         </div>
                     </div>`;
-                
+
                 document.body.insertAdjacentHTML('beforeend', terminalHTML);
-                
+
                 const terminalEl = document.getElementById(windowId);
                 this.makeDraggable(windowId);
                 this.centerWindow(windowId);
                 this.setupTerminalEvents(terminalId);
-                
+
                 // Register terminal instance
                 terminalInstances.set(terminalId, {
                     windowId: windowId,
                     element: terminalEl,
                     isMinimized: false
                 });
-                
+
                 this.addToTaskbar(terminalId);
                 this.setActiveTerminal(terminalId);
                 this.updateCounter();
-                
+
                 // Add welcome message
                 const output = terminalEl.querySelector('.terminal-output');
                 this.addOutput(terminalId, `Terminal ${terminalId} initialized.`);
                 this.addOutput(terminalId, 'Type "help" for available commands.');
-                
+
                 return terminalId;
             }
 
@@ -749,8 +792,14 @@
                     terminal.element.remove();
                     terminalInstances.delete(terminalId);
                     this.removeFromTaskbar(terminalId);
-                    this.updateCounter();
                     
+                    // Add ID back to available pool (except main terminal ID 1)
+                    if (terminalId !== 1) {
+                        availableIds.add(terminalId);
+                    }
+                    
+                    this.updateCounter();
+
                     // Set focus to another terminal if this was active
                     if (activeTerminalId === terminalId) {
                         const remainingTerminals = Array.from(terminalInstances.keys());
@@ -806,20 +855,25 @@
                 document.querySelectorAll('.terminal-tab').forEach(tab => {
                     tab.classList.remove('active');
                 });
-                
+
                 // Add active class to current tab
                 const tab = document.querySelector(`[data-terminal-id="${terminalId}"]`);
                 if (tab) {
                     tab.classList.add('active');
                 }
-                
+
                 activeTerminalId = terminalId;
-                
-                // Focus the input
+
+                // Bring terminal to front and focus the input
                 const terminal = terminalInstances.get(terminalId);
                 if (terminal) {
+                    terminal.element.style.zIndex = zIndex++;
                     const input = terminal.element.querySelector('.command-input');
-                    if (input) input.focus();
+                    if (input) {
+                        setTimeout(() => {
+                            input.focus();
+                        }, 50);
+                    }
                 }
             }
 
@@ -833,7 +887,7 @@
                     <div class="close-tab" onclick="event.stopPropagation(); TerminalManager.closeTerminal(${terminalId})">×</div>
                 `;
                 tab.onclick = () => this.focusTerminal(terminalId);
-                
+
                 // Insert before counter
                 const counter = document.getElementById('terminal-counter');
                 taskbar.insertBefore(tab, counter);
@@ -849,7 +903,7 @@
             static updateTaskbarTab(terminalId) {
                 const tab = document.querySelector(`[data-terminal-id="${terminalId}"]`);
                 const terminal = terminalInstances.get(terminalId);
-                
+
                 if (tab && terminal) {
                     if (terminal.isMinimized) {
                         tab.style.opacity = '0.5';
@@ -873,7 +927,7 @@
                 const startDrag = (e) => {
                     if (windowEl.classList.contains('maximized')) return;
                     if (e.target.classList.contains('button')) return;
-                    
+
                     isDragging = true;
                     offset = [
                         windowEl.offsetLeft - e.clientX,
@@ -916,22 +970,55 @@
                 const input = terminal.element.querySelector('.command-input');
                 const output = terminal.element.querySelector('.terminal-output');
 
-                input.addEventListener('keydown', (e) => {
+                if (!input || !output) return;
+
+                // Store reference to TerminalManager for proper context
+                const self = TerminalManager;
+
+                // Clear any existing event listeners and add new one
+                input.onkeydown = function(e) {
                     if (e.key === 'Enter') {
-                        const command = input.value.trim();
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const command = this.value.trim();
                         if (command) {
-                            this.addOutput(terminalId, `tester@user:~$ ${command}`, 'command');
-                            const result = executeCommand(command);
-                            if (result) this.addOutput(terminalId, result);
+                            self.addOutput(terminalId, `tester@user:~$ ${command}`, 'command');
+                            
+                            // Handle shutdown confirmation for new terminals
+                            if (isShutdownConfirmation) {
+                                if (command.toLowerCase() === 'y' || command.toLowerCase() === 'yes') {
+                                    confirmShutdown();
+                                } else {
+                                    self.addOutput(terminalId, 'Shutdown canceled.');
+                                    isShutdownConfirmation = false;
+                                }
+                            } else {
+                                const result = executeCommand(command);
+                                if (result === 'CLEAR_TERMINAL') {
+                                    // Clear this terminal's output
+                                    output.innerHTML = '';
+                                } else if (result) {
+                                    self.addOutput(terminalId, result);
+                                }
+                            }
                         }
-                        input.value = '';
+                        this.value = '';
+                        return false;
                     }
-                });
+                };
 
                 // Focus when clicking on terminal
-                terminal.element.addEventListener('click', () => {
-                    this.setActiveTerminal(terminalId);
-                });
+                terminal.element.onclick = function() {
+                    self.setActiveTerminal(terminalId);
+                    const currentInput = terminal.element.querySelector('.command-input');
+                    if (currentInput) currentInput.focus();
+                };
+
+                // Auto-focus the input
+                setTimeout(() => {
+                    input.focus();
+                }, 100);
             }
 
             static addOutput(terminalId, text, className = '') {
@@ -939,11 +1026,24 @@
                 if (!terminal) return;
 
                 const output = terminal.element.querySelector('.terminal-output');
+                if (!output) return;
+                
                 const div = document.createElement('div');
                 div.className = `output-text ${className}`;
                 div.textContent = text;
                 output.appendChild(div);
                 output.scrollTop = output.scrollHeight;
+
+                // Add subtle animation to new output
+                if (typeof anime !== 'undefined') {
+                    anime({
+                        targets: div,
+                        translateX: [-20, 0],
+                        opacity: [0, 1],
+                        duration: 300,
+                        easing: 'easeOutQuad'
+                    });
+                }
             }
         }
 
@@ -973,7 +1073,7 @@
         function initMatrix() {
             matrixCanvas.width = window.innerWidth;
             matrixCanvas.height = window.innerHeight;
-            
+
             const columns = matrixCanvas.width / 15;
             for (let i = 0; i < columns; i++) {
                 matrixDrops[i] = 1;
@@ -983,14 +1083,14 @@
         function drawMatrix() {
             matrixCtx.fillStyle = 'rgba(10, 10, 10, 0.05)';
             matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
-            
+
             matrixCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
             matrixCtx.font = '15px JetBrains Mono';
-            
+
             for (let i = 0; i < matrixDrops.length; i++) {
                 const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
                 matrixCtx.fillText(text, i * 15, matrixDrops[i] * 15);
-                
+
                 if (matrixDrops[i] * 15 > matrixCanvas.height && Math.random() > 0.975) {
                     matrixDrops[i] = 0;
                 }
@@ -999,72 +1099,17 @@
         }
 
         // Terminal Functions
-        function initializeTerminalDrag() {
-            const terminal = document.querySelector('.terminal');
-            const titleBar = terminal.querySelector('.title-bar');
-            let isDragging = false;
-            let offset = [0, 0];
-
-            terminal.style.left = `${(window.innerWidth - terminal.offsetWidth) / 2}px`;
-            terminal.style.top = `${(window.innerHeight - terminal.offsetHeight) / 2}px`;
-
-            const startDrag = (e) => {
-                if (terminal.classList.contains('maximized')) return;
-                if (e.target.classList.contains('button')) return;
-                if (e.target.closest('.button')) return;
-                
-                isDragging = true;
-                offset = [
-                    terminal.offsetLeft - e.clientX,
-                    terminal.offsetTop - e.clientY
-                ];
-                terminal.style.zIndex = zIndex++;
-                e.preventDefault();
-            };
-
-            const drag = (e) => {
-                if (isDragging) {
-                    const x = e.clientX + offset[0];
-                    const y = e.clientY + offset[1];
-                    const maxX = window.innerWidth - terminal.offsetWidth;
-                    const maxY = window.innerHeight - terminal.offsetHeight;
-
-                    terminal.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
-                    terminal.style.top = `${Math.max(0, Math.min(y, maxY))}px`;
-                }
-            };
-
-            const stopDrag = () => isDragging = false;
-
-            titleBar.addEventListener('mousedown', startDrag);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', stopDrag);
-        }
-
-        function minimizeTerminal() {
-            const terminal = document.querySelector('.terminal');
-            if (isMinimized) {
-                terminal.style.transform = '';
-                terminal.style.opacity = '1';
-            } else {
-                terminal.style.transform = 'translateY(calc(100vh - 100px))';
-                terminal.style.opacity = '0.5';
-            }
-            isMinimized = !isMinimized;
-        }
-
-        function maximizeTerminal() {
-            const terminal = document.querySelector('.terminal');
-            terminal.classList.toggle('maximized');
-            terminal.style.zIndex = zIndex++;
-            if (terminal.classList.contains('maximized')) {
-                terminal.style.opacity = '1';
-            }
-        }
-
         function confirmCloseTerminal() {
             addOutput('Close terminal? This will exit NeoM4trix. (y/n)');
             isShutdownConfirmation = true;
+        }
+
+        function minimizeTerminal() {
+            TerminalManager.minimizeTerminal(1);
+        }
+
+        function maximizeTerminal() {
+            TerminalManager.maximizeTerminal(1);
         }
 
         function shutdownSystem() {
@@ -1087,9 +1132,10 @@
 
         // Enhanced Command System
         function executeCommand(c) {
-            const [cmd, ...args] = c.trim().split(' ');
+            const fullCommand = c.trim();
+            const [cmd, ...args] = fullCommand.split(' ');
             const app = apps.find(a => a.command === cmd.toLowerCase());
-            
+
             if (app) {
                 WindowManager.createWindow(app);
                 return `${app.name} launched successfully.`;
@@ -1141,6 +1187,10 @@ ps                - List running processes
 background <cmd>  - Background management (upload/reset)
 location          - Show current location
 
+TERMINAL MANAGEMENT:
+newterminal       - Create new terminal window
+newterm           - Create new terminal window (alias)
+
 KEYBOARD SHORTCUTS:
 Press 'n'         - Open new terminal window
 
@@ -1168,8 +1218,8 @@ Available bundles: ${Object.keys(availableBundles).join(', ')}`;
                     return '';
 
                 case 'clear':
-                    output.innerHTML = '';
-                    return '';
+                    // Clear will be handled by the calling terminal
+                    return 'CLEAR_TERMINAL';
 
                 case 'theme':
                     if (!args.length) return 'Available themes: green, blue, purple, red';
@@ -1201,8 +1251,18 @@ Available bundles: ${Object.keys(availableBundles).join(', ')}`;
                     return 'Reality.exe has encountered an error...';
 
                 case 'prompt':
-                    if (!args.length) return 'Usage: prompt <text>';
-                    prompt.textContent = args.join(' ') + '$';
+                    if (args.length === 0) return 'Usage: prompt <text>';
+                    const newPrompt = args.join(' ') + '$';
+                    // Update prompt for current terminal
+                    if (terminalId && terminalId !== 1) {
+                        const terminal = terminalInstances.get(terminalId);
+                        if (terminal) {
+                            const promptElement = terminal.element.querySelector('.prompt');
+                            if (promptElement) promptElement.textContent = newPrompt;
+                        }
+                    } else {
+                        prompt.textContent = newPrompt;
+                    }
                     return 'Prompt updated';
 
                 case 'date':
@@ -1245,10 +1305,10 @@ Shell: /bin/bash
 Groups: sudo, admin, developers`;
 
                 case 'echo':
-                    return args.join(' ');
+                    return args.length > 0 ? args.join(' ') : '';
 
                 case 'cowsay':
-                    const text = args.join(' ') || 'Hello Matrix!';
+                    const text = args.length > 0 ? args.join(' ') : 'Hello Matrix!';
                     return `
  ${'-'.repeat(text.length + 2)}
 < ${text} >
@@ -1260,7 +1320,7 @@ Groups: sudo, admin, developers`;
                 ||     ||`;
 
                 case 'figlet':
-                    const figText = args.join(' ') || 'MATRIX';
+                    const figText = args.length > 0 ? args.join(' ') : 'MATRIX';
                     return `
 ███╗   ███╗ █████╗ ████████╗██████╗ ██╗██╗  ██╗
 ████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗██║╚██╗██╔╝
@@ -1351,6 +1411,15 @@ ${apps.map(a => `${a.command.padEnd(12)} - ${a.description || a.name}`).join('\n
 
 Total: ${apps.length} apps loaded`;
 
+                case 'newterminal':
+                case 'newterm':
+                    const newTerminalId = TerminalManager.createTerminal();
+                    if (newTerminalId) {
+                        return `New terminal ${newTerminalId} created successfully.`;
+                    } else {
+                        return `Cannot create new terminal. Maximum of ${MAX_TERMINALS} terminals reached.`;
+                    }
+
                 default:
                     return `Command not found: ${cmd}
 Type 'help' for available commands.`;
@@ -1404,7 +1473,7 @@ Type 'help' for available commands.`;
             if (!bundlePath.startsWith('NeoM4trixApps/')) {
                 bundlePath = 'NeoM4trixApps/' + bundlePath;
             }
-            
+
             fetch(bundlePath)
                 .then(r => {
                     if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -1437,7 +1506,7 @@ Type 'help' for available commands.`;
             div.textContent = text;
             output.appendChild(div);
             output.scrollTop = output.scrollHeight;
-            
+
             // Add subtle animation to new output
             if (typeof anime !== 'undefined') {
                 anime({
@@ -1447,6 +1516,15 @@ Type 'help' for available commands.`;
                     duration: 300,
                     easing: 'easeOutQuad'
                 });
+            }
+        }
+
+        // Terminal-specific output helper
+        function addOutputToTerminal(terminalId, text, className = '') {
+            if (terminalId === 1) {
+                addOutput(text, className);
+            } else {
+                TerminalManager.addOutput(terminalId, text, className);
             }
         }
 
@@ -1470,27 +1548,7 @@ Type 'help' for available commands.`;
             updateStatusBar();
         }
 
-        // Event Listeners
-        commandInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const command = commandInput.value.trim();
-                if (command) {
-                    addOutput(`${prompt.textContent} ${command}`, 'command');
-                    
-                    if (isShutdownConfirmation) {
-                        if (command.toLowerCase() === 'y' || command.toLowerCase() === 'yes') {
-                            confirmShutdown();
-                        } else {
-                            cancelShutdown();
-                        }
-                    } else {
-                        const result = executeCommand(command);
-                        if (result) addOutput(result);
-                    }
-                }
-                commandInput.value = '';
-            }
-        });
+        // Event Listeners (moved to initialize function)
 
         window.addEventListener('resize', () => {
             initMatrix();
@@ -1506,16 +1564,68 @@ Type 'help' for available commands.`;
             }
         });
 
+      const prefixes = ['Neo', 'Matrix', 'Code', 'Cyber', 'Data', 'Bit', 'Byte', 'System', 'Net', 'OS'];
+        const suffixes = ['Runner', 'Hacker', 'Warrior', 'Ninja', 'Pilot', 'Ghost', 'Specter', 'Agent', 'User', 'Admin'];
+
+        function generateUsername() {
+            return `${prefixes[Math.floor(Math.random() * prefixes.length)]}${suffixes[Math.floor(Math.random() * suffixes.length)]}${Math.floor(Math.random() * 1000)}`;
+        }
+
+
         // Initialization
         function initialize() {
             initMatrix();
-            initializeTerminalDrag();
             initBackgroundUpload();
             loadApps();
+
+            // Register the main terminal as terminal 1
+            const mainTerminal = document.getElementById('terminal');
+            mainTerminal.setAttribute('data-terminal-id', '1');
             
-            // Create first terminal
-            TerminalManager.createTerminal();
+            terminalInstances.set(1, {
+                windowId: 'terminal',
+                element: mainTerminal,
+                isMinimized: false
+            });
             
+            TerminalManager.addToTaskbar(1);
+            TerminalManager.setActiveTerminal(1);
+            TerminalManager.updateCounter();
+            TerminalManager.makeDraggable('terminal');
+            TerminalManager.centerWindow('terminal');
+            
+            // Setup event handlers for main terminal
+            const input = mainTerminal.querySelector('#command-input');
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const command = input.value.trim();
+                    if (command) {
+                        addOutput(`${prompt.textContent} ${command}`, 'command');
+
+                        if (isShutdownConfirmation) {
+                            if (command.toLowerCase() === 'y' || command.toLowerCase() === 'yes') {
+                                confirmShutdown();
+                            } else {
+                                cancelShutdown();
+                            }
+                        } else {
+                            const result = executeCommand(command);
+                            if (result === 'CLEAR_TERMINAL') {
+                                output.innerHTML = '';
+                            } else if (result) {
+                                addOutput(result);
+                            }
+                        }
+                    }
+                    input.value = '';
+                    e.preventDefault();
+                }
+            });
+
+            mainTerminal.addEventListener('click', () => {
+                TerminalManager.setActiveTerminal(1);
+            });
+
             // Enhanced terminal animation
             if (typeof anime !== 'undefined') {
                 anime({
@@ -1526,10 +1636,10 @@ Type 'help' for available commands.`;
                     easing: 'easeOutElastic(1, .8)'
                 });
             }
-            
+
             addOutput('NeoM4trix v3.0.0 - Enhanced with Alpine.js & Anime.js');
             addOutput('='.repeat(60));
-            addOutput('Welcome to AndyOS NeoM4trix version 3.0.0, tester.');
+            addOutput(`Welcome to AndyOS NeoM4trix version 3.0.0, ${generateUsername()}.`);
             addOutput('System location: San Francisco, CA');
             addOutput('');
             addOutput('Type "help" for available commands.');
@@ -1541,7 +1651,7 @@ Type 'help' for available commands.`;
 
             // Start matrix animation
             setInterval(drawMatrix, 50);
-            
+
             // Initialize and update system stats
             simulateSystemStats();
             setInterval(simulateSystemStats, 2000);
