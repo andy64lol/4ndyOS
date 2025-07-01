@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4ndyOS NeoM4trix v3.0.0</title>
+
+    <!-- CDN Libraries -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
@@ -317,7 +319,8 @@
             justify-content: center;
             font-weight: bold;
         }
-        
+
+        /* Matrix Effects */
         .matrix-glow {
             text-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent);
         }
@@ -377,6 +380,7 @@
             color: #ffaa00;
         }
 
+        /* Enhanced Theme Support */
         .theme-green { --accent: #00ff41; --accent-secondary: #00d4aa; }
         .theme-blue { --accent: #00b8ff; --accent-secondary: #0088cc; }
         .theme-purple { --accent: #a855f7; --accent-secondary: #7c3aed; }
@@ -517,6 +521,7 @@
         </div>
     </div>
 
+    <!-- Terminal Window -->
     <div class="terminal" id="terminal">
         <div class="title-bar">
             <div class="buttons">
@@ -524,7 +529,7 @@
                 <div class="button minimize" onclick="minimizeTerminal()"></div>
                 <div class="button maximize" onclick="maximizeTerminal()"></div>
             </div>
-            <div class="window-title">NeoM4trix Terminal v3.0.0</div>
+            <div class="window-title">NeoM4trix Terminal v3.0.0 - Matrix System</div>
         </div>
         <div class="content">
             <div class="terminal-output" id="output"></div>
@@ -725,13 +730,18 @@
                     addOutput(`Maximum number of terminals (${MAX_TERMINALS}) reached.`);
                     return null;
                 }
+                // If no terminals exist, always assign id 1 and reset ids
+                if (terminalInstances.size === 0) {
+                    nextTerminalId = 2;
+                    availableIds.clear();
+                }
                 // Assign terminalId
                 let terminalId;
                 if (availableIds.size > 0) {
                     terminalId = Math.min(...availableIds);
                     availableIds.delete(terminalId);
                 } else {
-                    terminalId = nextTerminalId++;
+                    terminalId = terminalInstances.size === 0 ? 1 : nextTerminalId++;
                 }
                 const windowId = `terminal-${terminalId}`;
                 // Terminal HTML
@@ -743,7 +753,7 @@
                                 <div class="button minimize" onclick="TerminalManager.minimizeTerminal(${terminalId})"></div>
                                 <div class="button maximize" onclick="TerminalManager.maximizeTerminal(${terminalId})"></div>
                             </div>
-                            <div class="window-title">NeoM4trix Terminal v3.0.0</div>
+                            <div class="window-title">NeoM4trix Terminal v3.0.0 - Matrix System</div>
                         </div>
                         <div class="content">
                             <div class="terminal-output"></div>
@@ -1043,7 +1053,7 @@
             addOutput('Shutting down NeoM4trix...');
             document.getElementById('shutdown-screen').style.display = 'flex';
             setTimeout(() => {
-                window.location.href = '../4ndyOS/index.html';
+                window.location.href = '4ndyOS/index.html';
             }, 3000);
         }
 
@@ -1052,6 +1062,7 @@
             isShutdownConfirmation = false;
         }
 
+        // Enhanced Command System
         function executeCommand(c, terminalId = 1) {
             const fullCommand = c.trim();
             const [cmd, ...args] = fullCommand.split(' ');
@@ -1064,7 +1075,7 @@
 
             switch (cmd.toLowerCase()) {
                 case 'help':
-                    return `NeoM4trix v3.0.0 - Commands:
+                    return `NeoM4trix v3.0.0 - Command Reference:
 ═══════════════════════════════════════════════
 
 SYSTEM COMMANDS:
@@ -1077,7 +1088,7 @@ status            - Show system status
 APP BUNDLES:
 apps              - List current bundle apps
 bundles           - Show available bundles
-switch <bundle>   - Switch app bundle
+switch <bundle>   - Switch app bundle (apps.json/games.json/4ndyTools.json)
 
 BUILT-IN APPS:
 calc              - Launch Calculator
@@ -1296,6 +1307,9 @@ CPU Usage: ${systemStats.cpu}%
 Memory Usage: ${systemStats.memory}%`;
 
                 case 'shutdown':
+                    if (terminalId !== 1) {
+                        return 'Shutdown can only be executed from the main terminal (T1).';
+                    }
                     shutdownSystem();
                     return '';
 
@@ -1367,7 +1381,7 @@ Type 'help' for available commands.`;
                     name: 'Text Editor', 
                     command: 'editor', 
                     path: 'NeoM4trixApps/editor.html',
-                    description: 'Advanced text editor with syntax highlighting'
+                    description: 'Text editor with syntax highlighting'
                 },
                 { 
                     name: 'Browser', 
@@ -1572,6 +1586,7 @@ Type 'help' for available commands.`;
                 TerminalManager.setActiveTerminal(1);
             });
 
+            // Enhanced terminal animation
             if (typeof anime !== 'undefined') {
                 anime({
                     targets: '.terminal',
@@ -1582,7 +1597,7 @@ Type 'help' for available commands.`;
                 });
             }
 
-            TerminalManager.addOutput(1, 'NeoM4trix v3.0.0 - Made with Alpine.js & Anime.js');
+            TerminalManager.addOutput(1, 'NeoM4trix v3.0.0 - Powered by Alpine.js & Anime.js');
             TerminalManager.addOutput(1, '='.repeat(60));
             TerminalManager.addOutput(1, `Welcome to AndyOS NeoM4trix version 3.0.0, ${generateUsername()}.`);
             TerminalManager.addOutput(1, 'System location: San Francisco, CA');
