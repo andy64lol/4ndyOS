@@ -52,5 +52,11 @@
         "name": "Games",
         "path": "NeoM4trixApps/Games.html",
         "description": "A simple 3 in 1 game."
+    },
+    {
+        "command": "mmb",
+        "name": "My music box",
+        "path": "NeoM4trixApps/My music box.html",
+        "description": "A simple horror game, press space to rewind music box, do not let the musoc stop."
     }
 ]
