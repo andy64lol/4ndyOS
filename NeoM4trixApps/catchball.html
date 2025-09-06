@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Falling Stars Catcher</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #0a0a2a, #1a1a3d);
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+  }
+
+  #ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10; /* always on top */
+  }
+
+  #scoreboard {
+    font-size: 20px;
+    background: rgba(0,0,0,0.5);
+    padding: 6px 12px;
+    border-radius: 8px;
+  }
+
+  #pauseBtn {
+    font-size: 16px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #FFD700;
+    color: #000;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  #pauseBtn:hover {
+    background: #ffea70;
+  }
+
+  #pausedOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: rgba(255, 255, 255, 0.85);
+    pointer-events: none; /* <--- now overlay doesn't block clicks */
+  }
+
+  #gameCanvas {
+    display: block;
+    margin: 0 auto;
+    background: rgba(0,0,0,0.4);
+  }
+</style>
+</head>
+<body>
+<div id="ui">
+  <div id="scoreboard">Score: 0 | Lives: 3</div>
+  <button id="pauseBtn">Pause</button>
+</div>
+<canvas id="gameCanvas" width="600" height="800"></canvas>
+<div id="pausedOverlay" style="display:none;">⏸ Paused</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const pauseBtn = document.getElementById('pauseBtn');
+const pausedOverlay = document.getElementById('pausedOverlay');
+
+let score = 0;
+let lives = 3;
+let paused = false;
+
+const basket = { x: 270, y: 750, width: 60, height: 20, speed: 7, vx: 0 };
+const stars = [];
+const starSpeed = 3;
+const spawnRate = 60;
+let frameCount = 0;
+
+const keys = {};
+
+document.addEventListener('keydown', e => { keys[e.key] = true; });
+document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+pauseBtn.addEventListener('click', () => {
+  paused = !paused;
+  pausedOverlay.style.display = paused ? 'block' : 'none';
+  pauseBtn.innerText = paused ? 'Resume' : 'Pause';
+});
+
+function spawnStar() {
+  const size = Math.random() * 20 + 10;
+  const x = Math.random() * (canvas.width - size);
+  stars.push({ x, y: -size, size });
+}
+
+function drawBasket() {
+  ctx.fillStyle = '#FFD700';
+  ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+}
+
+function drawStars() {
+  ctx.fillStyle = '#00FFFF';
+  stars.forEach(star => {
+    ctx.beginPath();
+    ctx.arc(star.x + star.size/2, star.y + star.size/2, star.size/2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function updateStars() {
+  for(let i = stars.length - 1; i >= 0; i--) {
+    stars[i].y += starSpeed;
+    if(stars[i].y + stars[i].size >= basket.y &&
+       stars[i].x + stars[i].size > basket.x &&
+       stars[i].x < basket.x + basket.width) {
+      score++;
+      stars.splice(i, 1);
+    } else if(stars[i].y > canvas.height) {
+      lives--;
+      stars.splice(i, 1);
+      if(lives <= 0) {
+        alert(`Game Over! Final Score: ${score}`);
+        document.location.reload();
+      }
+    }
+  }
+}
+
+function updateBasket() {
+  basket.vx = 0;
+  if(keys['ArrowLeft'] || keys['a']) basket.vx = -basket.speed;
+  if(keys['ArrowRight'] || keys['d']) basket.vx = basket.speed;
+  basket.x += basket.vx;
+  basket.x = Math.max(0, Math.min(canvas.width - basket.width, basket.x));
+}
+
+function updateScoreboard() {
+  document.getElementById('scoreboard').innerText = `Score: ${score} | Lives: ${lives}`;
+}
+
+function gameLoop() {
+  if(!paused) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    frameCount++;
+    if(frameCount % spawnRate === 0) spawnStar();
+    updateBasket();
+    updateStars();
+    drawStars();
+    drawBasket();
+    updateScoreboard();
+  }
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>

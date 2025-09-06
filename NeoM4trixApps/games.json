@@ -58,5 +58,11 @@
         "name": "My music box",
         "path": "NeoM4trixApps/My music box.html",
         "description": "A simple horror game, press space to rewind music box, do not let the musoc stop."
+    },
+    {
+        "command": "ctb",
+        "name": "Catch the Ball",
+        "path": "NeoM4trixApps/catchball.html",
+        "description": "A simple game where you catch falling stars."
     }
 ]

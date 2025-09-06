@@ -854,6 +854,24 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes loginFade {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes logoutFade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.95); }
+        }
+
+        .login-transition {
+            animation: loginFade 5s ease-in-out forwards;
+        }
+
+        .logout-transition {
+            animation: logoutFade 5s ease-in-out forwards;
+        }
+
         .animate-in {
             animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -1463,29 +1481,35 @@ print('Ready for enhanced computing!')"></textarea>
         }
 
         function handleLogin() {
-            const usernameInput = document.getElementById('loginUsername').value.trim();
-            const passwordInput = document.getElementById('loginPassword').value;
+            document.body.classList.add('login-transition');
+            setTimeout(() => {
+                const usernameInput = document.getElementById('loginUsername').value.trim();
+                const passwordInput = document.getElementById('loginPassword').value;
 
-            const storedUsername = localStorage.getItem('username') || 'user';
-            const storedPassword = localStorage.getItem('password') || '1234';
+                const storedUsername = localStorage.getItem('username') || 'user';
+                const storedPassword = localStorage.getItem('password') || '1234';
 
-            const errorDiv = document.getElementById('loginError');
+                const errorDiv = document.getElementById('loginError');
 
-            if (usernameInput === storedUsername && passwordInput === storedPassword) {
-                localStorage.setItem('loggedIn', 'true');
-                errorDiv.style.display = 'none';
-                playSound('login.mp3');
-                checkLogin();
-            } else {
-                errorDiv.style.display = 'block';
-                playSound('denied.mp3');
-            }
+                if (usernameInput === storedUsername && passwordInput === storedPassword) {
+                    localStorage.setItem('loggedIn', 'true');
+                    errorDiv.style.display = 'none';
+                    playSound('login.mp3');
+                    checkLogin();
+                } else {
+                    errorDiv.style.display = 'block';
+                    playSound('denied.mp3');
+                }
+            }, 5000);
         }
 
-        function logout() {
-            localStorage.setItem('loggedIn', 'false');
-            playSound('logout.mp3');
-            checkLogin();
+        function handleLogout() {
+            document.body.classList.add('logout-transition');
+            setTimeout(() => {
+                localStorage.setItem('loggedIn', 'false');
+                playSound('logout.mp3');
+                checkLogin();
+            }, 5000);
         }
 
         function playSound(soundFile) {
