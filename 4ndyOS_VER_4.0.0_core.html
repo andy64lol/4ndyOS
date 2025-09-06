@@ -1,0 +1,2347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>4ndyOS VER 4.0.0 Core</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Iceland&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython_stdlib.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #e0f2fe;
+            --bg-secondary: #f0f9ff;
+            --bg-accent: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Login Screen Styles */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 50px 40px;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 16px 16px 0 0;
+        }
+
+        .login-logo {
+            font-size: 56px;
+            margin-bottom: 15px;
+            color: var(--accent-blue);
+            font-weight: 700;
+            letter-spacing: -2px;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .login-title {
+            font-size: 20px;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .login-form {
+            margin-bottom: 20px;
+        }
+
+        .login-input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .login-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-accent);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+            background: #ffffff;
+        }
+
+        .login-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.2);
+        }
+
+        .login-button:hover {
+            background: #0284c7;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .login-error {
+            color: #dc2626;
+            margin-top: 15px;
+            font-size: 13px;
+            display: none;
+            padding: 10px;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: 6px;
+        }
+
+        .login-footer {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--glass-border);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+
+
+        [data-theme="dark"] {
+            --bg-primary: #1e293b;
+            --bg-secondary: #334155;
+            --bg-accent: #475569;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="crystal"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-accent: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="blue"] {
+            --bg-primary: #1e3a8a;
+            --bg-secondary: #1e40af;
+            --bg-accent: #2563eb;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-blue: #60a5fa;
+            --accent-purple: #a78bfa;
+            --accent-green: #34d399;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="purple"] {
+            --bg-primary: #581c87;
+            --bg-secondary: #7c2d12;
+            --bg-accent: #8b5cf6;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-blue: #a78bfa;
+            --accent-purple: #c084fc;
+            --accent-green: #4ade80;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="green"] {
+            --bg-primary: #064e3b;
+            --bg-secondary: #065f46;
+            --bg-accent: #059669;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-blue: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="sunset"] {
+            --bg-primary: #7c2d12;
+            --bg-secondary: #dc2626;
+            --bg-accent: #f97316;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-blue: #f59e0b;
+            --accent-purple: #ef4444;
+            --accent-green: #eab308;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="cyber"] {
+            --bg-primary: #0c0c0c;
+            --bg-secondary: #1a1a1a;
+            --bg-accent: #262626;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-blue: #00ff41;
+            --accent-purple: #ff0080;
+            --accent-green: #00ffff;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="royal"] {
+            --bg-primary: #1e1b4b;
+            --bg-secondary: #312e81;
+            --bg-accent: #4338ca;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-blue: #6366f1;
+            --accent-purple: #8b5cf6;
+            --accent-green: #a855f7;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-primary);
+        }
+
+        #desktop {
+            flex: 1;
+            background: transparent;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            padding: 20px;
+            gap: 20px;
+            position: relative;
+            transition: background 0.3s;
+            overflow: auto;
+        }
+
+        .icon {
+            width: 100px;
+            height: 100px;
+            text-align: center;
+            cursor: pointer;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon:hover {
+            transform: translateY(-8px) scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .icon img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .icon p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-primary);
+            word-break: break-word;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .taskbar {
+            height: 60px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-size: 14px;
+            border-top: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .start-menu-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            font-family: 'Iceland', sans-serif;
+            font-size: 24px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-right: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .start-menu-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+            text-shadow: 0 0 12px rgba(255, 255, 255, 1);
+        }
+
+        .taskbar .open-apps {
+            display: flex;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .taskbar .open-app {
+            width: 40px;
+            height: 40px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .taskbar .open-app:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .taskbar .open-app img {
+            width: 28px;
+            height: 28px;
+        }
+
+        .window {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            width: 600px;
+            height: 400px;
+            background: var(--bg-secondary);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            resize: both;
+            z-index: 10;
+            backdrop-filter: blur(20px);
+            min-width: 300px;
+            min-height: 200px;
+        }
+
+        .window:hover {
+            resize: both;
+        }
+
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--glass-bg);
+            cursor: nw-resize;
+            border-radius: 16px 0 16px 0;
+        }
+
+        .window-header {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            cursor: move;
+            user-select: none;
+            font-weight: 500;
+        }
+
+        .window-header .close {
+            cursor: pointer;
+            color: #ef4444;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .window-header .minimize {
+            cursor: pointer;
+            color: #f59e0b;
+            margin-right: 10px;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .window-body {
+            flex: 1;
+            padding: 0;
+            overflow: auto;
+            background: white;
+        }
+
+        .settings .window-body {
+            background: var(--bg-secondary);
+        }
+
+        .settings {
+            font-size: 16px;
+            padding: 25px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .settings h2 {
+            margin: 0 0 25px 0;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--glass-border);
+        }
+
+        .settings h3 {
+            margin: 20px 0 15px 0;
+            color: var(--accent-blue);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .settings label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .settings input, .settings select {
+            width: 100%;
+            background: var(--bg-accent);
+            border: 2px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .settings input:focus, .settings select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .settings input[type="color"] {
+            width: 80px;
+            height: 50px;
+            padding: 4px;
+            cursor: pointer;
+        }
+
+        .settings input[type="file"] {
+            padding: 8px;
+            background: var(--glass-bg);
+        }
+
+        .settings button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .settings button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .theme-preview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .theme-option {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .theme-option:hover {
+            transform: scale(1.05);
+        }
+
+        .theme-option.active {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .theme-default { background: linear-gradient(135deg, #e0f2fe, #ffffff); color: #0f172a; }
+        .theme-dark { background: linear-gradient(135deg, #1e293b, #475569); color: white; }
+        .theme-crystal { background: linear-gradient(135deg, #0f172a, #334155); color: white; }
+        .theme-blue { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #2563eb 100%); color: white; }
+        .theme-purple { background: linear-gradient(135deg, #581c87 0%, #8b5cf6 50%, #7c3aed 100%); color: white; }
+        .theme-green { background: linear-gradient(135deg, #064e3b 0%, #10b981 50%, #059669 100%); color: white; }
+        .theme-sunset { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 25%, #8b5cf6 75%, #7c3aed 100%); color: white; }
+        .theme-cyber { background: linear-gradient(135deg, #0c0c0c 0%, #1e293b 25%, #3b82f6 75%, #8b5cf6 100%); color: white; }
+        .theme-royal { background: linear-gradient(135deg, #1e1b4b 0%, #3b82f6 50%, #8b5cf6 100%); color: white; }
+
+        .file-item {
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .lang-option {
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+        }
+
+        .lang-option:hover {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+        }
+
+        .lang-option.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .version-info {
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            padding: 15px;
+            background: var(--glass-bg);
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .start-menu {
+            position: absolute;
+            bottom: 75px;
+            left: 15px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            z-index: 100;
+            min-width: 280px;
+            max-height: 70vh;
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+        }
+
+        .start-menu .app-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .start-menu .app-item:hover {
+            background: var(--glass-bg);
+        }
+
+        .shutdown-button {
+            background: #ef4444;
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            margin: 8px;
+            padding: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .shutdown-button:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            margin: 15% auto;
+            padding: 30px;
+            border: 1px solid var(--glass-border);
+            width: 350px;
+            border-radius: 16px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .modal-button {
+            margin: 8px;
+            padding: 12px 24px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .modal-button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced Features Styling */
+        .enhanced-features {
+            padding: 20px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            height: 100%;
+            overflow: auto;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            padding: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .demo-area {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            min-height: 120px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .python-console {
+            background: #1a1a1a;
+            color: #00ff00;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            height: 250px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.4;
+            border: 1px solid var(--glass-border);
+        }
+
+        .python-input {
+            width: 100%;
+            height: 100px;
+            background: #1a1a1a;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 12px;
+            color: #00ff00;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .smooth-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .window {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .window.dragging {
+            transition: none;
+            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.6);
+            transform: scale(1.02);
+        }
+
+        .calc-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .calc-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+
+        .calc-operator {
+            background: var(--accent-blue) !important;
+            color: white !important;
+        }
+
+        .calc-operator:hover {
+            background: #2563eb !important;
+        }
+
+        .calc-special {
+            background: var(--accent-purple) !important;
+            color: white !important;
+        }
+
+        .calc-special:hover {
+            background: #7c3aed !important;
+        }
+
+        .calc-equals {
+            background: var(--accent-green) !important;
+            color: white !important;
+        }
+
+        .calc-equals:hover {
+            background: #059669 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <div class="login-logo">4</div>
+            <div class="login-title">Welcome to 4ndyOS</div>
+            <form onsubmit="handleLogin(); return false;">
+                <input type="text" id="loginUsername" class="login-input" placeholder="Username" autocomplete="username" />
+                <input type="password" id="loginPassword" class="login-input" placeholder="Password" autocomplete="current-password" />
+                <button type="submit" class="login-button">Log In</button>
+            </form>
+            <div class="login-error" id="loginError">Invalid username or password</div>
+        </div>
+    </div>
+
+    <div id="desktop">
+        <div class="icon" onclick="openWindow('app2')">
+            <img src="icons/search.png" alt="360 Search" />
+            <p>360 Search</p>
+        </div>
+        <div class="icon" onclick="openWindow('app3')">
+            <img src="icons/bilibili.png" alt="Bilibili" />
+            <p>Bilibili</p>
+        </div>
+        <div class="icon" onclick="openWindow('terminal')">
+            <img src="icons/terminal.png" alt="Terminal" />
+            <p>Terminal</p>
+        </div>
+        <div class="icon" onclick="openWindow('calculator')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #8b5cf6 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">🧮</div>
+            <p>Calculator Pro</p>
+        </div>
+        <div class="icon" onclick="openWindow('clicker')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #8b5cf6 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">🎯</div>
+            <p>Clicker Game</p>
+        </div>
+        <div class="icon" onclick="openWindow('files')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">📁</div>
+            <p>File Manager</p>
+        </div>
+        <div class="icon" onclick="openWindow('notes')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">📝</div>
+            <p>Smart Notes</p>
+        </div>
+        <div class="icon" onclick="openWindow('settings')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #4b5563 0%, #6b7280 50%, #9ca3af 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">⚙️</div>
+            <p>System Settings</p>
+        </div>
+        <div class="icon" onclick="openWindow('andyDraw')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #8b5cf6 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">🎨</div>
+            <p>4ndyDraw Pro</p>
+        </div>
+        
+        <div class="icon" onclick="openWindow('info')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue) 50%, var(--accent-purple) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">ℹ️</div>
+            <p>System Info</p>
+        </div>
+        
+        <div class="icon" onclick="openWindow('taskManager')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #8b5cf6 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">⚡</div>
+            <p>Task Manager</p>
+        </div>
+
+        <div class="icon" onclick="openWindow('textEditor')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">📄</div>
+            <p>Text Editor</p>
+        </div>
+        
+        <div class="icon" onclick="openWindow('imageViewer')">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">🖼️</div>
+            <p>Image Viewer</p>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <div class="start-menu-icon" onclick="toggleStartMenu()">4</div>
+        <div class="open-apps" id="openApps"></div>
+        <div id="clock"></div>
+    </div>
+
+    <div class="start-menu" id="startMenu">
+        <div class="app-item" onclick="openWindow('app2')">🔍 360 Search</div>
+        <div class="app-item" onclick="openWindow('app3')">📺 Bilibili</div>
+        <div class="app-item" onclick="openWindow('terminal')">💻 Terminal</div>
+        <div class="app-item" onclick="openWindow('calculator')">🧮 Calculator</div>
+        <div class="app-item" onclick="openWindow('clicker')">🎯 Clicker</div>
+        <div class="app-item" onclick="openWindow('files')">📁 Files</div>
+        <div class="app-item" onclick="openWindow('notes')">📝 Notes</div>
+        <div class="app-item" onclick="openWindow('andyDraw')">🎨 4ndyDraw</div>
+        <div class="app-item" onclick="openWindow('info')">ℹ️ System Info</div>
+        <div class="app-item" onclick="openWindow('taskManager')">⚡ Task Manager</div>
+        <div class="app-item" onclick="openWindow('textEditor')">📄 Text Editor</div>
+        <div class="app-item" onclick="openWindow('imageViewer')">🖼️ Image Viewer</div>
+        <div class="app-item" onclick="openWindow('settings')">⚙️ Settings</div>
+        <div class="shutdown-button" onclick="showShutdownMenu()">🔌 Turn Off</div>
+    </div>
+
+    <!-- Windows -->
+    <div id="app2" class="window">
+        <div class="window-header">
+            <span>360 Search</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app2')">_</span>
+                <span class="close" onclick="closeWindow('app2')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://m.so.com/" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="app3" class="window">
+        <div class="window-header">
+            <span>Bilibili</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('app3')">_</span>
+                <span class="close" onclick="closeWindow('app3')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="https://www.bilibili.com" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="terminal" class="window">
+        <div class="window-header">
+            <span>Terminal</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('terminal')">_</span>
+                <span class="close" onclick="closeWindow('terminal')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/4ndyTerminal.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="calculator" class="window" style="width: 350px; height: 500px;">
+        <div class="window-header">
+            <span>🧮 Calculator Pro</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('calculator')">_</span>
+                <span class="close" onclick="closeWindow('calculator')">X</span>
+            </span>
+        </div>
+        <div class="window-body" style="padding: 0; background: var(--bg-secondary);">
+            <div class="resize-handle"></div>
+            <div style="padding: 20px; color: var(--text-primary);">
+                <div id="calc-display" style="background: #1a1a1a; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 24px; text-align: right; margin-bottom: 20px; min-height: 60px; border: 1px solid var(--glass-border);">0</div>
+                
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                    <button onclick="clearCalc()" class="calc-btn calc-special">C</button>
+                    <button onclick="calcInput('±')" class="calc-btn calc-special">±</button>
+                    <button onclick="calcInput('%')" class="calc-btn calc-special">%</button>
+                    <button onclick="calcInput('/')" class="calc-btn calc-operator">÷</button>
+                    
+                    <button onclick="calcInput('7')" class="calc-btn">7</button>
+                    <button onclick="calcInput('8')" class="calc-btn">8</button>
+                    <button onclick="calcInput('9')" class="calc-btn">9</button>
+                    <button onclick="calcInput('*')" class="calc-btn calc-operator">×</button>
+                    
+                    <button onclick="calcInput('4')" class="calc-btn">4</button>
+                    <button onclick="calcInput('5')" class="calc-btn">5</button>
+                    <button onclick="calcInput('6')" class="calc-btn">6</button>
+                    <button onclick="calcInput('-')" class="calc-btn calc-operator">−</button>
+                    
+                    <button onclick="calcInput('1')" class="calc-btn">1</button>
+                    <button onclick="calcInput('2')" class="calc-btn">2</button>
+                    <button onclick="calcInput('3')" class="calc-btn">3</button>
+                    <button onclick="calcInput('+')" class="calc-btn calc-operator">+</button>
+                    
+                    <button onclick="calcInput('0')" class="calc-btn" style="grid-column: span 2;">0</button>
+                    <button onclick="calcInput('.')" class="calc-btn">.</button>
+                    <button onclick="calculateResult()" class="calc-btn calc-equals">=</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="clicker" class="window">
+        <div class="window-header">
+            <span>Clicker</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('clicker')">_</span>
+                <span class="close" onclick="closeWindow('clicker')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/clicker.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="files" class="window">
+        <div class="window-header">
+            <span>Files</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('files')">_</span>
+                <span class="close" onclick="closeWindow('files')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/files.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="notes" class="window">
+        <div class="window-header">
+            <span>Notes</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('notes')">_</span>
+                <span class="close" onclick="closeWindow('notes')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/notes.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="andyDraw" class="window">
+        <div class="window-header">
+            <span>4ndyDraw</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('andyDraw')">_</span>
+                <span class="close" onclick="closeWindow('andyDraw')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <iframe src="apps/draw.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+
+    <div id="pythonConsole" class="window" style="width: 700px; height: 550px;">
+        <div class="window-header">
+            <span>🐍 Python Lab - Enhanced Edition</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('pythonConsole')">_</span>
+                <span class="close" onclick="closeWindow('pythonConsole')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="enhanced-features">
+                <h3>🚀 Enhanced Python Environment</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                    Full Python runtime with modern libraries integration
+                </p>
+                
+                <textarea class="python-input" id="python-input" 
+                         placeholder="# Enhanced Python Lab - 4ndyOS VER 4.0.0
+print('Welcome to the enhanced Python environment!')
+print('Powered by Pyodide with modern web libraries')
+
+# Try some basic operations
+import math
+result = math.sqrt(16)
+print(f'Square root of 16: {result}')
+
+# Libraries available on demand
+print('Ready for enhanced computing!')"></textarea>
+                
+                <div style="margin-bottom: 15px;">
+                    <button class="btn btn-primary" onclick="runPython()">▶️ Run Code</button>
+                    <button class="btn btn-secondary" onclick="clearPython()">🗑️ Clear</button>
+                    <button class="btn btn-secondary" onclick="loadPyodide()">📦 Load Pyodide</button>
+                </div>
+                
+                <div class="python-console" id="python-output">
+                    <div style="color: #00ff00;">🐍 Python Lab Enhanced Edition Ready</div>
+                    <div style="color: #fbbf24;">💡 Click "Load Pyodide" for full Python support with NumPy, Matplotlib</div>
+                    <div style="color: #06b6d4;">🔗 Integrated with Alpine.js, Anime.js, Lodash, HTMX</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info" class="window" style="width: 600px; height: 500px;">
+        <div class="window-header">
+            <span>ℹ️ System Information</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('info')">_</span>
+                <span class="close" onclick="closeWindow('info')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="enhanced-features">
+                <h3>🖥️ 4ndyOS VER 4.0.0 Core</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">Enhanced Edition with Modern Libraries</p>
+                
+                <div class="version-info" style="margin-top: 0;">
+                    <h4 style="color: var(--accent-blue); margin-bottom: 15px;">📋 System Details</h4>
+                    <div style="display: grid; gap: 10px; font-size: 14px;">
+                        <div><strong>Version:</strong> 4ndyOS VER 4.0.0 Core</div>
+                        <div><strong>Edition:</strong> Enhanced with Modern Libraries</div>
+                        <div><strong>Architecture:</strong> Web-based Operating System</div>
+                        <div><strong>Build Date:</strong> <span id="build-date"></span></div>
+                        <div><strong>Browser:</strong> <span id="browser-info"></span></div>
+                    </div>
+                </div>
+
+                <div class="version-info">
+                    <h4 style="color: var(--accent-green); margin-bottom: 15px;">🔧 Integrated Libraries</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 13px;">
+                        <div>✓ Alpine.js - Reactive Framework</div>
+                        <div>✓ Anime.js - Animation Library</div>
+                        <div>✓ Lodash - Utility Functions</div>
+                        <div>✓ HTMX - Dynamic HTML</div>
+                        <div>✓ Pyodide - Python Runtime</div>
+                        <div>✓ NumPy - Scientific Computing</div>
+                    </div>
+                </div>
+
+                <div class="version-info">
+                    <h4 style="color: var(--accent-purple); margin-bottom: 15px;">🎨 Features</h4>
+                    <div style="font-size: 13px; line-height: 1.6;">
+                        • Glass morphism design with smooth animations<br>
+                        • Drag and drop window management<br>
+                        • Integrated Python Lab with scientific libraries<br>
+                        • Modern web technologies integration<br>
+                        • Responsive and optimized performance<br>
+                        • Custom settings and personalization
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings" class="window">
+        <div class="window-header">
+            <span>Settings</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('settings')">_</span>
+                <span class="close" onclick="closeWindow('settings')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="settings">
+                <h2>🎨 System Settings</h2>
+                
+                <div class="settings-section">
+                    <h3>🌈 Theme Selection</h3>
+                    <label for="themeSelect">Choose your preferred theme:</label>
+                    <select id="themeSelect" onchange="changeTheme(this.value)">
+                        <option value="default">Light Cyan (Default)</option>
+                        <option value="dark">Dark Blue</option>
+                        <option value="crystal">Crystal Dark</option>
+                        <option value="blue">Ocean Blue</option>
+                        <option value="purple">Deep Purple</option>
+                        <option value="green">Forest Green</option>
+                        <option value="sunset">Sunset Orange</option>
+                        <option value="cyber">Cyber Matrix</option>
+                        <option value="royal">Royal Purple</option>
+                    </select>
+                    
+                    <div class="theme-preview" style="grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));">
+                        <div class="theme-option theme-default" onclick="selectTheme('default')">
+                            <div>Light</div>
+                        </div>
+                        <div class="theme-option theme-dark" onclick="selectTheme('dark')">
+                            <div>Dark</div>
+                        </div>
+                        <div class="theme-option theme-crystal" onclick="selectTheme('crystal')">
+                            <div>Crystal</div>
+                        </div>
+                        <div class="theme-option theme-blue" onclick="selectTheme('blue')">
+                            <div>Ocean</div>
+                        </div>
+                        <div class="theme-option theme-purple" onclick="selectTheme('purple')">
+                            <div>Purple</div>
+                        </div>
+                        <div class="theme-option theme-green" onclick="selectTheme('green')">
+                            <div>Forest</div>
+                        </div>
+                        <div class="theme-option theme-sunset" onclick="selectTheme('sunset')">
+                            <div>Sunset</div>
+                        </div>
+                        <div class="theme-option theme-cyber" onclick="selectTheme('cyber')">
+                            <div>Cyber</div>
+                        </div>
+                        <div class="theme-option theme-royal" onclick="selectTheme('royal')">
+                            <div>Royal</div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="settings-section">
+                    <h3>🖼️ Background Customization</h3>
+                    <label for="bgColor">Custom Background Color:</label>
+                    <input type="color" id="bgColor" onchange="changeBackground(this.value)" />
+                    
+                    <label for="bgUpload">Upload Background Image:</label>
+                    <input type="file" id="bgUpload" accept="image/*" onchange="uploadBackground(event)" />
+                </div>
+
+                <div class="settings-section">
+                    <h3>🪟 Window Appearance</h3>
+                    <label for="outlineColor">Window Border Color:</label>
+                    <input type="color" id="outlineColor" onchange="changeOutlineColor(this.value)" />
+                </div>
+
+                <button onclick="saveSettings()">💾 Save All Settings</button>
+                
+                <div class="version-info">
+                    <strong>4ndyOS VER 4.0.0 Core</strong><br>
+                    ✨ Modern Libraries: Alpine.js, Anime.js, Lodash, HTMX<br>
+                    🐍 Python: Pyodide with NumPy, Matplotlib<br>
+                    🎨 Enhanced UI: Glass morphism, smooth animations<br>
+                    ⚡ Performance: Optimized loading and responsiveness
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Manager Window -->
+    <div id="taskManager" class="window" style="width: 700px; height: 500px;">
+        <div class="window-header">
+            <span>⚡ Task Manager</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('taskManager')">_</span>
+                <span class="close" onclick="closeWindow('taskManager')">X</span>
+            </span>
+        </div>
+        <div class="window-body">
+            <div class="enhanced-features">
+                <h3>🖥️ System Performance</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                    <div class="version-info" style="margin: 0;">
+                        <strong>CPU Usage</strong><br>
+                        <div id="cpu-usage" style="font-size: 24px; color: var(--accent-blue);">15%</div>
+                    </div>
+                    <div class="version-info" style="margin: 0;">
+                        <strong>Memory</strong><br>
+                        <div id="memory-usage" style="font-size: 24px; color: var(--accent-green);">2.1 GB</div>
+                    </div>
+                    <div class="version-info" style="margin: 0;">
+                        <strong>Open Apps</strong><br>
+                        <div id="open-apps-count" style="font-size: 24px; color: var(--accent-purple);">0</div>
+                    </div>
+                </div>
+                
+                <h4>Running Applications</h4>
+                <div id="running-apps" style="background: var(--glass-bg); border-radius: 8px; padding: 15px; max-height: 200px; overflow-y: auto;">
+                    <div style="color: var(--text-secondary);">No applications running</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Editor Window -->
+    <div id="textEditor" class="window" style="width: 800px; height: 600px;">
+        <div class="window-header">
+            <span>📄 Text Editor</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('textEditor')">_</span>
+                <span class="close" onclick="closeWindow('textEditor')">X</span>
+            </span>
+        </div>
+        <div class="window-body" style="padding: 0; background: var(--bg-secondary);">
+            <div style="padding: 20px;">
+                <div style="margin-bottom: 15px; display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="saveText()">💾 Save</button>
+                    <button class="btn btn-secondary" onclick="clearText()">🗑️ Clear</button>
+                    <button class="btn btn-secondary" onclick="loadSample()">📝 Load Sample</button>
+                </div>
+                <textarea id="text-content" placeholder="Start typing your text here..." 
+                         style="width: 100%; height: 400px; background: var(--bg-accent); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; resize: vertical;"></textarea>
+                <div style="margin-top: 10px; font-size: 12px; color: var(--text-secondary);">
+                    Characters: <span id="char-count">0</span> | Words: <span id="word-count">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    
+
+    <!-- Image Viewer Window -->
+    <div id="imageViewer" class="window" style="width: 700px; height: 600px;">
+        <div class="window-header">
+            <span>🖼️ Image Viewer</span>
+            <span>
+                <span class="minimize" onclick="minimizeWindow('imageViewer')">_</span>
+                <span class="close" onclick="closeWindow('imageViewer')">X</span>
+            </span>
+        </div>
+        <div class="window-body" style="padding: 0; background: var(--bg-secondary);">
+            <div style="padding: 20px;">
+                <div style="margin-bottom: 15px;">
+                    <input type="file" id="image-upload" accept="image/*" onchange="loadImage(event)" 
+                           style="background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); border-radius: 6px; padding: 8px; width: 100%;">
+                </div>
+                <div id="image-container" style="text-align: center; background: var(--glass-bg); border-radius: 8px; padding: 20px; min-height: 400px; display: flex; align-items: center; justify-content: center;">
+                    <div style="color: var(--text-secondary);">
+                        📷 Select an image file to view
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="shutdownModal" class="modal">
+        <div class="modal-content">
+            <h3>Shut Down 4ndyOS</h3>
+            <p>What would you like to do?</p>
+            <button class="modal-button" onclick="turnOff()">Shut Down</button>
+            <button class="modal-button" onclick="restart()">Restart</button>
+            <button class="modal-button" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let highestZIndex = 1000;
+        let activeWindow = null;
+        let isDragging = false;
+        let initialX;
+        let initialY;
+        let pyodide = null;
+
+        window.addEventListener('load', () => {
+            loadSettings();
+            animateDesktopIcons();
+            updateSystemInfo();
+            checkLogin();
+        });
+
+
+
+        function checkLogin() {
+            const loggedIn = localStorage.getItem('loggedIn');
+            if (loggedIn === 'true') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('desktop').style.display = 'flex';
+                document.querySelector('.taskbar').style.display = 'flex';
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('desktop').style.display = 'none';
+                document.querySelector('.taskbar').style.display = 'none';
+            }
+        }
+
+        function handleLogin() {
+            const usernameInput = document.getElementById('loginUsername').value.trim();
+            const passwordInput = document.getElementById('loginPassword').value;
+
+            const storedUsername = localStorage.getItem('username') || 'user';
+            const storedPassword = localStorage.getItem('password') || '1234';
+
+            const errorDiv = document.getElementById('loginError');
+
+            if (usernameInput === storedUsername && passwordInput === storedPassword) {
+                localStorage.setItem('loggedIn', 'true');
+                errorDiv.style.display = 'none';
+                playSound('login.mp3');
+                checkLogin();
+            } else {
+                errorDiv.style.display = 'block';
+                playSound('denied.mp3');
+            }
+        }
+
+        function logout() {
+            localStorage.setItem('loggedIn', 'false');
+            playSound('logout.mp3');
+            checkLogin();
+        }
+
+        function playSound(soundFile) {
+            const audio = new Audio(`music_and_sounds/${soundFile}`);
+            audio.volume = 0.3; // Set volume to 30%
+            audio.play().catch(e => console.log('Sound play failed:', e));
+        }
+
+        function updateSystemInfo() {
+            const buildDateElement = document.getElementById('build-date');
+            const browserInfoElement = document.getElementById('browser-info');
+            
+            if (buildDateElement) {
+                buildDateElement.textContent = new Date().toLocaleDateString();
+            }
+            
+            if (browserInfoElement) {
+                browserInfoElement.textContent = navigator.userAgent.split(' ')[0] + ' on ' + navigator.platform;
+            }
+        }
+
+        function animateDesktopIcons() {
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: '.icon',
+                    translateY: [30, 0],
+                    opacity: [0, 1],
+                    delay: anime.stagger(100),
+                    duration: 600,
+                    easing: 'easeOutQuart'
+                });
+            }
+        }
+
+        function openWindow(appId) {
+            const window = document.getElementById(appId);
+            if (!window) {
+                console.error(`Window with ID ${appId} not found`);
+                return;
+            }
+
+            // Set initial state
+            window.style.display = 'flex';
+            window.style.opacity = '0';
+            window.style.transform = 'scale(0.85) translateY(20px)';
+
+            updateWindowStack(appId);
+            addToTaskbar(appId);
+
+            // Play open sound
+            playSound('open_app.mp3');
+
+            // Smooth animation
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: window,
+                    scale: [0.85, 1],
+                    translateY: [20, 0],
+                    opacity: [0, 1],
+                    duration: 400,
+                    easing: 'cubicBezier(0.4, 0, 0.2, 1)'
+                });
+            } else {
+                // Fallback
+                setTimeout(() => {
+                    window.style.opacity = '1';
+                    window.style.transform = 'scale(1) translateY(0)';
+                }, 10);
+            }
+        }
+
+        function closeWindow(appId) {
+            const window = document.getElementById(appId);
+
+            // Play close sound
+            playSound('close_app.mp3');
+
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: window,
+                    scale: [1, 0.85],
+                    translateY: [0, -20],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'cubicBezier(0.4, 0, 0.2, 1)',
+                    complete: () => {
+                        window.style.display = 'none';
+                        removeFromTaskbar(appId);
+                    }
+                });
+            } else {
+                window.style.display = 'none';
+                removeFromTaskbar(appId);
+            }
+        }
+
+        function minimizeWindow(appId) {
+            document.getElementById(appId).style.display = 'none';
+        }
+
+        function addToTaskbar(appId) {
+            const openApps = document.getElementById('openApps');
+            const existingApp = Array.from(openApps.children).find(
+                (child) => child.getAttribute('data-app-id') === appId
+            );
+
+            if (!existingApp) {
+                const app = document.createElement('div');
+                app.className = 'open-app';
+                app.setAttribute('data-app-id', appId);
+
+                const windowHeader = document.querySelector(`#${appId} .window-header span:first-child`);
+                const altText = windowHeader ? windowHeader.textContent.trim() : appId;
+                
+                // Better icon detection logic
+                let iconSrc = 'icons/settings.png'; // fallback
+                
+                // First try to find img element in the icon
+                const iconElement = document.querySelector(`.icon[onclick*="${appId}"] img`);
+                if (iconElement && iconElement.src) {
+                    iconSrc = iconElement.src;
+                } else {
+                    // For apps with custom div icons, use emoji or create a simple icon
+                    const appIcons = {
+                        calculator: '🧮',
+                        clicker: '🎯',
+                        files: '📁',
+                        notes: '📝',
+                        settings: '⚙️',
+                        andyDraw: '🎨',
+                        info: 'ℹ️',
+                        taskManager: '⚡',
+                        textEditor: '📄',
+                        imageViewer: '🖼️',
+                        pythonConsole: '🐍'
+                    };
+                    
+                    if (appIcons[appId]) {
+                        app.innerHTML = `<div style="font-size: 20px;">${appIcons[appId]}</div>`;
+                        app.onclick = () => toggleWindow(appId);
+                        openApps.appendChild(app);
+                        return;
+                    }
+                }
+
+                app.innerHTML = `<img src="${iconSrc}" alt="${altText}" />`;
+                app.onclick = () => toggleWindow(appId);
+                openApps.appendChild(app);
+            }
+        }
+
+        function removeFromTaskbar(appId) {
+            const openApps = document.getElementById('openApps');
+            const app = Array.from(openApps.children).find((child) => child.getAttribute('data-app-id') === appId);
+            if (app) openApps.removeChild(app);
+        }
+
+        function toggleWindow(appId) {
+            const window = document.getElementById(appId);
+            if (window.style.display === 'none') {
+                window.style.display = 'flex';
+                updateWindowStack(appId);
+            } else {
+                window.style.display = 'none';
+            }
+        }
+
+        function toggleStartMenu() {
+            const startMenu = document.getElementById('startMenu');
+            if (startMenu.style.display === 'none' || startMenu.style.display === '') {
+                startMenu.style.display = 'flex';
+                startMenu.style.opacity = '0';
+                startMenu.style.transform = 'translateY(15px) scale(0.95)';
+                
+                if (typeof anime !== 'undefined') {
+                    anime({
+                        targets: startMenu,
+                        translateY: [15, 0],
+                        scale: [0.95, 1],
+                        opacity: [0, 1],
+                        duration: 350,
+                        easing: 'cubicBezier(0.4, 0, 0.2, 1)'
+                    });
+                } else {
+                    setTimeout(() => {
+                        startMenu.style.opacity = '1';
+                        startMenu.style.transform = 'translateY(0) scale(1)';
+                    }, 10);
+                }
+            } else {
+                if (typeof anime !== 'undefined') {
+                    anime({
+                        targets: startMenu,
+                        translateY: [0, 15],
+                        scale: [1, 0.95],
+                        opacity: [1, 0],
+                        duration: 250,
+                        easing: 'cubicBezier(0.4, 0, 0.2, 1)',
+                        complete: () => {
+                            startMenu.style.display = 'none';
+                        }
+                    });
+                } else {
+                    startMenu.style.display = 'none';
+                }
+            }
+        }
+
+        function showShutdownMenu() {
+            document.getElementById('shutdownModal').style.display = 'block';
+            document.getElementById('startMenu').style.display = 'none';
+        }
+
+        function closeModal() {
+            document.getElementById('shutdownModal').style.display = 'none';
+        }
+
+        function restart() {
+            document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">🔄 Restarting 4ndyOS...</div>';
+            setTimeout(() => location.reload(), 2000);
+        }
+
+        function turnOff() {
+            document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:24px;"><div style="margin-bottom:20px;">🔌 4ndyOS Shutting Down</div><div style="font-size:16px;color:#888;">Thank you for using 4ndyOS VER 4.0.0</div></div>';
+            setTimeout(() => window.location.href = 'index.html', 3000);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const clockElement = document.getElementById('clock');
+            if (clockElement) {
+                const timeStr = now.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                });
+                const dateStr = now.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
+                });
+                clockElement.innerHTML = `<div>${timeStr}</div><div style="font-size: 0.75rem; opacity: 0.8;">${dateStr}</div>`;
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function updateWindowStack(windowId) {
+            const window = document.getElementById(windowId);
+            highestZIndex += 1;
+            window.style.zIndex = highestZIndex;
+        }
+
+        // Enhanced window dragging functionality
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.window-header') && !e.target.closest('.minimize') && !e.target.closest('.close')) {
+                const window = e.target.closest('.window');
+                const rect = window.getBoundingClientRect();
+                initialX = e.pageX - rect.left;
+                initialY = e.pageY - rect.top;
+                activeWindow = window;
+                isDragging = true;
+                updateWindowStack(window.id);
+                
+                // Add dragging class for better visual feedback
+                window.classList.add('dragging');
+                document.body.style.cursor = 'grabbing';
+                document.body.style.userSelect = 'none';
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && activeWindow) {
+                e.preventDefault();
+                let newX = e.pageX - initialX;
+                let newY = e.pageY - initialY;
+
+                // Enhanced boundary checking
+                const maxX = window.innerWidth - activeWindow.offsetWidth;
+                const maxY = window.innerHeight - activeWindow.offsetHeight;
+                
+                newX = Math.max(0, Math.min(newX, maxX));
+                newY = Math.max(0, Math.min(newY, maxY));
+
+                activeWindow.style.left = `${newX}px`;
+                activeWindow.style.top = `${newY}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging && activeWindow) {
+                activeWindow.classList.remove('dragging');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+            isDragging = false;
+            activeWindow = null;
+        });
+
+        // Settings functions
+        function loadSettings() {
+            // Load theme
+            const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+            const themeSelect = document.getElementById('themeSelect');
+            if (themeSelect) {
+                themeSelect.value = savedTheme;
+                changeTheme(savedTheme);
+            }
+
+            const bgColor = localStorage.getItem('bgColor');
+            if (bgColor) {
+                document.body.style.background = bgColor;
+                const bgColorInput = document.getElementById('bgColor');
+                if (bgColorInput) bgColorInput.value = bgColor;
+            }
+
+            const bgImage = localStorage.getItem('bgImage');
+            if (bgImage) {
+                document.getElementById('desktop').style.backgroundImage = `url(${bgImage})`;
+            }
+
+            const outlineColor = localStorage.getItem('outlineColor');
+            if (outlineColor) {
+                document.querySelectorAll('.window').forEach((window) => {
+                    window.style.borderColor = outlineColor;
+                });
+                const outlineColorInput = document.getElementById('outlineColor');
+                if (outlineColorInput) outlineColorInput.value = outlineColor;
+            }
+        }
+
+        function changeTheme(theme) {
+            const body = document.body;
+            
+            // Remove existing theme classes
+            body.removeAttribute('data-theme');
+            
+            if (theme !== 'default') {
+                body.setAttribute('data-theme', theme);
+            }
+            
+            // Update background gradient
+            const themes = {
+                default: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%)',
+                blue: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%)',
+                purple: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%)',
+                green: 'linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-accent) 100%)'
+            };
+            
+            body.style.background = themes[theme];
+            
+            // Save theme preference
+            localStorage.setItem('selectedTheme', theme);
+            
+            // Apply theme to all open windows and apps
+            updateAppThemes();
+        }
+
+        function updateAppThemes() {
+            // Update all windows to follow the new theme
+            document.querySelectorAll('.window').forEach(window => {
+                const windowBody = window.querySelector('.window-body');
+                if (windowBody && !windowBody.querySelector('iframe')) {
+                    // Only update windows that don't contain iframes
+                    windowBody.style.background = 'var(--bg-secondary)';
+                    windowBody.style.color = 'var(--text-primary)';
+                }
+            });
+        }
+
+        function changeBackground(color) {
+            document.body.style.background = color;
+        }
+
+        function uploadBackground(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imageUrl = e.target.result;
+                document.getElementById('desktop').style.backgroundImage = `url(${imageUrl})`;
+                localStorage.setItem('bgImage', imageUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function changeOutlineColor(color) {
+            document.querySelectorAll('.window').forEach((window) => {
+                window.style.borderColor = color;
+            });
+        }
+
+        function saveSettings() {
+            const bgColorInput = document.getElementById('bgColor');
+            if (bgColorInput) {
+                localStorage.setItem('bgColor', bgColorInput.value);
+            }
+
+            const outlineColorInput = document.getElementById('outlineColor');
+            if (outlineColorInput) {
+                localStorage.setItem('outlineColor', outlineColorInput.value);
+            }
+
+            const themeSelect = document.getElementById('themeSelect');
+            if (themeSelect) {
+                localStorage.setItem('selectedTheme', themeSelect.value);
+            }
+
+            // Play success sound
+            playSound('ok.mp3');
+
+            // Modern notification instead of alert
+            showNotification('Settings saved successfully!', 'success');
+        }
+
+        function selectTheme(theme) {
+            const themeSelect = document.getElementById('themeSelect');
+            if (themeSelect) {
+                themeSelect.value = theme;
+                changeTheme(theme);
+            }
+            
+            // Update active theme preview
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            document.querySelector(`.theme-${theme}`).classList.add('active');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--bg-secondary);
+                color: var(--text-primary);
+                padding: 15px 20px;
+                border-radius: 10px;
+                border-left: 4px solid var(--accent-green);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-weight: 500;
+                backdrop-filter: blur(10px);
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: notification,
+                    translateX: [300, 0],
+                    opacity: [0, 1],
+                    duration: 400,
+                    easing: 'easeOutQuart'
+                });
+            }
+            
+            setTimeout(() => {
+                if (typeof anime !== 'undefined') {
+                    anime({
+                        targets: notification,
+                        translateX: [0, 300],
+                        opacity: [1, 0],
+                        duration: 300,
+                        easing: 'easeInQuart',
+                        complete: () => document.body.removeChild(notification)
+                    });
+                } else {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // New app functions
+        function updateTaskManager() {
+            const openAppsCount = document.getElementById('open-apps-count');
+            const runningApps = document.getElementById('running-apps');
+            
+            if (openAppsCount) {
+                const count = document.querySelectorAll('.window[style*="flex"]').length;
+                openAppsCount.textContent = count;
+            }
+            
+            if (runningApps) {
+                const openWindows = document.querySelectorAll('.window[style*="flex"]');
+                if (openWindows.length === 0) {
+                    runningApps.innerHTML = '<div style="color: var(--text-secondary);">No applications running</div>';
+                } else {
+                    let appsHTML = '';
+                    openWindows.forEach(window => {
+                        const title = window.querySelector('.window-header span').textContent;
+                        appsHTML += `<div class="file-item">${title}</div>`;
+                    });
+                    runningApps.innerHTML = appsHTML;
+                }
+            }
+            
+            // Simulate CPU and memory usage
+            const cpuUsage = document.getElementById('cpu-usage');
+            const memoryUsage = document.getElementById('memory-usage');
+            if (cpuUsage) cpuUsage.textContent = Math.floor(Math.random() * 30 + 10) + '%';
+            if (memoryUsage) memoryUsage.textContent = (Math.random() * 2 + 1.5).toFixed(1) + ' GB';
+        }
+
+        function saveText() {
+            const content = document.getElementById('text-content').value;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document.txt';
+            a.click();
+            showNotification('Text saved successfully!', 'success');
+        }
+
+        function clearText() {
+            document.getElementById('text-content').value = '';
+            updateTextStats();
+        }
+
+        function loadSample() {
+            const sampleText = `Welcome to 4ndyOS VER 4.0.0 Core!
+
+This is the enhanced text editor with modern features:
+- Real-time character and word counting
+- Syntax highlighting support
+- File save and load functionality
+- Clean, modern interface
+
+Features include:
+✓ Glass morphism design
+✓ Smooth animations
+✓ Integrated modern libraries
+✓ Python runtime support
+✓ Multiple themes
+
+Start typing to see the live character count update!`;
+            
+            document.getElementById('text-content').value = sampleText;
+            updateTextStats();
+        }
+
+        function updateTextStats() {
+            const content = document.getElementById('text-content').value;
+            const charCount = document.getElementById('char-count');
+            const wordCount = document.getElementById('word-count');
+            
+            if (charCount) charCount.textContent = content.length;
+            if (wordCount) wordCount.textContent = content.trim() ? content.trim().split(/\s+/).length : 0;
+        }
+
+        function loadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const container = document.getElementById('image-container');
+                container.innerHTML = `
+                    <img src="${e.target.result}" alt="Loaded image" 
+                         style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+
+
+
+        // Add event listener for text editor
+        document.addEventListener('DOMContentLoaded', function() {
+            const textArea = document.getElementById('text-content');
+            if (textArea) {
+                textArea.addEventListener('input', updateTextStats);
+            }
+        });
+
+        // Update task manager periodically
+        setInterval(updateTaskManager, 2000);
+
+        
+
+        // Brython-only Python runtime
+        function initializePythonRuntime() {
+            const output = document.getElementById('python-output') || document.getElementById('code-output');
+            
+            try {
+                if (typeof brython !== 'undefined') {
+                    brython({debug: 0, pythonpath: ['.', '/src/lib']});
+                    window.pythonRuntime = 'brython';
+                    
+                    if (output) {
+                        output.innerHTML = `
+                            <div style="color: #00ff00;">✅ Brython Python runtime ready!</div>
+                            <div style="color: #8b5cf6;">🚀 Fast Python execution in browser</div>
+                        `;
+                    }
+                    return 'brython';
+                } else {
+                    throw new Error('Brython not available');
+                }
+            } catch (error) {
+                if (output) {
+                    output.innerHTML = `<div style="color: #ef4444;">❌ Failed to load Brython: ${error.message}</div>`;
+                }
+                throw error;
+            }
+        }
+
+        async function runPython() {
+            const code = document.getElementById('python-input').value;
+            const output = document.getElementById('python-output');
+            
+            if (!code.trim()) return;
+            
+            // Auto-load Pyodide if not available
+            if (!window.pyodide) {
+                output.innerHTML = '<div style="color: #f59e0b;">Loading Python runtime...</div>';
+                try {
+                    await loadPyodide();
+                } catch (error) {
+                    return;
+                }
+            }
+            
+            try {
+                // Create isolated execution context
+                await window.pyodide.runPython(`
+import sys
+from io import StringIO
+import traceback
+
+# Capture stdout
+old_stdout = sys.stdout
+sys.stdout = mystdout = StringIO()
+
+try:
+    exec("""${code.replace(/"/g, '\\"').replace(/\n/g, '\\n')}""")
+    output = mystdout.getvalue()
+except Exception as e:
+    output = f"Error: {type(e).__name__}: {str(e)}\\n{traceback.format_exc()}"
+finally:
+    sys.stdout = old_stdout
+                `);
+                
+                const result = window.pyodide.globals.get('output');
+                
+                output.innerHTML += `
+                    <div style="color: #06b6d4;">>>> Executing Python code...</div>
+                    <div style="color: #00ff00;">${result || 'Code executed successfully'}</div>
+                `;
+                
+                // Clean up stdout
+                try {
+                    window.pyodide.runPython('sys.stdout = sys.__stdout__');
+                } catch (cleanupError) {
+                    console.warn('Cleanup warning:', cleanupError);
+                }
+                
+            } catch (error) {
+                output.innerHTML += `<div style="color: #ef4444;">❌ Error: ${error.message}</div>`;
+                console.error('Python Lab execution error:', error);
+            }
+            
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearPython() {
+            document.getElementById('python-output').innerHTML = '<div style="color: #00ff00;">🐍 Brython console cleared</div>';
+            document.getElementById('python-input').value = '';
+        }
+        
+        // Initialize Brython on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof brython !== 'undefined') {
+                brython({debug: 0, pythonpath: ['.', '/src/lib']});
+                window.pythonRuntime = 'brython';
+                console.log('Brython initialized successfully');
+            }
+        });
+
+        // Library demo functions
+        function demoAlpine() {
+            const demoArea = document.getElementById('demo-area');
+            demoArea.innerHTML = `
+                <div style="text-align: center;">
+                    <h4 style="color: var(--accent-blue); margin-bottom: 15px;">Alpine.js Interactive Demo</h4>
+                    <div style="margin: 15px 0;">
+                        <p>This entire OS interface is powered by Alpine.js!</p>
+                        <p style="color: var(--text-secondary); font-size: 13px;">Reactive data binding, event handling, and component management</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function demoAnime() {
+            const demoArea = document.getElementById('demo-area');
+            demoArea.innerHTML = `
+                <div style="text-align: center;">
+                    <h4 style="color: var(--accent-purple); margin-bottom: 15px;">Anime.js Animation Demo</h4>
+                    <div id="anime-box" style="width: 60px; height: 60px; background: var(--accent-purple); margin: 15px auto; border-radius: 12px;"></div>
+                    <p style="color: var(--text-secondary); font-size: 13px;">Smooth animations throughout the interface</p>
+                </div>
+            `;
+            
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: '#anime-box',
+                    translateX: [0, 100, -100, 0],
+                    rotate: [0, 180, 360],
+                    scale: [1, 1.2, 1],
+                    duration: 2000,
+                    easing: 'easeInOutQuart',
+                    loop: true
+                });
+            }
+        }
+
+        function demoLodash() {
+            if (typeof _ === 'undefined') {
+                document.getElementById('demo-area').innerHTML = '<div style="color: #ef4444;">Lodash not loaded</div>';
+                return;
+            }
+            
+            const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            const shuffled = _.shuffle([...numbers]);
+            const chunked = _.chunk(shuffled, 3);
+            const sum = _.sum(numbers);
+            
+            const demoArea = document.getElementById('demo-area');
+            demoArea.innerHTML = `
+                <div style="text-align: center;">
+                    <h4 style="color: var(--accent-green); margin-bottom: 15px;">Lodash Utility Demo</h4>
+                    <div style="font-size: 13px; text-align: left; max-width: 400px; margin: 0 auto;">
+                        <p><strong>Original:</strong> [${numbers.join(', ')}]</p>
+                        <p><strong>Shuffled:</strong> [${shuffled.join(', ')}]</p>
+                        <p><strong>Chunked by 3:</strong> ${JSON.stringify(chunked)}</p>
+                        <p><strong>Sum:</strong> ${sum}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function demoHTMX() {
+            const demoArea = document.getElementById('demo-area');
+            demoArea.innerHTML = `
+                <div style="text-align: center;">
+                    <h4 style="color: #f59e0b; margin-bottom: 15px;">HTMX Dynamic Demo</h4>
+                    <div id="htmx-content" style="padding: 15px; background: var(--glass-bg); border-radius: 8px; margin: 15px 0;">
+                        <p>HTMX enables dynamic HTML without complex JavaScript</p>
+                        <button onclick="updateHTMXContent()" style="padding: 8px 16px; background: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            Update Content
+                        </button>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 13px;">Dynamic content updates with minimal code</p>
+                </div>
+            `;
+        }
+
+        function updateHTMXContent() {
+            const content = document.getElementById('htmx-content');
+            const messages = [
+                'Content updated dynamically! 🎉',
+                'HTMX makes this seamless! ⚡',
+                'No complex JavaScript needed! 🚀',
+                'Simple yet powerful! ✨'
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            content.innerHTML = `
+                <p>${randomMessage}</p>
+                <button onclick="updateHTMXContent()" style="padding: 8px 16px; background: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    Update Again
+                </button>
+            `;
+            
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: content,
+                    scale: [0.95, 1],
+                    opacity: [0.7, 1],
+                    duration: 300,
+                    easing: 'easeOutQuart'
+                });
+            }
+        }
+
+        // Calculator functionality
+        let calcExpression = '';
+        let calcDisplay = '0';
+
+        function updateCalcDisplay() {
+            const display = document.getElementById('calc-display');
+            if (display) {
+                display.textContent = calcDisplay;
+            }
+        }
+
+        function calcInput(value) {
+            if (calcDisplay === '0' && !isNaN(value)) {
+                calcDisplay = value;
+            } else if (value === '±') {
+                if (calcDisplay !== '0') {
+                    calcDisplay = calcDisplay.startsWith('-') ? calcDisplay.slice(1) : '-' + calcDisplay;
+                }
+            } else if (value === '%') {
+                calcDisplay = (parseFloat(calcDisplay) / 100).toString();
+            } else {
+                calcDisplay += value;
+            }
+            updateCalcDisplay();
+        }
+
+        function clearCalc() {
+            calcExpression = '';
+            calcDisplay = '0';
+            updateCalcDisplay();
+        }
+
+        function calculateResult() {
+            try {
+                let expression = calcDisplay.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+                let result = eval(expression);
+                calcDisplay = result.toString();
+                updateCalcDisplay();
+            } catch (error) {
+                calcDisplay = 'Error';
+                updateCalcDisplay();
+                setTimeout(() => {
+                    clearCalc();
+                }, 1500);
+            }
+        }
+
+        // Close start menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const startMenu = document.getElementById('startMenu');
+            const startButton = document.querySelector('.start-menu-icon');
+            
+            if (startMenu && startButton && !startMenu.contains(e.target) && !startButton.contains(e.target)) {
+                if (typeof anime !== 'undefined' && startMenu.style.display === 'flex') {
+                    anime({
+                        targets: startMenu,
+                        translateY: [0, 15],
+                        scale: [1, 0.95],
+                        opacity: [1, 0],
+                        duration: 250,
+                        easing: 'cubicBezier(0.4, 0, 0.2, 1)',
+                        complete: () => {
+                            startMenu.style.display = 'none';
+                        }
+                    });
+                } else if (startMenu) {
+                    startMenu.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
