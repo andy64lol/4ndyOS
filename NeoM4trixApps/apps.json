@@ -56,7 +56,7 @@
     {
         "command": "chat",
         "name": "Our Legacy Chat",
-        "path": "https://github.com/andy64lol/Our_Legacy/blob/main/chat.html",
+        "path": "https://andy64lol.github.io/Our_Legacy/chat.html",
         "description": "A chat"
     }
 ]
