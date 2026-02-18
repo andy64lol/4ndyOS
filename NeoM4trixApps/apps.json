@@ -52,5 +52,11 @@
         "name": "shield.io badge creator",
         "path": "NeoM4trixApps/shield_badge_creator_.html",
         "description": "Basic shield.io badge creator for you"
+    },
+    {
+        "command": "chat",
+        "name": "Our Legacy Chat",
+        "path": "https://github.com/andy64lol/Our_Legacy/blob/main/chat.html",
+        "description": "A chat"
     }
 ]
